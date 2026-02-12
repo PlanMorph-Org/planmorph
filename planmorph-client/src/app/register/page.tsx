@@ -296,7 +296,7 @@ export default function RegisterPage() {
                           id="professionalLicense"
                           name="professionalLicense"
                           type="text"
-                          required={accountType !== 'Client'}
+                          required
                           value={formData.professionalLicense}
                           onChange={handleChange}
                           className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
@@ -312,7 +312,7 @@ export default function RegisterPage() {
                           id="yearsOfExperience"
                           name="yearsOfExperience"
                           type="number"
-                          required={accountType !== 'Client'}
+                          required
                           value={formData.yearsOfExperience}
                           onChange={handleChange}
                           className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
@@ -365,7 +365,7 @@ export default function RegisterPage() {
                                 name="cvFile"
                                 type="file"
                                 accept=".pdf,application/pdf"
-                                required={accountType !== 'Client' && !formData.portfolio.trim()}
+                                required={!formData.portfolio.trim()}
                                 onChange={handleFileChange(setCvFile)}
                                 className="block w-full text-sm text-gray-700"
                               />
@@ -379,7 +379,7 @@ export default function RegisterPage() {
                                 name="coverLetterFile"
                                 type="file"
                                 accept=".pdf,application/pdf"
-                                required={accountType !== 'Client' && !formData.portfolio.trim()}
+                                required={!formData.portfolio.trim()}
                                 onChange={handleFileChange(setCoverLetterFile)}
                                 className="block w-full text-sm text-gray-700"
                               />
@@ -393,7 +393,7 @@ export default function RegisterPage() {
                                 name="workExperienceFile"
                                 type="file"
                                 accept=".pdf,application/pdf"
-                                required={accountType !== 'Client' && !formData.portfolio.trim()}
+                                required={!formData.portfolio.trim()}
                                 onChange={handleFileChange(setWorkExperienceFile)}
                                 className="block w-full text-sm text-gray-700"
                               />
