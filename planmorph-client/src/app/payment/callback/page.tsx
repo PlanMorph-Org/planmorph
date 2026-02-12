@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import api from '@/src/lib/api';
 
-export default function PaystackCallbackPage() {
+function PaystackCallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState('Verifying your payment...');
@@ -37,5 +37,13 @@ export default function PaystackCallbackPage() {
         <p className="text-sm text-gray-600">{status}</p>
       </div>
     </div>
+  );
+}
+
+export default function PaystackCallbackPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">Loading payment status...</div>}>
+      <PaystackCallbackContent />
+    </Suspense>
   );
 }
