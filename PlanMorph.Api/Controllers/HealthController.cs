@@ -35,26 +35,22 @@ public class HealthController : ControllerBase
     [HttpGet("detailed")]
     public async Task<IActionResult> GetDetailedHealth()
     {
-        var response = new
-        {
-            status = "checking",
-            timestamp = DateTime.UtcNow,
-            version = GetApplicationVersion(),
-            services = new Dictionary<string, object>()
-        };
+        var timestamp = DateTime.UtcNow;
+        var version = GetApplicationVersion();
+        var services = new Dictionary<string, object>();
 
         try
         {
             // Check database connectivity
             var dbHealthy = await CheckDatabaseHealth();
-            response.services["database"] = new { status = dbHealthy ? "healthy" : "unhealthy" };
+            services["database"] = new { status = dbHealthy ? "healthy" : "unhealthy" };
 
             // Check API
-            response.services["api"] = new { status = "healthy" };
+            services["api"] = new { status = "healthy" };
 
             // Overall status
             var overallStatus = dbHealthy ? "healthy" : "degraded";
-            return Ok(new { status = overallStatus, ...response });
+            return Ok(new { status = overallStatus, timestamp, version, services });
         }
         catch (Exception ex)
         {
