@@ -1,0 +1,101 @@
+@page "/login"
+@using PlanMorph.Core.Entities
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex align-items-center gap-2">
+                        <img src="planmorph.svg" alt="PlanMorph" style="height: 28px; width: auto;" />
+                        <h3 class="mb-0">PlanMorph Admin Login</h3>
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger">@errorMessage</div>
+                    }
+
+                    <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary />
+
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <InputText @bind-Value="loginModel.Email" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <InputText @bind-Value="loginModel.Password" type="password" class="form-control" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100" disabled="@isLoading">
+                            @if (isLoading)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                            }
+                            Login
+                        </button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginModel loginModel = new();
+    private string? errorMessage;
+    private bool isLoading;
+
+    private async Task HandleLogin()
+    {
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            var response = await ApiClient.PostAsync<LoginModel, LoginResponse>("/api/auth/login", loginModel);
+
+            if (response != null && !string.IsNullOrEmpty(response.Token))
+            {
+                ApiClient.SetAuthToken(response.Token);
+                var parsedRole = Enum.TryParse<UserRole>(response.Role, true, out var role)
+                    ? role
+                    : UserRole.Admin;
+
+                await AuthState.LoginAsync(response.Token, response.Email, response.FirstName, response.LastName, parsedRole);
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                errorMessage = "Invalid email or password";
+            }
+        }
+        catch (Exception)
+        {
+            errorMessage = "Login failed. Please try again.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    public class LoginModel
+    {
+        public string Email { get; set; } = "admin@planmorph.com";
+        public string Password { get; set; } = "Admin@123";
+    }
+
+    public class LoginResponse
+    {
+        public string Token { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string FirstName { get; set; } = "";
+        public string LastName { get; set; } = "";
+        public string Role { get; set; } = "";
+    }
+}

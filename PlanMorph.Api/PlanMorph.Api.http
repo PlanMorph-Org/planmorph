@@ -1,0 +1,6 @@
+@PlanMorph.Api_HostAddress = http://localhost:5038
+
+GET {{PlanMorph.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,922 @@
+@page "/designs"
+@using Microsoft.EntityFrameworkCore
+@using PlanMorph.Admin.Services
+@using PlanMorph.Core.Entities
+@using PlanMorph.Core.Interfaces
+@using PlanMorph.Infrastructure.Data
+@using PlanMorph.Infrastructure.Repositories
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+@inject ApiClient ApiClient
+@inject AuthStateService AuthState
+@inject NavigationManager Navigation
+
+<PageTitle>Designs - PlanMorph Admin</PageTitle>
+
+<h1>Design Management</h1>
+
+<div class="d-flex justify-content-between align-items-center mt-3">
+    <div class="text-muted">
+        Manage all uploaded designs, approvals, and visibility.
+    </div>
+    <button class="btn btn-sm btn-outline-danger" @onclick="PromptDeleteAllDesigns">
+        <i class="bi bi-trash3"></i> Delete All Designs
+    </button>
+</div>
+
+<!-- Filter Tabs -->
+<ul class="nav nav-tabs mt-4 mb-3">
+    <li class="nav-item">
+        <button class="nav-link @(currentFilter == "All" ? "active" : "")" @onclick='() => FilterDesigns("All")'>
+            All Designs (@allCount)
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link @(currentFilter == "PendingVerification" ? "active" : "")" @onclick='() => FilterDesigns("PendingVerification")'>
+            Pending Verification (@pendingVerificationCount)
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link @(currentFilter == "PendingApproval" ? "active" : "")" @onclick='() => FilterDesigns("PendingApproval")'>
+            Pending Approval (@pendingCount)
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link @(currentFilter == "Approved" ? "active" : "")" @onclick='() => FilterDesigns("Approved")'>
+            Approved (@approvedCount)
+        </button>
+    </li>
+    <li class="nav-item">
+        <button class="nav-link @(currentFilter == "Rejected" ? "active" : "")" @onclick='() => FilterDesigns("Rejected")'>
+            Rejected (@rejectedCount)
+        </button>
+    </li>
+</ul>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        @if (isLoading)
+        {
+            <div class="text-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        }
+        else if (filteredDesigns == null || !filteredDesigns.Any())
+        {
+            <div class="alert alert-info">No designs found.</div>
+        }
+        else
+        {
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Preview</th>
+                        <th>Title</th>
+                        <th>Architect</th>
+                        <th>Category</th>
+                        <th>Specs</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var design in filteredDesigns)
+                    {
+                        <tr>
+                            <td>
+                                @if (design.PreviewImageUrl != null)
+                                {
+                                    <img src="@design.PreviewImageUrl" alt="Preview" style="width: 60px; height: 60px; object-fit: cover; border-radius: 4px;" />
+                                }
+                                else
+                                {
+                                    <div style="width: 60px; height: 60px; background-color: #e9ecef; border-radius: 4px;"></div>
+                                }
+                            </td>
+                            <td>
+                                <strong>@design.Title</strong><br/>
+                                <small class="text-muted">@design.Description?.Substring(0, Math.Min(50, design.Description.Length))...</small>
+                            </td>
+                            <td>@design.ArchitectName</td>
+                            <td>@design.Category</td>
+                            <td>
+                                <small>
+                                    @design.Bedrooms BR • @design.Bathrooms BA<br/>
+                                    @design.SquareFootage sqft • @design.Stories story
+                                </small>
+                            </td>
+                            <td>
+                                <strong>KES @design.Price.ToString("N0")</strong><br/>
+                                <small class="text-muted">Est: KES @design.EstimatedConstructionCost.ToString("N0")</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-@GetStatusBadge(design.Status)">
+                                    @design.Status
+                                </span>
+                                @if (design.Status == "PendingVerification" && design.IsReadyForApproval)
+                                {
+                                    <div class="text-success small mt-1">Verified - Awaiting admin approval</div>
+                                }
+                            </td>
+                            <td>
+                                <small>@design.CreatedAt.ToShortDateString()</small>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-primary me-1" @onclick="() => ViewDesign(design.Id)">
+                                    <i class="bi bi-eye"></i> View
+                                </button>
+                                @if (CanApproveDesign(design))
+                                {
+                                    <button class="btn btn-sm btn-success me-1" @onclick="() => ApproveDesign(design.Id)">
+                                        Approve
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" @onclick="() => RejectDesign(design.Id)">
+                                        Reject
+                                    </button>
+                                }
+                                @if (design.Status == "Rejected")
+                                {
+                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => PromptDeleteDesign(design.Id, design.Title)">
+                                        Delete
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+<!-- View Design Modal -->
+@if (showViewModal && selectedDesign != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@selectedDesign.Title</h5>
+                    <div class="ms-auto me-3">
+                        <span class="badge bg-@GetStatusBadge(selectedDesign.Status)">
+                            @selectedDesign.Status
+                        </span>
+                    </div>
+                    <button type="button" class="btn-close" @onclick="CloseViewModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Preview Media -->
+                        <div class="col-md-5">
+                            @{
+                                var primaryPreview = selectedDesignFiles?.FirstOrDefault(f => f.Category == FileCategory.PreviewImage);
+                            }
+                            @if (primaryPreview != null)
+                            {
+                                <img src="@GetFileUrl(primaryPreview)" alt="@selectedDesign.Title"
+                                     class="img-fluid rounded mb-3" style="width: 100%; max-height: 300px; object-fit: cover;" />
+                            }
+                            else
+                            {
+                                <div class="bg-light rounded d-flex align-items-center justify-content-center mb-3"
+                                     style="width: 100%; height: 200px;">
+                                    <span class="text-muted">No Preview Available</span>
+                                </div>
+                            }
+
+                            <!-- Preview Images Gallery -->
+                            @if (selectedDesignFiles != null && selectedDesignFiles.Any(f => f.Category == FileCategory.PreviewImage))
+                            {
+                                <div class="row g-2 mb-3">
+                                    @foreach (var file in selectedDesignFiles.Where(f => f.Category == FileCategory.PreviewImage))
+                                    {
+                                        <div class="col-4">
+                                            <img src="@GetFileUrl(file)" alt="Preview" class="img-fluid rounded"
+                                                 style="height: 70px; width: 100%; object-fit: cover;" />
+                                        </div>
+                                    }
+                                </div>
+                            }
+
+                            <!-- Preview Videos -->
+                            @if (selectedDesignFiles != null && selectedDesignFiles.Any(f => f.Category == FileCategory.PreviewVideo))
+                            {
+                                <div class="mb-3">
+                                    <h6 class="mb-2">Video Walkthroughs</h6>
+                                    @foreach (var file in selectedDesignFiles.Where(f => f.Category == FileCategory.PreviewVideo))
+                                    {
+                                        <video controls class="w-100 rounded mb-2">
+                                            <source src="@GetFileUrl(file)" type="video/mp4" />
+                                            Your browser does not support the video tag.
+                                        </video>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Design Details -->
+                        <div class="col-md-7">
+                            <!-- Architect Info -->
+                            <div class="mb-3">
+                                <small class="text-muted">Architect</small>
+                                <p class="mb-0 fw-semibold">@selectedDesign.ArchitectName</p>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="mb-3">
+                                <small class="text-muted">Description</small>
+                                <p class="mb-0">@selectedDesign.Description</p>
+                            </div>
+
+                            <!-- Category -->
+                            <div class="mb-3">
+                                <span class="badge bg-secondary">@selectedDesign.Category</span>
+                            </div>
+
+                            <!-- Specifications -->
+                            <div class="card bg-light mb-3">
+                                <div class="card-body py-2">
+                                    <h6 class="card-title mb-2">Specifications</h6>
+                                    <div class="row">
+                                        <div class="col-6 mb-2">
+                                            <small class="text-muted d-block">Bedrooms</small>
+                                            <strong>@selectedDesign.Bedrooms</strong>
+                                        </div>
+                                        <div class="col-6 mb-2">
+                                            <small class="text-muted d-block">Bathrooms</small>
+                                            <strong>@selectedDesign.Bathrooms</strong>
+                                        </div>
+                                        <div class="col-6 mb-2">
+                                            <small class="text-muted d-block">Square Footage</small>
+                                            <strong>@selectedDesign.SquareFootage.ToString("N0") sqft</strong>
+                                        </div>
+                                        <div class="col-6 mb-2">
+                                            <small class="text-muted d-block">Stories</small>
+                                            <strong>@selectedDesign.Stories</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Pricing -->
+                            <div class="card mb-3">
+                                <div class="card-body py-2">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <span>Design Price</span>
+                                        <strong class="text-primary fs-5">KES @selectedDesign.Price.ToString("N0")</strong>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted">Est. Construction Cost</small>
+                                        <strong>KES @selectedDesign.EstimatedConstructionCost.ToString("N0")</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Uploaded Files -->
+                            @if (selectedDesignFiles != null && selectedDesignFiles.Any())
+                            {
+                                <div class="mb-3">
+                                    <h6>Uploaded Files (@selectedDesignFiles.Count)</h6>
+                                    <small class="text-muted d-block mb-2">Uploaded by @selectedDesign.ArchitectName</small>
+                                    @if (!string.IsNullOrWhiteSpace(fileUrlError))
+                                    {
+                                        <div class="alert alert-warning py-2">@fileUrlError</div>
+                                    }
+                                    <div class="list-group list-group-flush">
+                                        @foreach (var file in selectedDesignFiles)
+                                        {
+                                            <div class="list-group-item d-flex justify-content-between align-items-center px-0 py-2">
+                                                <div>
+                                                    <span class="badge bg-@GetFileCategoryBadge(file.Category) me-2">@GetFileCategoryLabel(file.Category)</span>
+                                                    <small>@file.FileName</small>
+                                                </div>
+                                                <div class="d-flex align-items-center gap-3">
+                                                    <small class="text-muted">@FormatFileSize(file.FileSizeBytes)</small>
+                                                    @if (HasFileUrl(file))
+                                                    {
+                                                        <a class="btn btn-sm btn-outline-primary" href="@GetFileUrl(file)" target="_blank">
+                                                            View
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-muted">Loading...</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            <!-- Dates -->
+                            <div class="text-muted">
+                                <small>Created: @selectedDesign.CreatedAt.ToString("dd MMM yyyy, HH:mm")</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    @if (CanApproveDesign(selectedDesign))
+                    {
+                        <button class="btn btn-success" @onclick="() => ApproveDesignFromModal(selectedDesign.Id)">
+                            <i class="bi bi-check-circle"></i> Approve
+                        </button>
+                        <button class="btn btn-danger" @onclick="() => RejectDesignFromModal(selectedDesign.Id)">
+                            <i class="bi bi-x-circle"></i> Reject
+                        </button>
+                    }
+                    @if (selectedDesign.Status == "Rejected")
+                    {
+                        <button class="btn btn-outline-danger" @onclick="() => PromptDeleteDesign(selectedDesign.Id, selectedDesign.Title)">
+                            <i class="bi bi-trash"></i> Delete
+                        </button>
+                    }
+                    <button type="button" class="btn btn-secondary" @onclick="CloseViewModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showDeleteAllModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">Delete All Designs</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDeleteAllModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-warning">
+                        This will delete <strong>all designs</strong> and their files from the platform.
+                        Existing orders may lose access to files. This action cannot be undone.
+                    </div>
+                    <p class="mb-2">Type <strong>DELETE ALL</strong> to confirm:</p>
+                    <input class="form-control" @bind="deleteAllConfirmText" placeholder="DELETE ALL" />
+                    @if (!string.IsNullOrWhiteSpace(deleteAllErrorMessage))
+                    {
+                        <div class="text-danger mt-2">@deleteAllErrorMessage</div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="CloseDeleteAllModal" disabled="@isDeletingAll">Cancel</button>
+                    <button class="btn btn-danger" @onclick="ConfirmDeleteAllDesigns" disabled="@isDeletingAll">
+                        @if (isDeletingAll)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2"></span>
+                        }
+                        Delete Everything
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showDeleteModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Rejected Design</h5>
+                    <button type="button" class="btn-close" @onclick="CloseDeleteModal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">
+                        This will permanently remove the rejected design <strong>@deleteDesignTitle</strong> from the system.
+                    </p>
+                    @if (!string.IsNullOrWhiteSpace(deleteErrorMessage))
+                    {
+                        <div class="alert alert-danger mt-3 mb-0">@deleteErrorMessage</div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseDeleteModal">Cancel</button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmDeleteDesign">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<DesignViewModel>? allDesigns;
+    private List<DesignViewModel>? filteredDesigns;
+    private bool isLoading = true;
+    private bool showDeleteAllModal;
+    private bool isDeletingAll;
+    private string deleteAllConfirmText = "";
+    private string? deleteAllErrorMessage;
+    private string currentFilter = "All";
+
+    private int allCount = 0;
+    private int pendingVerificationCount = 0;
+    private int pendingCount = 0;
+    private int approvedCount = 0;
+    private int rejectedCount = 0;
+
+    // View modal state
+    private bool showViewModal = false;
+    private DesignViewModel? selectedDesign;
+    private List<DesignFile>? selectedDesignFiles;
+    private Dictionary<Guid, string> fileUrls = new();
+    private string? fileUrlError;
+    private bool showDeleteModal = false;
+    private Guid deleteDesignId;
+    private string deleteDesignTitle = "";
+    private string? deleteErrorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthState.InitializeAsync();
+
+        if (!AuthState.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        if (AuthState.UserRole != UserRole.Admin)
+        {
+            Navigation.NavigateTo("/verifications");
+            return;
+        }
+
+        await LoadDesigns();
+    }
+
+    private async Task LoadDesigns()
+    {
+        isLoading = true;
+
+        // Create a new context for this operation
+        await using var context = await DbContextFactory.CreateDbContextAsync();
+        var unitOfWork = new UnitOfWork(context);
+
+        var designs = await unitOfWork.Designs.GetAllAsync();
+        var designIds = designs.Select(d => d.Id).ToList();
+        var verifications = await unitOfWork.DesignVerifications.FindAsync(v => designIds.Contains(v.DesignId));
+        var verificationLookup = verifications
+            .GroupBy(v => v.DesignId)
+            .ToDictionary(g => g.Key, g => g.ToList());
+        var designsToPromote = new List<Design>();
+        allDesigns = new List<DesignViewModel>();
+
+        foreach (var design in designs.OrderByDescending(d => d.CreatedAt))
+        {
+            var architect = await unitOfWork.Users.GetByIdAsync(design.ArchitectId);
+            var files = await unitOfWork.DesignFiles.FindAsync(f => f.DesignId == design.Id);
+            var previewImage = files.FirstOrDefault(f => f.Category == FileCategory.PreviewImage);
+            var designVerifications = verificationLookup.TryGetValue(design.Id, out var list)
+                ? list
+                : new List<DesignVerification>();
+            var readyForApproval = IsReadyForApproval(designVerifications);
+
+            if (readyForApproval && design.Status == DesignStatus.PendingVerification)
+            {
+                design.Status = DesignStatus.PendingApproval;
+                design.UpdatedAt = DateTime.UtcNow;
+                designsToPromote.Add(design);
+            }
+
+            allDesigns.Add(new DesignViewModel
+            {
+                Id = design.Id,
+                Title = design.Title,
+                Description = design.Description,
+                ArchitectName = architect != null ? $"{architect.FirstName} {architect.LastName}" : "Unknown",
+                Category = design.Category.ToString(),
+                Bedrooms = design.Bedrooms,
+                Bathrooms = design.Bathrooms,
+                SquareFootage = design.SquareFootage,
+                Stories = design.Stories,
+                Price = design.Price,
+                EstimatedConstructionCost = design.EstimatedConstructionCost,
+                Status = design.Status.ToString(),
+                CreatedAt = design.CreatedAt,
+                PreviewImageUrl = previewImage?.StorageUrl,
+                IsReadyForApproval = readyForApproval
+            });
+        }
+
+        if (designsToPromote.Any())
+        {
+            foreach (var design in designsToPromote)
+            {
+                await unitOfWork.Designs.UpdateAsync(design);
+            }
+            await unitOfWork.SaveChangesAsync();
+        }
+
+        // Calculate counts
+        allCount = allDesigns.Count;
+        pendingVerificationCount = allDesigns.Count(d => d.Status == "PendingVerification");
+        pendingCount = allDesigns.Count(d => d.Status == "PendingApproval");
+        approvedCount = allDesigns.Count(d => d.Status == "Approved");
+        rejectedCount = allDesigns.Count(d => d.Status == "Rejected");
+
+        filteredDesigns = allDesigns;
+        isLoading = false;
+    }
+
+    private void FilterDesigns(string filter)
+    {
+        currentFilter = filter;
+
+        filteredDesigns = filter switch
+        {
+            "PendingVerification" => allDesigns?.Where(d => d.Status == "PendingVerification").ToList(),
+            "PendingApproval" => allDesigns?.Where(d => d.Status == "PendingApproval").ToList(),
+            "Approved" => allDesigns?.Where(d => d.Status == "Approved").ToList(),
+            "Rejected" => allDesigns?.Where(d => d.Status == "Rejected").ToList(),
+            _ => allDesigns
+        };
+    }
+
+    private async Task ApproveDesign(Guid id)
+    {
+        // Create a new context for this operation
+        await using var context = await DbContextFactory.CreateDbContextAsync();
+        var unitOfWork = new UnitOfWork(context);
+
+        var design = await unitOfWork.Designs.GetByIdAsync(id);
+        if (design != null)
+        {
+            if (design.Status == DesignStatus.PendingVerification)
+            {
+                var verifications = await unitOfWork.DesignVerifications.FindAsync(v => v.DesignId == id);
+                if (!IsReadyForApproval(verifications))
+                    return;
+
+                design.Status = DesignStatus.PendingApproval;
+            }
+
+            if (design.Status != DesignStatus.PendingApproval)
+                return;
+
+            design.Status = DesignStatus.Approved;
+            design.UpdatedAt = DateTime.UtcNow;
+            await unitOfWork.Designs.UpdateAsync(design);
+            await unitOfWork.SaveChangesAsync();
+            await LoadDesigns();
+        }
+    }
+
+    private async Task RejectDesign(Guid id)
+    {
+        // Create a new context for this operation
+        await using var context = await DbContextFactory.CreateDbContextAsync();
+        var unitOfWork = new UnitOfWork(context);
+
+        var design = await unitOfWork.Designs.GetByIdAsync(id);
+        if (design != null)
+        {
+            if (design.Status == DesignStatus.PendingVerification)
+            {
+                var verifications = await unitOfWork.DesignVerifications.FindAsync(v => v.DesignId == id);
+                if (!IsReadyForApproval(verifications))
+                    return;
+
+                design.Status = DesignStatus.PendingApproval;
+            }
+
+            if (design.Status != DesignStatus.PendingApproval)
+                return;
+
+            design.Status = DesignStatus.Rejected;
+            design.UpdatedAt = DateTime.UtcNow;
+            await unitOfWork.Designs.UpdateAsync(design);
+            await unitOfWork.SaveChangesAsync();
+            await LoadDesigns();
+        }
+    }
+
+    private async Task ViewDesign(Guid id)
+    {
+        selectedDesign = allDesigns?.FirstOrDefault(d => d.Id == id);
+        if (selectedDesign != null)
+        {
+            // Create a new context for this operation
+            await using var context = await DbContextFactory.CreateDbContextAsync();
+            var unitOfWork = new UnitOfWork(context);
+
+            var files = await unitOfWork.DesignFiles.FindAsync(f => f.DesignId == id);
+            selectedDesignFiles = files.ToList();
+            await LoadFileUrlsAsync(selectedDesignFiles);
+            showViewModal = true;
+        }
+    }
+
+    private async Task ApproveDesignFromModal(Guid id)
+    {
+        await ApproveDesign(id);
+        selectedDesign = allDesigns?.FirstOrDefault(d => d.Id == id);
+    }
+
+    private async Task RejectDesignFromModal(Guid id)
+    {
+        await RejectDesign(id);
+        selectedDesign = allDesigns?.FirstOrDefault(d => d.Id == id);
+    }
+
+    private void CloseViewModal()
+    {
+        showViewModal = false;
+        selectedDesign = null;
+        selectedDesignFiles = null;
+        fileUrls.Clear();
+        fileUrlError = null;
+    }
+
+    private bool HasFileUrl(DesignFile file)
+    {
+        return fileUrls.ContainsKey(file.Id);
+    }
+
+    private string GetFileUrl(DesignFile file)
+    {
+        if (fileUrls.TryGetValue(file.Id, out var url))
+            return url;
+
+        return file.StorageUrl;
+    }
+
+    private async Task LoadFileUrlsAsync(IEnumerable<DesignFile> files)
+    {
+        fileUrls.Clear();
+        fileUrlError = null;
+
+        try
+        {
+            foreach (var file in files)
+            {
+                var response = await ApiClient.GetAsync<SignedUrlResponse>($"/api/designs/files/{file.Id}/admin-download");
+                if (response != null && !string.IsNullOrWhiteSpace(response.Url))
+                {
+                    fileUrls[file.Id] = response.Url;
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            fileUrlError = $"Failed to load file previews: {ex.Message}";
+        }
+    }
+
+    private void PromptDeleteDesign(Guid designId, string title)
+    {
+        deleteDesignId = designId;
+        deleteDesignTitle = title;
+        deleteErrorMessage = null;
+        showDeleteModal = true;
+    }
+
+    private void CloseDeleteModal()
+    {
+        showDeleteModal = false;
+        deleteDesignId = Guid.Empty;
+        deleteDesignTitle = "";
+        deleteErrorMessage = null;
+    }
+
+    private void PromptDeleteAllDesigns()
+    {
+        deleteAllConfirmText = "";
+        deleteAllErrorMessage = null;
+        showDeleteAllModal = true;
+    }
+
+    private void CloseDeleteAllModal()
+    {
+        showDeleteAllModal = false;
+        deleteAllConfirmText = "";
+        deleteAllErrorMessage = null;
+    }
+
+    private async Task ConfirmDeleteAllDesigns()
+    {
+        deleteAllErrorMessage = null;
+
+        if (!string.Equals(deleteAllConfirmText.Trim(), "DELETE ALL", StringComparison.OrdinalIgnoreCase))
+        {
+            deleteAllErrorMessage = "Please type DELETE ALL to confirm.";
+            return;
+        }
+
+        isDeletingAll = true;
+
+        try
+        {
+            await using var context = await DbContextFactory.CreateDbContextAsync();
+            var unitOfWork = new UnitOfWork(context);
+
+            var designs = (await unitOfWork.Designs.GetAllAsync()).ToList();
+            if (!designs.Any())
+            {
+                CloseDeleteAllModal();
+                return;
+            }
+
+            var designIds = designs.Select(d => d.Id).ToList();
+            var files = await unitOfWork.DesignFiles.FindAsync(f => designIds.Contains(f.DesignId));
+            var verifications = await unitOfWork.DesignVerifications.FindAsync(v => designIds.Contains(v.DesignId));
+
+            foreach (var design in designs)
+            {
+                design.IsDeleted = true;
+                design.UpdatedAt = DateTime.UtcNow;
+                await unitOfWork.Designs.UpdateAsync(design);
+            }
+
+            foreach (var file in files)
+            {
+                file.IsDeleted = true;
+                file.UpdatedAt = DateTime.UtcNow;
+                await unitOfWork.DesignFiles.UpdateAsync(file);
+            }
+
+            foreach (var verification in verifications)
+            {
+                verification.IsDeleted = true;
+                verification.UpdatedAt = DateTime.UtcNow;
+                await unitOfWork.DesignVerifications.UpdateAsync(verification);
+            }
+
+            await unitOfWork.SaveChangesAsync();
+            CloseDeleteAllModal();
+            CloseViewModal();
+            await LoadDesigns();
+        }
+        catch (Exception ex)
+        {
+            deleteAllErrorMessage = $"Failed to delete designs: {ex.Message}";
+        }
+        finally
+        {
+            isDeletingAll = false;
+        }
+    }
+
+    private async Task ConfirmDeleteDesign()
+    {
+        deleteErrorMessage = null;
+
+        if (deleteDesignId == Guid.Empty)
+        {
+            deleteErrorMessage = "Invalid design selection.";
+            return;
+        }
+
+        await using var context = await DbContextFactory.CreateDbContextAsync();
+        var unitOfWork = new UnitOfWork(context);
+
+        var design = await unitOfWork.Designs.GetByIdAsync(deleteDesignId);
+        if (design == null)
+        {
+            deleteErrorMessage = "Design not found.";
+            return;
+        }
+
+        if (design.Status != DesignStatus.Rejected)
+        {
+            deleteErrorMessage = "Only rejected designs can be deleted.";
+            return;
+        }
+
+        design.IsDeleted = true;
+        design.UpdatedAt = DateTime.UtcNow;
+        await unitOfWork.Designs.UpdateAsync(design);
+
+        var files = await unitOfWork.DesignFiles.FindAsync(f => f.DesignId == design.Id);
+        foreach (var file in files)
+        {
+            file.IsDeleted = true;
+            file.UpdatedAt = DateTime.UtcNow;
+            await unitOfWork.DesignFiles.UpdateAsync(file);
+        }
+
+        var verifications = await unitOfWork.DesignVerifications.FindAsync(v => v.DesignId == design.Id);
+        foreach (var verification in verifications)
+        {
+            verification.IsDeleted = true;
+            verification.UpdatedAt = DateTime.UtcNow;
+            await unitOfWork.DesignVerifications.UpdateAsync(verification);
+        }
+
+        await unitOfWork.SaveChangesAsync();
+        CloseDeleteModal();
+        CloseViewModal();
+        await LoadDesigns();
+    }
+
+    private string GetStatusBadge(string status)
+    {
+        return status switch
+        {
+            "Approved" => "success",
+            "PendingVerification" => "info",
+            "PendingApproval" => "warning",
+            "Rejected" => "danger",
+            _ => "secondary"
+        };
+    }
+
+    private string GetFileCategoryBadge(FileCategory category)
+    {
+        return category switch
+        {
+            FileCategory.PreviewImage => "info",
+            FileCategory.PreviewVideo => "info",
+            FileCategory.ArchitecturalDrawing => "primary",
+            FileCategory.StructuralDrawing => "primary",
+            FileCategory.BOQ => "warning",
+            FileCategory.FullRenderImage => "success",
+            FileCategory.FullRenderVideo => "success",
+            _ => "secondary"
+        };
+    }
+
+    private string GetFileCategoryLabel(FileCategory category)
+    {
+        return category switch
+        {
+            FileCategory.PreviewImage => "Preview Image",
+            FileCategory.PreviewVideo => "Preview Video",
+            FileCategory.ArchitecturalDrawing => "Architectural",
+            FileCategory.StructuralDrawing => "Structural",
+            FileCategory.BOQ => "BOQ",
+            FileCategory.FullRenderImage => "Render Image",
+            FileCategory.FullRenderVideo => "Render Video",
+            _ => "Other"
+        };
+    }
+
+    private string FormatFileSize(long bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1} KB";
+        return $"{bytes / (1024.0 * 1024.0):F1} MB";
+    }
+
+    public class DesignViewModel
+    {
+        public Guid Id { get; set; }
+        public string Title { get; set; } = "";
+        public string Description { get; set; } = "";
+        public string ArchitectName { get; set; } = "";
+        public string Category { get; set; } = "";
+        public int Bedrooms { get; set; }
+        public int Bathrooms { get; set; }
+        public double SquareFootage { get; set; }
+        public int Stories { get; set; }
+        public decimal Price { get; set; }
+        public decimal EstimatedConstructionCost { get; set; }
+        public string Status { get; set; } = "";
+        public DateTime CreatedAt { get; set; }
+        public string? PreviewImageUrl { get; set; }
+        public bool IsReadyForApproval { get; set; }
+    }
+
+    public class SignedUrlResponse
+    {
+        public string Url { get; set; } = "";
+    }
+
+    private bool CanApproveDesign(DesignViewModel design)
+    {
+        return design.Status == "PendingApproval" ||
+               (design.Status == "PendingVerification" && design.IsReadyForApproval);
+    }
+
+    private static bool IsReadyForApproval(IEnumerable<DesignVerification> verifications)
+    {
+        var list = verifications.ToList();
+        if (!list.Any())
+            return false;
+
+        var architecturalOk = list.Any(v => v.VerificationType == VerificationType.Architectural && v.Status == VerificationStatus.Verified);
+        var structuralOk = list.Any(v => v.VerificationType == VerificationType.Structural && v.Status == VerificationStatus.Verified);
+
+        var boqArchitectExists = list.Any(v => v.VerificationType == VerificationType.BOQArchitect);
+        var boqEngineerExists = list.Any(v => v.VerificationType == VerificationType.BOQEngineer);
+
+        bool boqOk;
+        if (boqArchitectExists || boqEngineerExists)
+        {
+            boqOk = list.Any(v => v.VerificationType == VerificationType.BOQArchitect && v.Status == VerificationStatus.Verified)
+                && list.Any(v => v.VerificationType == VerificationType.BOQEngineer && v.Status == VerificationStatus.Verified);
+        }
+        else
+        {
+            boqOk = list.Any(v => v.VerificationType == VerificationType.BOQ && v.Status == VerificationStatus.Verified);
+        }
+
+        return architecturalOk && structuralOk && boqOk;
+    }
+}

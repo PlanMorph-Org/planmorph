@@ -1,0 +1,80 @@
+# Git files
+.git
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+README.md
+PRIVACY_POLICY.md
+TERMS_OF_SERVICE.md
+LEGAL_EMAIL_INTEGRATION_GUIDE.md
+
+# Environment files
+.env
+.env.local
+.env.*.local
+*.env
+
+# IDE and editor files
+.vs
+.vscode
+.idea
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build outputs
+**/bin/
+**/obj/
+**/out/
+**/publish/
+
+# Package files
+*.nupkg
+*.snupkg
+
+# Node.js (for Next.js client)
+planmorph-client/node_modules/
+planmorph-client/.next/
+planmorph-client/out/
+planmorph-client/build/
+planmorph-client/.env*.local
+
+# Test files
+**/TestResults/
+**/*.trx
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Docker files (don't copy Docker files into Docker builds)
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Nginx config (already handled separately)
+nginx/
+
+# Temporary files
+*.swp
+*.swo
+*~

@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="PlanMorph.Admin/PlanMorph.Admin.csproj" />
+  <Project Path="PlanMorph.Api/PlanMorph.Api.csproj" />
+  <Project Path="PlanMorph.Application/PlanMorph.Application.csproj" />
+  <Project Path="PlanMorph.Core/PlanMorph.Core.csproj" />
+  <Project Path="PlanMorph.Infrastructure/PlanMorph.Infrastructure.csproj" />
+</Solution>

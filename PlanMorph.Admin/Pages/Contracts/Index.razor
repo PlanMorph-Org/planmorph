@@ -1,0 +1,267 @@
+﻿@page "/contracts"
+@using Microsoft.EntityFrameworkCore
+@using PlanMorph.Core.Entities
+@using PlanMorph.Core.Interfaces
+@using PlanMorph.Admin.Services
+@inject IUnitOfWork UnitOfWork
+@inject AuthStateService AuthState
+@inject NavigationManager Navigation
+
+<PageTitle>Construction Contracts - PlanMorph Admin</PageTitle>
+
+<h1>Construction Contracts</h1>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        @if (isLoading)
+        {
+            <div class="text-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        }
+        else if (contracts == null || !contracts.Any())
+        {
+            <div class="alert alert-info">No construction contracts found.</div>
+        }
+        else
+        {
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Order Number</th>
+                        <th>Client</th>
+                        <th>Location</th>
+                        <th>Estimated Cost</th>
+                        <th>Commission (2%)</th>
+                        <th>Contractor</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var contract in contracts)
+                    {
+                        <tr>
+                            <td>@contract.OrderNumber</td>
+                            <td>@contract.ClientName</td>
+                            <td>@contract.Location</td>
+                            <td>KES @contract.EstimatedCost.ToString("N0")</td>
+                            <td>KES @contract.CommissionAmount.ToString("N0")</td>
+                            <td>
+                                @if (string.IsNullOrEmpty(contract.ContractorName))
+                                {
+                                    <span class="badge bg-warning">Unassigned</span>
+                                }
+                                else
+                                {
+                                    @contract.ContractorName
+                                }
+                            </td>
+                            <td>
+                                <span class="badge bg-@GetStatusBadge(contract.Status)">
+                                    @contract.Status
+                                </span>
+                            </td>
+                            <td>
+                                @if (string.IsNullOrEmpty(contract.ContractorName))
+                                {
+                                    <button class="btn btn-sm btn-primary" @onclick="() => AssignContractor(contract.Id)">
+                                        Assign Contractor
+                                    </button>
+                                }
+                                else if (contract.Status == "Pending")
+                                {
+                                    <button class="btn btn-sm btn-success" @onclick="() => StartContract(contract.Id)">
+                                        Start
+                                    </button>
+                                }
+                                else if (contract.Status == "InProgress")
+                                {
+                                    <button class="btn btn-sm btn-info" @onclick="() => CompleteContract(contract.Id)">
+                                        Complete
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@if (showAssignModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Assign Contractor</h5>
+                    <button type="button" class="btn-close" @onclick="CloseAssignModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Select Contractor</label>
+                        <select class="form-select" @bind="selectedContractorId">
+                            <option value="">-- Select Contractor --</option>
+                            @foreach (var contractor in contractors ?? new List<User>())
+                            {
+                                <option value="@contractor.Id">@contractor.FirstName @contractor.LastName (@contractor.Email)</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseAssignModal">Cancel</button>
+                    <button type="button" class="btn btn-primary" @onclick="SaveContractorAssignment">Assign</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<ContractViewModel>? contracts;
+    private List<User>? contractors;
+    private bool isLoading = true;
+    private bool showAssignModal = false;
+    private Guid currentContractId;
+    private string selectedContractorId = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthState.InitializeAsync();
+
+        if (!AuthState.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        if (AuthState.UserRole != UserRole.Admin)
+        {
+            Navigation.NavigateTo("/verifications");
+            return;
+        }
+
+        await LoadContracts();
+        await LoadContractors();
+    }
+
+    private async Task LoadContracts()
+    {
+        isLoading = true;
+        
+        var allContracts = await UnitOfWork.ConstructionContracts.GetAllAsync();
+        contracts = new List<ContractViewModel>();
+
+        foreach (var contract in allContracts)
+        {
+            var order = await UnitOfWork.Orders.GetByIdAsync(contract.OrderId);
+            var client = order != null ? await UnitOfWork.Users.GetByIdAsync(order.ClientId) : null;
+            var contractor = contract.ContractorId.HasValue ? await UnitOfWork.Users.GetByIdAsync(contract.ContractorId.Value) : null;
+
+            contracts.Add(new ContractViewModel
+            {
+                Id = contract.Id,
+                OrderNumber = order?.OrderNumber ?? "N/A",
+                ClientName = client != null ? $"{client.FirstName} {client.LastName}" : "N/A",
+                Location = contract.Location,
+                EstimatedCost = contract.EstimatedCost,
+                CommissionAmount = contract.CommissionAmount,
+                ContractorName = contractor != null ? $"{contractor.FirstName} {contractor.LastName}" : null,
+                Status = contract.Status.ToString()
+            });
+        }
+
+        isLoading = false;
+    }
+
+    private async Task LoadContractors()
+    {
+        contractors = (await UnitOfWork.Users.FindAsync(u => u.Role == UserRole.Contractor && u.IsActive)).ToList();
+    }
+
+    private void AssignContractor(Guid contractId)
+    {
+        currentContractId = contractId;
+        selectedContractorId = "";
+        showAssignModal = true;
+    }
+
+    private async Task SaveContractorAssignment()
+    {
+        if (string.IsNullOrEmpty(selectedContractorId))
+            return;
+
+        var contract = await UnitOfWork.ConstructionContracts.GetByIdAsync(currentContractId);
+        if (contract != null)
+        {
+            contract.ContractorId = Guid.Parse(selectedContractorId);
+            contract.Status = ContractStatus.Assigned;
+            await UnitOfWork.ConstructionContracts.UpdateAsync(contract);
+            await UnitOfWork.SaveChangesAsync();
+            
+            await LoadContracts();
+            CloseAssignModal();
+        }
+    }
+
+    private async Task StartContract(Guid contractId)
+    {
+        var contract = await UnitOfWork.ConstructionContracts.GetByIdAsync(contractId);
+        if (contract != null)
+        {
+            contract.Status = ContractStatus.InProgress;
+            contract.StartDate = DateTime.UtcNow;
+            await UnitOfWork.ConstructionContracts.UpdateAsync(contract);
+            await UnitOfWork.SaveChangesAsync();
+            await LoadContracts();
+        }
+    }
+
+    private async Task CompleteContract(Guid contractId)
+    {
+        var contract = await UnitOfWork.ConstructionContracts.GetByIdAsync(contractId);
+        if (contract != null)
+        {
+            contract.Status = ContractStatus.Completed;
+            contract.CompletionDate = DateTime.UtcNow;
+            await UnitOfWork.ConstructionContracts.UpdateAsync(contract);
+            await UnitOfWork.SaveChangesAsync();
+            await LoadContracts();
+        }
+    }
+
+    private void CloseAssignModal()
+    {
+        showAssignModal = false;
+    }
+
+    private string GetStatusBadge(string status)
+    {
+        return status switch
+        {
+            "Completed" => "success",
+            "InProgress" => "primary",
+            "Assigned" => "info",
+            "Pending" => "warning",
+            "Cancelled" => "danger",
+            _ => "secondary"
+        };
+    }
+
+    public class ContractViewModel
+    {
+        public Guid Id { get; set; }
+        public string OrderNumber { get; set; } = "";
+        public string ClientName { get; set; } = "";
+        public string Location { get; set; } = "";
+        public decimal EstimatedCost { get; set; }
+        public decimal CommissionAmount { get; set; }
+        public string? ContractorName { get; set; }
+        public string Status { get; set; } = "";
+    }
+}

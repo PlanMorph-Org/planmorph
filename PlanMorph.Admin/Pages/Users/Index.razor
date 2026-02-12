@@ -1,0 +1,1155 @@
+@page "/users"
+@using Microsoft.AspNetCore.Identity
+@using Microsoft.EntityFrameworkCore
+@using PlanMorph.Core.Entities
+@using PlanMorph.Admin.Services
+@using PlanMorph.Infrastructure.Data
+@inject UserManager<User> UserManager
+@inject AuthStateService AuthState
+@inject NavigationManager Navigation
+@inject ApiClient ApiClient
+@inject IDbContextFactory<ApplicationDbContext> DbFactory
+
+<PageTitle>Users - PlanMorph Admin</PageTitle>
+
+<h1>User Management</h1>
+
+<div class="row mt-3 mb-3">
+    <div class="col-md-6">
+        <button class="btn btn-primary" @onclick="ShowAddUserModal">
+            <span class="oi oi-plus"></span> Add New User
+        </button>
+    </div>
+    <div class="col-md-6">
+        <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search users..." @bind="searchTerm" @bind:event="oninput" />
+            <button class="btn btn-outline-secondary" @onclick="SearchUsers">Search</button>
+        </div>
+    </div>
+</div>
+
+@if (isLoading)
+{
+    <div class="text-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Pending Professional Applications -->
+    @if (pendingProfessionals != null && pendingProfessionals.Any())
+    {
+        <div class="alert alert-warning mb-4">
+            <h5 class="alert-heading">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                Pending Professional Applications (@pendingProfessionals.Count)
+            </h5>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Phone</th>
+                            <th>Applied</th>
+                            <th>Requirements</th>
+                            <th>Details</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var professional in pendingProfessionals)
+                        {
+                            <tr>
+                                <td>@professional.FirstName @professional.LastName</td>
+                                <td>@professional.Email</td>
+                                <td>
+                                    <span class="badge bg-@GetRoleBadge(professional.Role.ToString())">
+                                        @professional.Role
+                                    </span>
+                                </td>
+                                <td>@professional.PhoneNumber</td>
+                                <td>@professional.CreatedAt.ToShortDateString()</td>
+                                <td>
+                                    @if (HasPortfolio(professional))
+                                    {
+                                        <span class="badge bg-info">Portfolio</span>
+                                    }
+                                    else if (HasAllDocuments(professional))
+                                    {
+                                        <span class="badge bg-info">Documents</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Missing</span>
+                                    }
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" @onclick="() => ViewProfessionalDetailsAsync(professional)">
+                                        View
+                                    </button>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-success" disabled="@(!IsReadyForApproval(professional))" @onclick="() => ApproveProfessionalAsync(professional.Id)">
+                                        Approve
+                                    </button>
+                                    <button class="btn btn-sm btn-danger ms-2" @onclick="() => StartRejectProfessional(professional.Id)">
+                                        Reject
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    <!-- Professionals Table (Engineers & Architects) -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Professionals (Engineers & Architects)</h5>
+            <span class="badge bg-primary">@filteredProfessionals?.Count total</span>
+        </div>
+        <div class="card-body">
+            @if (filteredProfessionals == null || !filteredProfessionals.Any())
+            {
+                <div class="alert alert-info mb-0">No professionals found.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in filteredProfessionals)
+                            {
+                                <tr>
+                                    <td>@user.FirstName @user.LastName</td>
+                                    <td>@user.Email</td>
+                                    <td>
+                                        <span class="badge bg-@GetRoleBadge(user.Role.ToString())">
+                                            @user.Role
+                                        </span>
+                                    </td>
+                                    <td>@user.PhoneNumber</td>
+                                    <td>
+                                        @if (user.IsActive)
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Inactive</span>
+                                        }
+                                    </td>
+                                    <td>@user.CreatedAt.ToShortDateString()</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" @onclick="() => EditUser(user)">Edit</button>
+                                        @if (user.IsActive)
+                                        {
+                                            <button class="btn btn-sm btn-danger ms-2" @onclick="() => DeactivateUser(user.Id)">Deactivate</button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-sm btn-success ms-2" @onclick="() => ActivateUser(user.Id)">Activate</button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Contractors Table -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Contractors</h5>
+            <span class="badge bg-warning">@filteredContractors?.Count total</span>
+        </div>
+        <div class="card-body">
+            @if (filteredContractors == null || !filteredContractors.Any())
+            {
+                <div class="alert alert-info mb-0">No contractors found.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in filteredContractors)
+                            {
+                                <tr>
+                                    <td>@user.FirstName @user.LastName</td>
+                                    <td>@user.Email</td>
+                                    <td>@user.PhoneNumber</td>
+                                    <td>
+                                        @if (user.IsActive)
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Inactive</span>
+                                        }
+                                    </td>
+                                    <td>@user.CreatedAt.ToShortDateString()</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" @onclick="() => EditUser(user)">Edit</button>
+                                        @if (user.IsActive)
+                                        {
+                                            <button class="btn btn-sm btn-danger ms-2" @onclick="() => DeactivateUser(user.Id)">Deactivate</button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-sm btn-success ms-2" @onclick="() => ActivateUser(user.Id)">Activate</button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Users Table (Clients) -->
+    <div class="card mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Users (Clients)</h5>
+            <span class="badge bg-info">@filteredClients?.Count total</span>
+        </div>
+        <div class="card-body">
+            @if (filteredClients == null || !filteredClients.Any())
+            {
+                <div class="alert alert-info mb-0">No users found.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in filteredClients)
+                            {
+                                <tr>
+                                    <td>@user.FirstName @user.LastName</td>
+                                    <td>@user.Email</td>
+                                    <td>@user.PhoneNumber</td>
+                                    <td>
+                                        @if (user.IsActive)
+                                        {
+                                            <span class="badge bg-success">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Inactive</span>
+                                        }
+                                    </td>
+                                    <td>@user.CreatedAt.ToShortDateString()</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" @onclick="() => EditUser(user)">Edit</button>
+                                        @if (user.IsActive)
+                                        {
+                                            <button class="btn btn-sm btn-danger ms-2" @onclick="() => DeactivateUser(user.Id)">Deactivate</button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-sm btn-success ms-2" @onclick="() => ActivateUser(user.Id)">Activate</button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@if (showModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">@(isEditMode ? "Edit User" : "Add New User")</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="userModel" OnValidSubmit="SaveUser">
+                        <DataAnnotationsValidator />
+
+                        <div class="mb-3">
+                            <label class="form-label">First Name</label>
+                            <InputText @bind-Value="userModel.FirstName" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Last Name</label>
+                            <InputText @bind-Value="userModel.LastName" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <InputText @bind-Value="userModel.Email" class="form-control" disabled="@isEditMode" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number</label>
+                            <InputText @bind-Value="userModel.PhoneNumber" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Role</label>
+                            <InputSelect @bind-Value="userModel.Role" class="form-select">
+                                <option value="@UserRole.Client">Client</option>
+                                <option value="@UserRole.Architect">Architect</option>
+                                <option value="@UserRole.Engineer">Engineer</option>
+                                <option value="@UserRole.Contractor">Contractor</option>
+                                <option value="@UserRole.Admin">Admin</option>
+                            </InputSelect>
+                        </div>
+
+                        @if (!isEditMode)
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">Password</label>
+                                <InputText @bind-Value="userModel.Password" type="password" class="form-control" />
+                            </div>
+                        }
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Save</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showProfessionalModal && selectedProfessional != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Professional Application Details</h5>
+                    <button type="button" class="btn-close" @onclick="CloseProfessionalModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-12 d-flex flex-wrap gap-2">
+                            @if (selectedProfessional.IsActive)
+                            {
+                                <span class="badge bg-success">Approved</span>
+                            }
+                            else if (selectedProfessional.IsRejected)
+                            {
+                                <span class="badge bg-danger">Rejected</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            }
+
+                            @if (HasRequiredDocuments(selectedProfessional))
+                            {
+                                <span class="badge bg-info">Requirements met</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Missing requirements</span>
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Name</label>
+                            <div class="fw-semibold">@selectedProfessional.FirstName @selectedProfessional.LastName</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Role</label>
+                            <div class="fw-semibold">@selectedProfessional.Role</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Email</label>
+                            <div class="fw-semibold">@selectedProfessional.Email</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Phone</label>
+                            <div class="fw-semibold">@selectedProfessional.PhoneNumber</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Professional License</label>
+                            <div class="fw-semibold">@selectedProfessional.ProfessionalLicense</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Years of Experience</label>
+                            <div class="fw-semibold">@selectedProfessional.YearsOfExperience</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Specialization</label>
+                            <div class="fw-semibold">@selectedProfessional.Specialization</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Portfolio</label>
+                            @if (!string.IsNullOrWhiteSpace(selectedProfessional.PortfolioUrl))
+                            {
+                                <a class="fw-semibold" href="@selectedProfessional.PortfolioUrl" target="_blank" rel="noopener noreferrer">@selectedProfessional.PortfolioUrl</a>
+                            }
+                            else
+                            {
+                                <div class="text-muted">Not provided</div>
+                            }
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-muted">Professional Documents</label>
+                            @if (isDocumentLoading)
+                            {
+                                <div class="text-muted">Generating secure links...</div>
+                            }
+                            else
+                            {
+                                <div class="d-flex flex-column gap-2">
+                                    <div class="d-flex align-items-center flex-wrap gap-2">
+                                        <span class="fw-semibold">CV:</span>
+                                        @if (!string.IsNullOrWhiteSpace(cvSignedUrl))
+                                        {
+                                            <a class="btn btn-sm btn-outline-primary" href="@cvSignedUrl" target="_blank" rel="noopener noreferrer">Open CV</a>
+                                            <span class="text-muted">@GetDocumentMeta(cvFileName, cvFileSizeBytes, cvUploadedAt)</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Not provided</span>
+                                        }
+                                    </div>
+                                    <div class="d-flex align-items-center flex-wrap gap-2">
+                                        <span class="fw-semibold">Cover Letter:</span>
+                                        @if (!string.IsNullOrWhiteSpace(coverLetterSignedUrl))
+                                        {
+                                            <a class="btn btn-sm btn-outline-primary" href="@coverLetterSignedUrl" target="_blank" rel="noopener noreferrer">Open Cover Letter</a>
+                                            <span class="text-muted">@GetDocumentMeta(coverLetterFileName, coverLetterFileSizeBytes, coverLetterUploadedAt)</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Not provided</span>
+                                        }
+                                    </div>
+                                    <div class="d-flex align-items-center flex-wrap gap-2">
+                                        <span class="fw-semibold">Work Experience PDF:</span>
+                                        @if (!string.IsNullOrWhiteSpace(workExperienceSignedUrl))
+                                        {
+                                            <a class="btn btn-sm btn-outline-primary" href="@workExperienceSignedUrl" target="_blank" rel="noopener noreferrer">Open Work Experience</a>
+                                            <span class="text-muted">@GetDocumentMeta(workExperienceFileName, workExperienceFileSizeBytes, workExperienceUploadedAt)</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Not provided</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Applied</label>
+                            <div class="fw-semibold">@selectedProfessional.CreatedAt.ToString("dd MMM yyyy")</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Last Reviewed</label>
+                            @if (selectedProfessional.LastReviewedAt.HasValue)
+                            {
+                                <div class="fw-semibold">
+                                    @selectedProfessional.LastReviewedAt.Value.ToString("dd MMM yyyy HH:mm") (@selectedProfessional.LastReviewedByName)
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="text-muted">Not reviewed yet</div>
+                            }
+                        </div>
+                        @if (selectedProfessional.IsRejected && !string.IsNullOrWhiteSpace(selectedProfessional.RejectionReason))
+                        {
+                            <div class="col-12">
+                                <label class="form-label text-muted">Rejection Reason</label>
+                                <div class="fw-semibold text-danger">@selectedProfessional.RejectionReason</div>
+                            </div>
+                        }
+                        <div class="col-12">
+                            <label class="form-label text-muted">Verification Checklist</label>
+                            <div class="form-check">
+                                <InputCheckbox class="form-check-input" @bind-Value="selectedProfessional.LicenseVerified" />
+                                <label class="form-check-label">License verified</label>
+                            </div>
+                            <div class="form-check">
+                                <InputCheckbox class="form-check-input" @bind-Value="selectedProfessional.DocumentsVerified" />
+                                <label class="form-check-label">Documents verified</label>
+                            </div>
+                            <div class="form-check">
+                                <InputCheckbox class="form-check-input" @bind-Value="selectedProfessional.ExperienceVerified" />
+                                <label class="form-check-label">Experience verified</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label text-muted">Verification Notes</label>
+                            <InputTextArea @bind-Value="selectedProfessional.VerificationNotes" class="form-control" rows="3" />
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(reviewErrorMessage))
+                        {
+                            <div class="col-12">
+                                <div class="alert alert-danger mb-0">@reviewErrorMessage</div>
+                            </div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(reviewSuccessMessage))
+                        {
+                            <div class="col-12">
+                                <div class="alert alert-success mb-0">@reviewSuccessMessage</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseProfessionalModal">Close</button>
+                    <button type="button" class="btn btn-outline-primary" @onclick="SaveReviewAsync">Save Review</button>
+                    <button type="button" class="btn btn-success" disabled="@(!IsReadyForApproval(selectedProfessional))" @onclick="() => ApproveProfessionalAsync(selectedProfessional.Id)">Approve</button>
+                    <button type="button" class="btn btn-danger" @onclick="() => StartRejectProfessional(selectedProfessional.Id)">Reject</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (showRejectModal && selectedProfessional != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Reject Application</h5>
+                    <button type="button" class="btn-close" @onclick="CloseRejectModal"></button>
+                </div>
+                <div class="modal-body">
+                    <label class="form-label text-muted">Rejection Reason (required)</label>
+                    <InputTextArea @bind-Value="rejectReason" class="form-control" rows="4" />
+                    @if (!string.IsNullOrWhiteSpace(rejectErrorMessage))
+                    {
+                        <div class="alert alert-danger mt-3 mb-0">@rejectErrorMessage</div>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseRejectModal">Cancel</button>
+                    <button type="button" class="btn btn-danger" @onclick="ConfirmRejectAsync">Confirm Reject</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<User>? allUsers;
+    private List<User>? filteredProfessionals;
+    private List<User>? filteredContractors;
+    private List<User>? filteredClients;
+    private List<User>? pendingProfessionals;
+    private string searchTerm = "";
+    private bool isLoading = true;
+    private bool showModal = false;
+    private bool isEditMode = false;
+    private UserModel userModel = new();
+    private bool showProfessionalModal = false;
+    private User? selectedProfessional;
+    private string? cvSignedUrl;
+    private string? coverLetterSignedUrl;
+    private string? workExperienceSignedUrl;
+    private string? cvFileName;
+    private long? cvFileSizeBytes;
+    private DateTime? cvUploadedAt;
+    private string? coverLetterFileName;
+    private long? coverLetterFileSizeBytes;
+    private DateTime? coverLetterUploadedAt;
+    private string? workExperienceFileName;
+    private long? workExperienceFileSizeBytes;
+    private DateTime? workExperienceUploadedAt;
+    private bool isDocumentLoading;
+    private bool showRejectModal;
+    private string rejectReason = "";
+    private string? rejectErrorMessage;
+    private string? reviewErrorMessage;
+    private string? reviewSuccessMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthState.InitializeAsync();
+
+        if (!AuthState.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        if (AuthState.UserRole != UserRole.Admin)
+        {
+            Navigation.NavigateTo("/verifications");
+            return;
+        }
+
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        isLoading = true;
+        allUsers = UserManager.Users.OrderByDescending(u => u.CreatedAt).ToList();
+
+        // Pending professional applications (inactive engineers & architects)
+        pendingProfessionals = allUsers
+            .Where(u => (u.Role == UserRole.Architect || u.Role == UserRole.Engineer) && !u.IsActive && !u.IsRejected)
+            .ToList();
+
+        ApplyFilters();
+        isLoading = false;
+    }
+
+    private void ApplyFilters()
+    {
+        var filtered = allUsers;
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            filtered = allUsers?.Where(u =>
+                u.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                u.LastName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                u.Email!.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            ).ToList();
+        }
+
+        // Active professionals (Engineers & Architects who are approved)
+        filteredProfessionals = filtered?
+            .Where(u => (u.Role == UserRole.Architect || u.Role == UserRole.Engineer) && u.IsActive)
+            .ToList();
+
+        // Contractors (all)
+        filteredContractors = filtered?
+            .Where(u => u.Role == UserRole.Contractor)
+            .ToList();
+
+        // Clients only
+        filteredClients = filtered?
+            .Where(u => u.Role == UserRole.Client)
+            .ToList();
+    }
+
+    private async Task ApproveProfessionalAsync(Guid userId)
+    {
+        reviewErrorMessage = null;
+        reviewSuccessMessage = null;
+
+        var user = await UserManager.FindByIdAsync(userId.ToString());
+        if (user == null)
+        {
+            reviewErrorMessage = "User not found.";
+            return;
+        }
+
+        var reviewSource = selectedProfessional != null && selectedProfessional.Id == user.Id
+            ? selectedProfessional
+            : user;
+
+        if (!IsReadyForApproval(reviewSource))
+        {
+            reviewErrorMessage = "Complete the checklist and ensure all requirements are met before approval.";
+            return;
+        }
+
+        var admin = await GetCurrentAdminAsync();
+        if (admin == null)
+        {
+            reviewErrorMessage = "Unable to determine current admin user.";
+            return;
+        }
+
+        user.IsActive = true;
+        user.IsRejected = false;
+        user.RejectionReason = null;
+        user.RejectedAt = null;
+        user.RejectedById = null;
+        user.LicenseVerified = reviewSource.LicenseVerified;
+        user.DocumentsVerified = reviewSource.DocumentsVerified;
+        user.ExperienceVerified = reviewSource.ExperienceVerified;
+        user.VerificationNotes = reviewSource.VerificationNotes?.Trim();
+        user.LastReviewedAt = DateTime.UtcNow;
+        user.LastReviewedById = admin.Id;
+        user.LastReviewedByName = $"{admin.FirstName} {admin.LastName}";
+
+        var result = await UserManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            reviewErrorMessage = "Failed to approve professional.";
+            return;
+        }
+
+        await LogReviewAsync(user, admin, ProfessionalReviewAction.Approved, null);
+        reviewSuccessMessage = "Professional approved successfully.";
+        await LoadUsers();
+    }
+
+    private async Task SaveReviewAsync()
+    {
+        reviewErrorMessage = null;
+        reviewSuccessMessage = null;
+
+        if (selectedProfessional == null)
+        {
+            reviewErrorMessage = "No professional selected.";
+            return;
+        }
+
+        var user = await UserManager.FindByIdAsync(selectedProfessional.Id.ToString());
+        if (user == null)
+        {
+            reviewErrorMessage = "User not found.";
+            return;
+        }
+
+        var admin = await GetCurrentAdminAsync();
+        if (admin == null)
+        {
+            reviewErrorMessage = "Unable to determine current admin user.";
+            return;
+        }
+
+        user.LicenseVerified = selectedProfessional.LicenseVerified;
+        user.DocumentsVerified = selectedProfessional.DocumentsVerified;
+        user.ExperienceVerified = selectedProfessional.ExperienceVerified;
+        user.VerificationNotes = selectedProfessional.VerificationNotes?.Trim();
+        user.LastReviewedAt = DateTime.UtcNow;
+        user.LastReviewedById = admin.Id;
+        user.LastReviewedByName = $"{admin.FirstName} {admin.LastName}";
+
+        var result = await UserManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            reviewErrorMessage = "Failed to save review details.";
+            return;
+        }
+
+        selectedProfessional = user;
+        reviewSuccessMessage = "Review details saved.";
+        await LoadUsers();
+    }
+
+    private async Task StartRejectProfessional(Guid userId)
+    {
+        rejectErrorMessage = null;
+        rejectReason = "";
+
+        if (selectedProfessional == null || selectedProfessional.Id != userId)
+        {
+            selectedProfessional = await UserManager.FindByIdAsync(userId.ToString());
+        }
+
+        showRejectModal = true;
+    }
+
+    private async Task ConfirmRejectAsync()
+    {
+        rejectErrorMessage = null;
+        reviewErrorMessage = null;
+        reviewSuccessMessage = null;
+
+        if (selectedProfessional == null)
+        {
+            rejectErrorMessage = "No professional selected.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(rejectReason))
+        {
+            rejectErrorMessage = "Rejection reason is required.";
+            return;
+        }
+
+        var user = await UserManager.FindByIdAsync(selectedProfessional.Id.ToString());
+        if (user == null)
+        {
+            rejectErrorMessage = "User not found.";
+            return;
+        }
+
+        var admin = await GetCurrentAdminAsync();
+        if (admin == null)
+        {
+            rejectErrorMessage = "Unable to determine current admin user.";
+            return;
+        }
+
+        user.IsActive = false;
+        user.IsRejected = true;
+        user.RejectionReason = rejectReason.Trim();
+        user.RejectedAt = DateTime.UtcNow;
+        user.RejectedById = admin.Id;
+        user.LicenseVerified = selectedProfessional.LicenseVerified;
+        user.DocumentsVerified = selectedProfessional.DocumentsVerified;
+        user.ExperienceVerified = selectedProfessional.ExperienceVerified;
+        user.VerificationNotes = selectedProfessional.VerificationNotes?.Trim();
+        user.LastReviewedAt = DateTime.UtcNow;
+        user.LastReviewedById = admin.Id;
+        user.LastReviewedByName = $"{admin.FirstName} {admin.LastName}";
+
+        var result = await UserManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            rejectErrorMessage = "Failed to reject professional.";
+            return;
+        }
+
+        await LogReviewAsync(user, admin, ProfessionalReviewAction.Rejected, rejectReason.Trim());
+        CloseRejectModal();
+        await LoadUsers();
+    }
+
+    private void CloseRejectModal()
+    {
+        showRejectModal = false;
+        rejectReason = "";
+        rejectErrorMessage = null;
+    }
+
+    private void SearchUsers()
+    {
+        ApplyFilters();
+    }
+
+    private void ShowAddUserModal()
+    {
+        isEditMode = false;
+        userModel = new UserModel();
+        showModal = true;
+    }
+
+    private void EditUser(User user)
+    {
+        isEditMode = true;
+        userModel = new UserModel
+        {
+            Id = user.Id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email ?? "",
+            PhoneNumber = user.PhoneNumber ?? "",
+            Role = user.Role
+        };
+        showModal = true;
+    }
+
+    private async Task SaveUser()
+    {
+        if (isEditMode)
+        {
+            var user = await UserManager.FindByIdAsync(userModel.Id.ToString());
+            if (user != null)
+            {
+                user.FirstName = userModel.FirstName;
+                user.LastName = userModel.LastName;
+                user.PhoneNumber = userModel.PhoneNumber;
+                user.Role = userModel.Role;
+
+                await UserManager.UpdateAsync(user);
+
+                // Update role
+                var currentRoles = await UserManager.GetRolesAsync(user);
+                await UserManager.RemoveFromRolesAsync(user, currentRoles);
+                await UserManager.AddToRoleAsync(user, userModel.Role.ToString());
+            }
+        }
+        else
+        {
+            var user = new User
+            {
+                UserName = userModel.Email,
+                Email = userModel.Email,
+                FirstName = userModel.FirstName,
+                LastName = userModel.LastName,
+                PhoneNumber = userModel.PhoneNumber,
+                Role = userModel.Role,
+                EmailConfirmed = true,
+                IsActive = true
+            };
+
+            var result = await UserManager.CreateAsync(user, userModel.Password);
+
+            if (result.Succeeded)
+            {
+                await UserManager.AddToRoleAsync(user, userModel.Role.ToString());
+            }
+        }
+
+        await LoadUsers();
+        CloseModal();
+    }
+
+    private async Task DeactivateUser(Guid userId)
+    {
+        var user = await UserManager.FindByIdAsync(userId.ToString());
+        if (user != null)
+        {
+            user.IsActive = false;
+            await UserManager.UpdateAsync(user);
+            await LoadUsers();
+        }
+    }
+
+    private async Task ActivateUser(Guid userId)
+    {
+        var user = await UserManager.FindByIdAsync(userId.ToString());
+        if (user != null)
+        {
+            user.IsActive = true;
+            await UserManager.UpdateAsync(user);
+            await LoadUsers();
+        }
+    }
+
+    private void CloseModal()
+    {
+        showModal = false;
+        userModel = new();
+    }
+
+    private async Task ViewProfessionalDetailsAsync(User professional)
+    {
+        selectedProfessional = professional;
+        showProfessionalModal = true;
+        reviewErrorMessage = null;
+        reviewSuccessMessage = null;
+        await LoadProfessionalDocumentLinksAsync(professional);
+    }
+
+    private void CloseProfessionalModal()
+    {
+        showProfessionalModal = false;
+        selectedProfessional = null;
+        cvSignedUrl = null;
+        coverLetterSignedUrl = null;
+        workExperienceSignedUrl = null;
+        cvFileName = null;
+        cvFileSizeBytes = null;
+        cvUploadedAt = null;
+        coverLetterFileName = null;
+        coverLetterFileSizeBytes = null;
+        coverLetterUploadedAt = null;
+        workExperienceFileName = null;
+        workExperienceFileSizeBytes = null;
+        workExperienceUploadedAt = null;
+        isDocumentLoading = false;
+        reviewErrorMessage = null;
+        reviewSuccessMessage = null;
+        CloseRejectModal();
+    }
+
+    private async Task<User?> GetCurrentAdminAsync()
+    {
+        if (string.IsNullOrWhiteSpace(AuthState.UserEmail))
+        {
+            return null;
+        }
+
+        return await UserManager.FindByEmailAsync(AuthState.UserEmail);
+    }
+
+    private async Task LogReviewAsync(User professional, User admin, ProfessionalReviewAction action, string? reason)
+    {
+        await using var db = await DbFactory.CreateDbContextAsync();
+        var log = new ProfessionalReviewLog
+        {
+            ProfessionalUserId = professional.Id,
+            AdminUserId = admin.Id,
+            Action = action,
+            Reason = reason,
+            Notes = professional.VerificationNotes,
+            LicenseVerified = professional.LicenseVerified,
+            DocumentsVerified = professional.DocumentsVerified,
+            ExperienceVerified = professional.ExperienceVerified,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        db.ProfessionalReviewLogs.Add(log);
+        await db.SaveChangesAsync();
+    }
+
+    private static bool HasPortfolio(User professional)
+        => !string.IsNullOrWhiteSpace(professional.PortfolioUrl);
+
+    private static bool HasAllDocuments(User professional)
+        => !string.IsNullOrWhiteSpace(professional.CvUrl)
+           && !string.IsNullOrWhiteSpace(professional.CoverLetterUrl)
+           && !string.IsNullOrWhiteSpace(professional.WorkExperienceUrl);
+
+    private static bool HasRequiredDocuments(User professional)
+        => HasPortfolio(professional) || HasAllDocuments(professional);
+
+    private static bool IsReadyForApproval(User professional)
+        => HasRequiredDocuments(professional)
+           && professional.LicenseVerified
+           && professional.DocumentsVerified
+           && professional.ExperienceVerified;
+
+    private static string GetDocumentMeta(string? fileName, long? fileSizeBytes, DateTime? uploadedAt)
+    {
+        var parts = new List<string>();
+        if (!string.IsNullOrWhiteSpace(fileName))
+        {
+            parts.Add(fileName);
+        }
+
+        if (fileSizeBytes.HasValue)
+        {
+            parts.Add(FormatBytes(fileSizeBytes.Value));
+        }
+
+        if (uploadedAt.HasValue)
+        {
+            parts.Add(uploadedAt.Value.ToString("dd MMM yyyy"));
+        }
+
+        return parts.Count == 0 ? "Metadata unavailable" : string.Join(" • ", parts);
+    }
+
+    private static string FormatBytes(long bytes)
+    {
+        if (bytes < 1024)
+        {
+            return $"{bytes} B";
+        }
+
+        var kb = bytes / 1024d;
+        if (kb < 1024)
+        {
+            return $"{kb:F1} KB";
+        }
+
+        var mb = kb / 1024d;
+        if (mb < 1024)
+        {
+            return $"{mb:F1} MB";
+        }
+
+        var gb = mb / 1024d;
+        return $"{gb:F1} GB";
+    }
+
+    private async Task LoadProfessionalDocumentLinksAsync(User professional)
+    {
+        isDocumentLoading = true;
+        cvSignedUrl = null;
+        coverLetterSignedUrl = null;
+        workExperienceSignedUrl = null;
+        cvFileName = null;
+        cvFileSizeBytes = null;
+        cvUploadedAt = null;
+        coverLetterFileName = null;
+        coverLetterFileSizeBytes = null;
+        coverLetterUploadedAt = null;
+        workExperienceFileName = null;
+        workExperienceFileSizeBytes = null;
+        workExperienceUploadedAt = null;
+        StateHasChanged();
+
+        var response = await ApiClient.GetAsync<ProfessionalDocumentLinks>($"/api/users/{professional.Id}/professional-documents");
+        if (response != null)
+        {
+            cvSignedUrl = response.CvUrl;
+            coverLetterSignedUrl = response.CoverLetterUrl;
+            workExperienceSignedUrl = response.WorkExperienceUrl;
+            cvFileName = response.CvFileName;
+            cvFileSizeBytes = response.CvFileSizeBytes;
+            cvUploadedAt = response.CvUploadedAt;
+            coverLetterFileName = response.CoverLetterFileName;
+            coverLetterFileSizeBytes = response.CoverLetterFileSizeBytes;
+            coverLetterUploadedAt = response.CoverLetterUploadedAt;
+            workExperienceFileName = response.WorkExperienceFileName;
+            workExperienceFileSizeBytes = response.WorkExperienceFileSizeBytes;
+            workExperienceUploadedAt = response.WorkExperienceUploadedAt;
+        }
+
+        isDocumentLoading = false;
+        StateHasChanged();
+    }
+
+    private sealed class ProfessionalDocumentLinks
+    {
+        public string? CvUrl { get; set; }
+        public string? CvFileName { get; set; }
+        public long? CvFileSizeBytes { get; set; }
+        public DateTime? CvUploadedAt { get; set; }
+        public string? CoverLetterUrl { get; set; }
+        public string? CoverLetterFileName { get; set; }
+        public long? CoverLetterFileSizeBytes { get; set; }
+        public DateTime? CoverLetterUploadedAt { get; set; }
+        public string? WorkExperienceUrl { get; set; }
+        public string? WorkExperienceFileName { get; set; }
+        public long? WorkExperienceFileSizeBytes { get; set; }
+        public DateTime? WorkExperienceUploadedAt { get; set; }
+    }
+
+    private string GetRoleBadge(string role)
+    {
+        return role switch
+        {
+            "Admin" => "danger",
+            "Architect" => "primary",
+            "Engineer" => "success",
+            "Contractor" => "warning",
+            "Client" => "info",
+            _ => "secondary"
+        };
+    }
+
+    public class UserModel
+    {
+        public Guid Id { get; set; }
+        public string FirstName { get; set; } = "";
+        public string LastName { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string PhoneNumber { get; set; } = "";
+        public UserRole Role { get; set; } = UserRole.Client;
+        public string Password { get; set; } = "";
+    }
+}

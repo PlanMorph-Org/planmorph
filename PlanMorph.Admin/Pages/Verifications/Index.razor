@@ -1,0 +1,550 @@
+@page "/verifications"
+@using Microsoft.EntityFrameworkCore
+@using PlanMorph.Admin.Services
+@using PlanMorph.Core.Entities
+@using PlanMorph.Core.Interfaces
+@using PlanMorph.Infrastructure.Data
+@using PlanMorph.Infrastructure.Repositories
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+@inject AuthStateService AuthState
+@inject NavigationManager Navigation
+
+<PageTitle>Design Verifications - PlanMorph Admin</PageTitle>
+
+<h1>Design Verifications</h1>
+
+@if (isLoading)
+{
+    <div class="text-center mt-5">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+}
+else
+{
+    <!-- Filter Tabs -->
+    <ul class="nav nav-tabs mt-4 mb-3">
+        <li class="nav-item">
+            <button class="nav-link @(currentFilter == "All" ? "active" : "")" @onclick='() => FilterVerifications("All")'>
+                All (@allCount)
+            </button>
+        </li>
+        @if (userRole == UserRole.Architect || userRole == UserRole.Admin)
+        {
+            <li class="nav-item">
+                <button class="nav-link @(currentFilter == "Architectural" ? "active" : "")" @onclick='() => FilterVerifications("Architectural")'>
+                    Architectural (@architecturalCount)
+                </button>
+            </li>
+        }
+        @if (userRole == UserRole.Engineer || userRole == UserRole.Admin)
+        {
+            <li class="nav-item">
+                <button class="nav-link @(currentFilter == "Structural" ? "active" : "")" @onclick='() => FilterVerifications("Structural")'>
+                    Structural (@structuralCount)
+                </button>
+            </li>
+        }
+        <li class="nav-item">
+            <button class="nav-link @(currentFilter == "BOQ" ? "active" : "")" @onclick='() => FilterVerifications("BOQ")'>
+                BOQ (@boqCount)
+            </button>
+        </li>
+    </ul>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            @if (filteredVerifications == null || !filteredVerifications.Any())
+            {
+                <div class="alert alert-info">No pending verifications found.</div>
+            }
+            else
+            {
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Design</th>
+                            <th>Architect</th>
+                            <th>Verification Type</th>
+                            <th>Status</th>
+                            <th>Submitted</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var verification in filteredVerifications)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@verification.DesignTitle</strong>
+                                </td>
+                                <td>@verification.ArchitectName</td>
+                                <td>
+                                    <span class="badge bg-@GetVerificationTypeBadge(verification.VerificationType)">
+                                        @GetVerificationTypeLabel(verification.VerificationType)
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-@GetVerificationStatusBadge(verification.Status)">
+                                        @verification.Status
+                                    </span>
+                                </td>
+                                <td>
+                                    <small>@verification.CreatedAt.ToShortDateString()</small>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary me-1" @onclick="() => ViewVerification(verification.Id)">
+                                        <i class="bi bi-eye"></i> Review
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+}
+
+<!-- Review Verification Modal -->
+@if (showReviewModal && selectedVerification != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Review @GetVerificationTypeLabel(selectedVerification.VerificationType) Verification</h5>
+                    <div class="ms-auto me-3">
+                        <span class="badge bg-@GetVerificationTypeBadge(selectedVerification.VerificationType)">
+                            @GetVerificationTypeLabel(selectedVerification.VerificationType)
+                        </span>
+                    </div>
+                    <button type="button" class="btn-close" @onclick="CloseReviewModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Design Info -->
+                        <div class="col-md-4">
+                            <h6>Design Information</h6>
+                            <div class="card mb-3">
+                                <div class="card-body">
+                                    <p><strong>Title:</strong> @selectedVerification.DesignTitle</p>
+                                    <p><strong>Architect:</strong> @selectedVerification.ArchitectName</p>
+                                    <p><strong>Submitted:</strong> @selectedVerification.CreatedAt.ToString("dd MMM yyyy")</p>
+                                </div>
+                            </div>
+
+                            <!-- Verification Comments -->
+                            @if (selectedVerification.Status == VerificationStatus.Pending.ToString())
+                            {
+                                <h6>Verification Comments</h6>
+                                <textarea class="form-control" rows="4" @bind="verificationComments" placeholder="Add comments about this verification..."></textarea>
+                            }
+                            else if (!string.IsNullOrEmpty(selectedVerification.Comments))
+                            {
+                                <h6>Comments</h6>
+                                <div class="alert alert-info">
+                                    @selectedVerification.Comments
+                                </div>
+                            }
+                        </div>
+
+                        <!-- Files to Verify -->
+                        <div class="col-md-8">
+                            <h6>Files for @GetVerificationTypeLabel(selectedVerification.VerificationType) Verification</h6>
+                            @if (relevantFiles != null && relevantFiles.Any())
+                            {
+                                <div class="row g-3">
+                                    @foreach (var file in relevantFiles)
+                                    {
+                                        <div class="col-md-6">
+                                            <div class="card">
+                                                <div class="card-body">
+                                                    <h6 class="card-title">
+                                                        <span class="badge bg-@GetFileCategoryBadge(file.Category)">
+                                                            @GetFileCategoryLabel(file.Category)
+                                                        </span>
+                                                    </h6>
+                                                    <p class="card-text">
+                                                        <small>@file.FileName</small><br/>
+                                                        <small class="text-muted">@FormatFileSize(file.FileSizeBytes)</small>
+                                                    </p>
+                                                    @if (file.Category == FileCategory.PreviewImage || file.Category == FileCategory.FullRenderImage)
+                                                    {
+                                                        <img src="@file.StorageUrl" alt="@file.FileName" class="img-fluid mb-2" style="max-height: 200px; object-fit: contain;" />
+                                                    }
+                                                    <a href="@file.StorageUrl" target="_blank" class="btn btn-sm btn-outline-primary">
+                                                        <i class="bi bi-download"></i> View/Download
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-warning">No files found for this verification type.</div>
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    @if (selectedVerification.Status == VerificationStatus.Pending.ToString() && CanVerify(selectedVerification.VerificationType))
+                    {
+                        <button class="btn btn-success" @onclick="() => VerifyDesign(selectedVerification.Id)">
+                            <i class="bi bi-check-circle"></i> Approve
+                        </button>
+                        <button class="btn btn-danger" @onclick="() => RejectVerification(selectedVerification.Id)">
+                            <i class="bi bi-x-circle"></i> Reject
+                        </button>
+                    }
+                    <button type="button" class="btn btn-secondary" @onclick="CloseReviewModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<VerificationViewModel>? allVerifications;
+    private List<VerificationViewModel>? filteredVerifications;
+    private bool isLoading = true;
+    private string currentFilter = "All";
+    private UserRole userRole = UserRole.Client;
+
+    private int allCount = 0;
+    private int architecturalCount = 0;
+    private int structuralCount = 0;
+    private int boqCount = 0;
+
+    // Review modal state
+    private bool showReviewModal = false;
+    private VerificationViewModel? selectedVerification;
+    private List<DesignFile>? relevantFiles;
+    private string verificationComments = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthState.InitializeAsync();
+
+        if (!AuthState.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        // Get current user role (you'll need to implement this in AuthStateService)
+        userRole = AuthState.UserRole;
+
+        if (userRole != UserRole.Architect && userRole != UserRole.Engineer && userRole != UserRole.Admin)
+        {
+            Navigation.NavigateTo("/");
+            return;
+        }
+
+        await LoadVerifications();
+    }
+
+    private async Task LoadVerifications()
+    {
+        isLoading = true;
+
+        await using var context = await DbContextFactory.CreateDbContextAsync();
+        var unitOfWork = new UnitOfWork(context);
+
+        var verifications = await unitOfWork.DesignVerifications.GetAllAsync();
+        allVerifications = new List<VerificationViewModel>();
+
+        foreach (var verification in verifications.OrderByDescending(v => v.CreatedAt))
+        {
+            // Filter based on user role
+            if (!CanAccessVerification(userRole, verification.VerificationType))
+                continue;
+
+            var design = await unitOfWork.Designs.GetByIdAsync(verification.DesignId);
+            if (design == null) continue;
+
+            var architect = await unitOfWork.Users.GetByIdAsync(design.ArchitectId);
+
+            allVerifications.Add(new VerificationViewModel
+            {
+                Id = verification.Id,
+                DesignId = design.Id,
+                DesignTitle = design.Title,
+                ArchitectName = architect != null ? $"{architect.FirstName} {architect.LastName}" : "Unknown",
+                VerificationType = verification.VerificationType.ToString(),
+                Status = verification.Status.ToString(),
+                Comments = verification.Comments,
+                CreatedAt = verification.CreatedAt
+            });
+        }
+
+        // Calculate counts
+        allCount = allVerifications.Count(v => v.Status == VerificationStatus.Pending.ToString());
+        architecturalCount = allVerifications.Count(v => v.VerificationType == VerificationType.Architectural.ToString() && v.Status == VerificationStatus.Pending.ToString());
+        structuralCount = allVerifications.Count(v => v.VerificationType == VerificationType.Structural.ToString() && v.Status == VerificationStatus.Pending.ToString());
+        boqCount = allVerifications.Count(v => IsBqType(v.VerificationType) && v.Status == VerificationStatus.Pending.ToString());
+
+        filteredVerifications = allVerifications.Where(v => v.Status == VerificationStatus.Pending.ToString()).ToList();
+        isLoading = false;
+    }
+
+    private void FilterVerifications(string filter)
+    {
+        currentFilter = filter;
+
+        filteredVerifications = filter switch
+        {
+            "Architectural" => allVerifications?.Where(v => v.VerificationType == VerificationType.Architectural.ToString() && v.Status == VerificationStatus.Pending.ToString()).ToList(),
+            "Structural" => allVerifications?.Where(v => v.VerificationType == VerificationType.Structural.ToString() && v.Status == VerificationStatus.Pending.ToString()).ToList(),
+            "BOQ" => allVerifications?.Where(v => IsBqType(v.VerificationType) && v.Status == VerificationStatus.Pending.ToString()).ToList(),
+            _ => allVerifications?.Where(v => v.Status == VerificationStatus.Pending.ToString()).ToList()
+        };
+    }
+
+    private async Task ViewVerification(Guid id)
+    {
+        selectedVerification = allVerifications?.FirstOrDefault(v => v.Id == id);
+        if (selectedVerification != null)
+        {
+            await using var context = await DbContextFactory.CreateDbContextAsync();
+            var unitOfWork = new UnitOfWork(context);
+
+            var files = await unitOfWork.DesignFiles.FindAsync(f => f.DesignId == selectedVerification.DesignId);
+
+            // Filter files based on verification type
+            relevantFiles = selectedVerification.VerificationType switch
+            {
+                nameof(VerificationType.Architectural) => files.Where(f => f.Category == FileCategory.ArchitecturalDrawing || f.Category == FileCategory.PreviewImage || f.Category == FileCategory.FullRenderImage).ToList(),
+                nameof(VerificationType.Structural) => files.Where(f => f.Category == FileCategory.StructuralDrawing).ToList(),
+                _ when IsBqType(selectedVerification.VerificationType) => files.Where(f => f.Category == FileCategory.BOQ).ToList(),
+                _ => files.ToList()
+            };
+
+            verificationComments = "";
+            showReviewModal = true;
+        }
+    }
+
+    private async Task VerifyDesign(Guid verificationId)
+    {
+        await using var context = await DbContextFactory.CreateDbContextAsync();
+        var unitOfWork = new UnitOfWork(context);
+
+        var verification = await unitOfWork.DesignVerifications.GetByIdAsync(verificationId);
+        if (verification != null && CanVerify(verification.VerificationType.ToString()))
+        {
+            verification.Status = VerificationStatus.Verified;
+            verification.Comments = verificationComments;
+            verification.VerifiedAt = DateTime.UtcNow;
+            verification.UpdatedAt = DateTime.UtcNow;
+            verification.VerifierUserId = await ResolveVerifierUserIdAsync(unitOfWork);
+
+            await unitOfWork.DesignVerifications.UpdateAsync(verification);
+            await unitOfWork.SaveChangesAsync();
+
+            // Check if all required verifications are complete
+            await CheckAndUpdateDesignStatus(verification.DesignId, unitOfWork);
+
+            await LoadVerifications();
+            CloseReviewModal();
+        }
+    }
+
+    private async Task RejectVerification(Guid verificationId)
+    {
+        await using var context = await DbContextFactory.CreateDbContextAsync();
+        var unitOfWork = new UnitOfWork(context);
+
+        var verification = await unitOfWork.DesignVerifications.GetByIdAsync(verificationId);
+        if (verification != null && CanVerify(verification.VerificationType.ToString()))
+        {
+            verification.Status = VerificationStatus.Rejected;
+            verification.Comments = verificationComments;
+            verification.VerifiedAt = DateTime.UtcNow;
+            verification.UpdatedAt = DateTime.UtcNow;
+            verification.VerifierUserId = await ResolveVerifierUserIdAsync(unitOfWork);
+
+            await unitOfWork.DesignVerifications.UpdateAsync(verification);
+
+            // Update design status to rejected
+            var design = await unitOfWork.Designs.GetByIdAsync(verification.DesignId);
+            if (design != null)
+            {
+                design.Status = DesignStatus.Rejected;
+                design.UpdatedAt = DateTime.UtcNow;
+                await unitOfWork.Designs.UpdateAsync(design);
+            }
+
+            await unitOfWork.SaveChangesAsync();
+            await LoadVerifications();
+            CloseReviewModal();
+        }
+    }
+
+    private async Task CheckAndUpdateDesignStatus(Guid designId, IUnitOfWork unitOfWork)
+    {
+        var verifications = await unitOfWork.DesignVerifications.FindAsync(v => v.DesignId == designId);
+
+        // Check if all verifications are verified
+        bool allVerified = verifications.All(v => v.Status == VerificationStatus.Verified);
+
+        if (allVerified)
+        {
+            var design = await unitOfWork.Designs.GetByIdAsync(designId);
+            if (design != null && design.Status == DesignStatus.PendingVerification)
+            {
+                design.Status = DesignStatus.PendingApproval;
+                design.UpdatedAt = DateTime.UtcNow;
+                await unitOfWork.Designs.UpdateAsync(design);
+                await unitOfWork.SaveChangesAsync();
+            }
+        }
+    }
+
+    private async Task<Guid?> ResolveVerifierUserIdAsync(IUnitOfWork unitOfWork)
+    {
+        if (string.IsNullOrWhiteSpace(AuthState.UserEmail))
+            return null;
+
+        var user = await unitOfWork.Users.FirstOrDefaultAsync(u => u.Email == AuthState.UserEmail);
+        return user?.Id;
+    }
+
+    private bool CanVerify(string verificationType)
+    {
+        return verificationType switch
+        {
+            nameof(VerificationType.Architectural) => userRole == UserRole.Architect,
+            nameof(VerificationType.Structural) => userRole == UserRole.Engineer,
+            nameof(VerificationType.BOQArchitect) => userRole == UserRole.Architect,
+            nameof(VerificationType.BOQEngineer) => userRole == UserRole.Engineer,
+            nameof(VerificationType.BOQ) => userRole == UserRole.Architect || userRole == UserRole.Engineer,
+            _ => false
+        };
+    }
+
+    private bool CanAccessVerification(UserRole role, VerificationType verificationType)
+    {
+        if (role == UserRole.Admin) return true;
+
+        if (role == UserRole.Architect)
+        {
+            return verificationType == VerificationType.Architectural
+                || verificationType == VerificationType.BOQ
+                || verificationType == VerificationType.BOQArchitect;
+        }
+
+        if (role == UserRole.Engineer)
+        {
+            return verificationType == VerificationType.Structural
+                || verificationType == VerificationType.BOQ
+                || verificationType == VerificationType.BOQEngineer;
+        }
+
+        return false;
+    }
+
+    private bool IsBqType(string verificationType)
+    {
+        return verificationType == nameof(VerificationType.BOQ)
+            || verificationType == nameof(VerificationType.BOQArchitect)
+            || verificationType == nameof(VerificationType.BOQEngineer);
+    }
+
+    private void CloseReviewModal()
+    {
+        showReviewModal = false;
+        selectedVerification = null;
+        relevantFiles = null;
+        verificationComments = "";
+    }
+
+    private string GetVerificationTypeBadge(string type)
+    {
+        return type switch
+        {
+            nameof(VerificationType.Architectural) => "primary",
+            nameof(VerificationType.Structural) => "info",
+            nameof(VerificationType.BOQ) => "warning",
+            nameof(VerificationType.BOQArchitect) => "warning",
+            nameof(VerificationType.BOQEngineer) => "warning",
+            _ => "secondary"
+        };
+    }
+
+    private string GetVerificationTypeLabel(string type)
+    {
+        return type switch
+        {
+            nameof(VerificationType.Architectural) => "Architectural",
+            nameof(VerificationType.Structural) => "Structural",
+            nameof(VerificationType.BOQ) => "BOQ",
+            nameof(VerificationType.BOQArchitect) => "BOQ (Architect)",
+            nameof(VerificationType.BOQEngineer) => "BOQ (Engineer)",
+            _ => type
+        };
+    }
+
+    private string GetVerificationStatusBadge(string status)
+    {
+        return status switch
+        {
+            nameof(VerificationStatus.Verified) => "success",
+            nameof(VerificationStatus.Pending) => "warning",
+            nameof(VerificationStatus.Rejected) => "danger",
+            _ => "secondary"
+        };
+    }
+
+    private string GetFileCategoryBadge(FileCategory category)
+    {
+        return category switch
+        {
+            FileCategory.PreviewImage => "info",
+            FileCategory.PreviewVideo => "info",
+            FileCategory.ArchitecturalDrawing => "primary",
+            FileCategory.StructuralDrawing => "primary",
+            FileCategory.BOQ => "warning",
+            FileCategory.FullRenderImage => "success",
+            FileCategory.FullRenderVideo => "success",
+            _ => "secondary"
+        };
+    }
+
+    private string GetFileCategoryLabel(FileCategory category)
+    {
+        return category switch
+        {
+            FileCategory.PreviewImage => "Preview Image",
+            FileCategory.PreviewVideo => "Preview Video",
+            FileCategory.ArchitecturalDrawing => "Architectural",
+            FileCategory.StructuralDrawing => "Structural",
+            FileCategory.BOQ => "BOQ",
+            FileCategory.FullRenderImage => "Render Image",
+            FileCategory.FullRenderVideo => "Render Video",
+            _ => "Other"
+        };
+    }
+
+    private string FormatFileSize(long bytes)
+    {
+        if (bytes < 1024) return $"{bytes} B";
+        if (bytes < 1024 * 1024) return $"{bytes / 1024.0:F1} KB";
+        return $"{bytes / (1024.0 * 1024.0):F1} MB";
+    }
+
+    public class VerificationViewModel
+    {
+        public Guid Id { get; set; }
+        public Guid DesignId { get; set; }
+        public string DesignTitle { get; set; } = "";
+        public string ArchitectName { get; set; } = "";
+        public string VerificationType { get; set; } = "";
+        public string Status { get; set; } = "";
+        public string? Comments { get; set; }
+        public DateTime CreatedAt { get; set; }
+    }
+}

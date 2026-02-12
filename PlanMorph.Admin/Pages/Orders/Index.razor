@@ -1,0 +1,237 @@
+﻿@page "/orders"
+@using PlanMorph.Admin.Services
+@using PlanMorph.Core.Entities
+@inject ApiClient ApiClient
+@inject AuthStateService AuthState
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<PageTitle>Orders - PlanMorph Admin</PageTitle>
+
+<h1>Order Management</h1>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        @if (isLoading)
+        {
+            <div class="text-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        }
+        else if (orders == null || !orders.Any())
+        {
+            <div class="alert alert-info">No orders found.</div>
+        }
+        else
+        {
+            @if (!string.IsNullOrWhiteSpace(actionErrorMessage))
+            {
+                <div class="alert alert-danger">@actionErrorMessage</div>
+            }
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Order Number</th>
+                        <th>Design</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Payment Method</th>
+                        <th>Construction</th>
+                        <th>Created</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in orders)
+                    {
+                        <tr>
+                            <td>@order.OrderNumber</td>
+                            <td>@order.DesignTitle</td>
+                            <td>KES @order.Amount.ToString("N0")</td>
+                            <td>
+                                <span class="badge bg-@GetStatusBadge(order.Status)">
+                                    @order.Status
+                                </span>
+                            </td>
+                            <td>@order.PaymentMethod</td>
+                            <td>
+                                @if (order.IncludesConstruction)
+                                {
+                                    <span class="badge bg-info">Yes</span>
+                                    @if (order.ConstructionContract != null)
+                                    {
+                                        <br/>
+                                        <small>@order.ConstructionContract.Status</small>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">No</span>
+                                }
+                            </td>
+                            <td>@order.CreatedAt.ToShortDateString()</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" @onclick="() => ViewOrder(order.Id)">
+                                    View Details
+                                </button>
+                                @if (order.Status == "Paid")
+                                {
+                                    <button class="btn btn-sm btn-success ms-2" @onclick="() => MarkCompleted(order.Id)">
+                                        Mark Done
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</div>
+
+@if (selectedOrder != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Order Details - @selectedOrder.OrderNumber</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Order Information</h6>
+                            <p><strong>Design:</strong> @selectedOrder.DesignTitle</p>
+                            <p><strong>Amount:</strong> KES @selectedOrder.Amount.ToString("N0")</p>
+                            <p><strong>Status:</strong> @selectedOrder.Status</p>
+                            <p><strong>Payment Method:</strong> @selectedOrder.PaymentMethod</p>
+                            <p><strong>Created:</strong> @selectedOrder.CreatedAt</p>
+                            @if (selectedOrder.PaidAt.HasValue)
+                            {
+                                <p><strong>Paid At:</strong> @selectedOrder.PaidAt.Value</p>
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            @if (selectedOrder.IncludesConstruction && selectedOrder.ConstructionContract != null)
+                            {
+                                <h6>Construction Contract</h6>
+                                <p><strong>Location:</strong> @selectedOrder.ConstructionContract.Location</p>
+                                <p><strong>Estimated Cost:</strong> KES @selectedOrder.ConstructionContract.EstimatedCost.ToString("N0")</p>
+                                <p><strong>Commission (2%):</strong> KES @selectedOrder.ConstructionContract.CommissionAmount.ToString("N0")</p>
+                                <p><strong>Status:</strong> @selectedOrder.ConstructionContract.Status</p>
+                                @if (!string.IsNullOrEmpty(selectedOrder.ConstructionContract.ContractorName))
+                                {
+                                    <p><strong>Contractor:</strong> @selectedOrder.ConstructionContract.ContractorName</p>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private List<OrderDto>? orders;
+    private OrderDto? selectedOrder;
+    private bool isLoading = true;
+    private string? actionErrorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthState.InitializeAsync();
+
+        if (!AuthState.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        if (AuthState.UserRole != UserRole.Admin)
+        {
+            Navigation.NavigateTo("/verifications");
+            return;
+        }
+
+        await LoadOrders();
+    }
+
+    private async Task LoadOrders()
+    {
+        isLoading = true;
+        orders = await ApiClient.GetAsync<List<OrderDto>>("/api/orders");
+        isLoading = false;
+    }
+
+    private async Task MarkCompleted(Guid orderId)
+    {
+        actionErrorMessage = null;
+
+        var shouldProceed = await JS.InvokeAsync<bool>("confirm", "Mark this order as completed? This will move it to previous orders.");
+        if (!shouldProceed)
+            return;
+
+        var result = await ApiClient.PostAsync<object, object>($"/api/orders/{orderId}/mark-completed", new { });
+        if (result == null)
+        {
+            actionErrorMessage = "Unable to mark order as completed.";
+            return;
+        }
+
+        await LoadOrders();
+    }
+
+    private void ViewOrder(Guid id)
+    {
+        selectedOrder = orders?.FirstOrDefault(o => o.Id == id);
+    }
+
+    private void CloseModal()
+    {
+        selectedOrder = null;
+    }
+
+    private string GetStatusBadge(string status)
+    {
+        return status switch
+        {
+            "Paid" => "success",
+            "Pending" => "warning",
+            "Completed" => "primary",
+            "Cancelled" => "danger",
+            _ => "secondary"
+        };
+    }
+
+    public class OrderDto
+    {
+        public Guid Id { get; set; }
+        public string OrderNumber { get; set; } = "";
+        public Guid DesignId { get; set; }
+        public string DesignTitle { get; set; } = "";
+        public decimal Amount { get; set; }
+        public string Status { get; set; } = "";
+        public string PaymentMethod { get; set; } = "";
+        public DateTime CreatedAt { get; set; }
+        public DateTime? PaidAt { get; set; }
+        public bool IncludesConstruction { get; set; }
+        public ConstructionContractDto? ConstructionContract { get; set; }
+    }
+
+    public class ConstructionContractDto
+    {
+        public Guid Id { get; set; }
+        public string Location { get; set; } = "";
+        public decimal EstimatedCost { get; set; }
+        public decimal CommissionAmount { get; set; }
+        public string Status { get; set; } = "";
+        public string? ContractorName { get; set; }
+    }
+}

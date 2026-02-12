@@ -1,0 +1,117 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: planmorph_test
+          POSTGRES_USER: planmorph
+          POSTGRES_PASSWORD: test_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '8.0.x'
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: 'planmorph-client/package-lock.json'
+
+    # Backend Build
+    - name: Restore dependencies (.NET)
+      run: dotnet restore
+
+    - name: Build API
+      run: dotnet build PlanMorph.Api/PlanMorph.Api.csproj -c Release --no-restore
+
+    - name: Build Admin
+      run: dotnet build PlanMorph.Admin/PlanMorph.Admin.csproj -c Release --no-restore
+
+    # Database Migrations
+    - name: Run Entity Framework Migrations
+      env:
+        ConnectionStrings__DefaultConnection: "Host=localhost;Port=5432;Database=planmorph_test;Username=planmorph;Password=test_password"
+      run: |
+        dotnet tool install --global dotnet-ef
+        dotnet ef database update --project PlanMorph.Infrastructure --startup-project PlanMorph.Api
+
+    # Frontend Build
+    - name: Install frontend dependencies
+      working-directory: ./planmorph-client
+      run: npm ci
+
+    - name: Build Next.js
+      working-directory: ./planmorph-client
+      env:
+        NEXT_PUBLIC_API_URL: http://localhost:7038
+      run: npm run build
+
+    - name: Lint Next.js
+      working-directory: ./planmorph-client
+      run: npm run lint --fix
+
+    # Code Quality
+    - name: Run .NET tests
+      run: dotnet test --configuration Release --logger "trx" --results-directory "test-results"
+      continue-on-error: true
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: test-results/
+
+    # Docker Build
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Build API Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: ./PlanMorph.Api/Dockerfile
+        push: false
+        tags: planmorph-api:latest
+
+    - name: Build Client Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: ./planmorph-client
+        file: ./planmorph-client/Dockerfile
+        push: false
+        tags: planmorph-client:latest
+        build-args: |
+          NEXT_PUBLIC_API_URL=http://localhost:7038
+
+    - name: Build Admin Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: .
+        file: ./PlanMorph.Admin/Dockerfile
+        push: false
+        tags: planmorph-admin:latest

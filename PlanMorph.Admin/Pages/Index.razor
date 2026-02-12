@@ -1,0 +1,463 @@
+﻿@page "/"
+@using Microsoft.EntityFrameworkCore
+@using PlanMorph.Core.Entities
+@using PlanMorph.Core.Interfaces
+@using PlanMorph.Admin.Services
+@using PlanMorph.Infrastructure.Data
+@using PlanMorph.Infrastructure.Repositories
+@inject IDbContextFactory<ApplicationDbContext> DbContextFactory
+@inject AuthStateService AuthState
+@inject NavigationManager Navigation
+
+@if (!AuthState.IsAuthenticated)
+{
+    <div class="text-center mt-5">
+        <p>Redirecting to login...</p>
+    </div>
+}
+else
+{
+    <PageTitle>Dashboard - PlanMorph Admin</PageTitle>
+
+    <h1>Dashboard</h1>
+
+    <div class="row mt-4">
+        <div class="col-md-3">
+            <div class="card text-white bg-primary mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Designs</h5>
+                    <p class="card-text display-4">@totalDesigns</p>
+                    <small>@approvedDesigns approved</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-warning mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Pending Approvals</h5>
+                    <p class="card-text display-4">@pendingApprovals</p>
+                    <a href="/designs" class="btn btn-light btn-sm mt-2">Review Now</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-success mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Total Orders</h5>
+                    <p class="card-text display-4">@totalOrders</p>
+                    <small>KES @totalRevenue.ToString("N0") revenue</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-white bg-info mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Active Contracts</h5>
+                    <p class="card-text display-4">@activeContracts</p>
+                    <small>@pendingContracts pending assignment</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Professional Applications Alert -->
+    @if (pendingProfessionals > 0)
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <h5 class="alert-heading">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                @pendingProfessionals Pending Professional Application@(pendingProfessionals > 1 ? "s" : "")
+            </h5>
+            <p>There @(pendingProfessionals > 1 ? "are" : "is") @pendingProfessionals professional application@(pendingProfessionals > 1 ? "s" : "") waiting for your review.</p>
+            <hr>
+            <a href="/users" class="btn btn-warning">Review Applications</a>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Pending Design Approvals Alert -->
+    @if (pendingApprovals > 0)
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <h5 class="alert-heading">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                @pendingApprovals Design@(pendingApprovals > 1 ? "s" : "") Awaiting Approval
+            </h5>
+            <p>There @(pendingApprovals > 1 ? "are" : "is") @pendingApprovals design@(pendingApprovals > 1 ? "s" : "") submitted by architects waiting for approval.</p>
+            <hr>
+            <a href="/designs" class="btn btn-info">Review Designs</a>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Revenue Overview</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Total Revenue:</strong> KES @totalRevenue.ToString("N0")
+                    </div>
+                    <div class="mb-3">
+                        <strong>Commission Earned (30%):</strong> KES @platformCommission.ToString("N0")
+                    </div>
+                    <div class="mb-3">
+                        <strong>Architect Payouts (70%):</strong> KES @architectPayouts.ToString("N0")
+                    </div>
+                    <div class="mb-3">
+                        <strong>This Month:</strong> KES @monthlyRevenue.ToString("N0")
+                    </div>
+                    <hr>
+                    <div class="mb-2">
+                        <strong>Construction Commissions (2%):</strong> KES @totalConstructionCommission.ToString("N0")
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>User Statistics</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Total Users:</strong> @totalUsers
+                    </div>
+                    <div class="mb-3">
+                        <strong>Clients:</strong> @totalClients
+                    </div>
+                    <div class="mb-3">
+                        <strong>Architects:</strong> @totalArchitects (@activeArchitects active)
+                    </div>
+                    <div class="mb-3">
+                        <strong>Engineers:</strong> @totalEngineers (@activeEngineers active)
+                    </div>
+                    <div class="mb-3">
+                        <strong>Contractors:</strong> @totalContractors
+                    </div>
+                    <div class="mb-3">
+                        <strong>Pending Professional Applications:</strong> @pendingProfessionals
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Pending Orders</h5>
+                        @if (previousOrders != null && previousOrders.Any())
+                        {
+                            <button class="btn btn-sm btn-outline-primary" @onclick="OpenPreviousOrders">
+                                View Previous Orders
+                            </button>
+                        }
+                    </div>
+                </div>
+                <div class="card-body">
+                    @if (recentOrders == null || !recentOrders.Any())
+                    {
+                        <p class="text-muted">No pending orders</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Order Number</th>
+                                        <th>Client</th>
+                                        <th>Design</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var order in recentOrders)
+                                    {
+                                        <tr>
+                                            <td>@order.OrderNumber</td>
+                                            <td>@order.ClientName</td>
+                                            <td>@order.DesignTitle</td>
+                                            <td>KES @order.Amount.ToString("N0")</td>
+                                            <td>
+                                                <span class="badge bg-@GetOrderStatusBadge(order.Status)">
+                                                    @order.Status
+                                                </span>
+                                            </td>
+                                            <td>@order.CreatedAt.ToShortDateString()</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <a href="/orders" class="btn btn-primary">Manage Orders</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (showPreviousOrders)
+    {
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Previous Orders</h5>
+                        <button type="button" class="btn-close" @onclick="ClosePreviousOrders"></button>
+                    </div>
+                    <div class="modal-body">
+                        @if (previousOrders == null || !previousOrders.Any())
+                        {
+                            <p class="text-muted mb-0">No previous orders found.</p>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Order Number</th>
+                                            <th>Client</th>
+                                            <th>Design</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var order in previousOrders)
+                                        {
+                                            <tr>
+                                                <td>@order.OrderNumber</td>
+                                                <td>@order.ClientName</td>
+                                                <td>@order.DesignTitle</td>
+                                                <td>KES @order.Amount.ToString("N0")</td>
+                                                <td>
+                                                    <span class="badge bg-@GetOrderStatusBadge(order.Status)">
+                                                        @order.Status
+                                                    </span>
+                                                </td>
+                                                <td>@order.CreatedAt.ToShortDateString()</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" @onclick="ClosePreviousOrders">Close</button>
+                        <a href="/orders" class="btn btn-primary">View All Orders</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2 d-md-flex">
+                        <a href="/designs" class="btn btn-outline-primary">
+                            <i class="bi bi-brush me-2"></i>Manage Designs
+                        </a>
+                        <a href="/orders" class="btn btn-outline-success">
+                            <i class="bi bi-cart me-2"></i>View Orders
+                        </a>
+                        <a href="/users" class="btn btn-outline-info">
+                            <i class="bi bi-people me-2"></i>Manage Users
+                        </a>
+                        <a href="/contracts" class="btn btn-outline-warning">
+                            <i class="bi bi-document me-2"></i>Construction Contracts
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private int totalDesigns = 0;
+    private int approvedDesigns = 0;
+    private int pendingApprovals = 0;
+    private int totalOrders = 0;
+    private int activeContracts = 0;
+    private int pendingContracts = 0;
+    private decimal totalRevenue = 0;
+    private decimal platformCommission = 0;
+    private decimal architectPayouts = 0;
+    private decimal monthlyRevenue = 0;
+    private decimal totalConstructionCommission = 0;
+    
+    private int totalUsers = 0;
+    private int totalClients = 0;
+    private int totalArchitects = 0;
+    private int activeArchitects = 0;
+    private int totalEngineers = 0;
+    private int activeEngineers = 0;
+    private int totalContractors = 0;
+    private int pendingProfessionals = 0;
+
+    private List<RecentOrderViewModel>? recentOrders;
+    private List<RecentOrderViewModel>? previousOrders;
+    private bool showPreviousOrders;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthState.InitializeAsync();
+
+        if (!AuthState.IsAuthenticated)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        if (AuthState.UserRole != UserRole.Admin)
+        {
+            Navigation.NavigateTo("/verifications");
+            return;
+        }
+        
+        await LoadStatistics();
+    }
+
+    private async Task LoadStatistics()
+    {
+        // Create a new context for this operation
+        await using var context = await DbContextFactory.CreateDbContextAsync();
+        var unitOfWork = new UnitOfWork(context);
+
+        // Load design statistics
+        var designs = await unitOfWork.Designs.GetAllAsync();
+        totalDesigns = designs.Count();
+        approvedDesigns = designs.Count(d => d.Status == DesignStatus.Approved);
+        pendingApprovals = designs.Count(d => d.Status == DesignStatus.PendingApproval);
+
+        // Load order statistics
+        var orders = await unitOfWork.Orders.GetAllAsync();
+        totalOrders = orders.Count();
+        totalRevenue = orders.Where(o => o.Status == OrderStatus.Paid).Sum(o => o.Amount);
+
+        // Calculate commissions
+        platformCommission = totalRevenue * 0.30m; // 30% platform fee
+        architectPayouts = totalRevenue * 0.70m; // 70% to architects
+
+        var currentMonth = DateTime.UtcNow.Month;
+        var currentYear = DateTime.UtcNow.Year;
+        monthlyRevenue = orders
+            .Where(o => o.Status == OrderStatus.Paid
+                && o.PaidAt.HasValue
+                && o.PaidAt.Value.Month == currentMonth
+                && o.PaidAt.Value.Year == currentYear)
+            .Sum(o => o.Amount);
+
+        // Load contract statistics
+        var contracts = await unitOfWork.ConstructionContracts.GetAllAsync();
+        activeContracts = contracts.Count(c => c.Status == ContractStatus.InProgress || c.Status == ContractStatus.Assigned);
+        pendingContracts = contracts.Count(c => c.Status == ContractStatus.Pending);
+        totalConstructionCommission = contracts.Sum(c => c.CommissionAmount);
+
+        // Load user statistics
+        var users = await unitOfWork.Users.GetAllAsync();
+        totalUsers = users.Count();
+        totalClients = users.Count(u => u.Role == UserRole.Client);
+        totalArchitects = users.Count(u => u.Role == UserRole.Architect);
+        activeArchitects = users.Count(u => u.Role == UserRole.Architect && u.IsActive);
+        totalEngineers = users.Count(u => u.Role == UserRole.Engineer);
+        activeEngineers = users.Count(u => u.Role == UserRole.Engineer && u.IsActive);
+        pendingProfessionals = users.Count(u => (u.Role == UserRole.Architect || u.Role == UserRole.Engineer) && !u.IsActive);
+        totalContractors = users.Count(u => u.Role == UserRole.Contractor);
+
+        // Load pending orders (dashboard only)
+        recentOrders = new List<RecentOrderViewModel>();
+        var recentOrdersList = orders
+            .Where(o => o.Status == OrderStatus.Pending)
+            .OrderByDescending(o => o.CreatedAt)
+            .Take(5);
+
+        foreach (var order in recentOrdersList)
+        {
+            var client = await unitOfWork.Users.GetByIdAsync(order.ClientId);
+            var design = await unitOfWork.Designs.GetByIdAsync(order.DesignId);
+
+            recentOrders.Add(new RecentOrderViewModel
+            {
+                OrderNumber = order.OrderNumber,
+                ClientName = client != null ? $"{client.FirstName} {client.LastName}" : "Unknown",
+                DesignTitle = design?.Title ?? "Unknown",
+                Amount = order.Amount,
+                Status = order.Status.ToString(),
+                CreatedAt = order.CreatedAt
+            });
+        }
+
+        // Load previous orders (non-pending)
+        previousOrders = new List<RecentOrderViewModel>();
+        var previousOrdersList = orders
+            .Where(o => o.Status != OrderStatus.Pending)
+            .OrderByDescending(o => o.CreatedAt)
+            .Take(20);
+
+        foreach (var order in previousOrdersList)
+        {
+            var client = await unitOfWork.Users.GetByIdAsync(order.ClientId);
+            var design = await unitOfWork.Designs.GetByIdAsync(order.DesignId);
+
+            previousOrders.Add(new RecentOrderViewModel
+            {
+                OrderNumber = order.OrderNumber,
+                ClientName = client != null ? $"{client.FirstName} {client.LastName}" : "Unknown",
+                DesignTitle = design?.Title ?? "Unknown",
+                Amount = order.Amount,
+                Status = order.Status.ToString(),
+                CreatedAt = order.CreatedAt
+            });
+        }
+    }
+
+    private void OpenPreviousOrders()
+    {
+        showPreviousOrders = true;
+    }
+
+    private void ClosePreviousOrders()
+    {
+        showPreviousOrders = false;
+    }
+
+    private string GetOrderStatusBadge(string status)
+    {
+        return status switch
+        {
+            "Paid" => "success",
+            "Pending" => "warning",
+            "Completed" => "primary",
+            "Cancelled" => "danger",
+            _ => "secondary"
+        };
+    }
+
+    public class RecentOrderViewModel
+    {
+        public string OrderNumber { get; set; } = "";
+        public string ClientName { get; set; } = "";
+        public string DesignTitle { get; set; } = "";
+        public decimal Amount { get; set; }
+        public string Status { get; set; } = "";
+        public DateTime CreatedAt { get; set; }
+    }
+}
