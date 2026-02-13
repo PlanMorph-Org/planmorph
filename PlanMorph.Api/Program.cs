@@ -153,13 +153,16 @@ builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
-// Seed database
+// Apply migrations and seed baseline data on startup.
+// This avoids boot failures on fresh managed Postgres databases.
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    var dbContext = services.GetRequiredService<ApplicationDbContext>();
     var userManager = services.GetRequiredService<UserManager<User>>();
     var roleManager = services.GetRequiredService<RoleManager<IdentityRole<Guid>>>();
-    
+
+    await dbContext.Database.MigrateAsync();
     await DbInitializer.SeedRolesAsync(roleManager);
     await DbInitializer.SeedAdminUserAsync(userManager, roleManager);
 }
@@ -175,13 +178,14 @@ if (app.Environment.IsDevelopment())
 }
 else
 {
-    // Only use HTTPS redirection in production
-    app.UseHttpsRedirection();
-
+    // Ensure proxy headers are applied before redirect/auth logic.
     app.UseForwardedHeaders(new ForwardedHeadersOptions
     {
         ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
     });
+
+    // Only use HTTPS redirection in production
+    app.UseHttpsRedirection();
 }
 
 app.UseCors("Default");

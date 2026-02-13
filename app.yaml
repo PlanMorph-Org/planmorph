@@ -1,205 +1,204 @@
 name: planmorph
+region: nyc
+
+ingress:
+  rules:
+    - component:
+        name: api
+      match:
+        path:
+          prefix: /api
+    - component:
+        name: admin
+      match:
+        path:
+          prefix: /admin
+    - component:
+        name: client
+      match:
+        path:
+          prefix: /
+
 services:
-- name: api
-  github:
-    repo: your-org/planmorph
-    branch: main
-  build_command: dotnet publish PlanMorph.Api/PlanMorph.Api.csproj -c Release -o out
-  source_dir: .
-  dockerfile_path: PlanMorph.Api/Dockerfile
-  http_port: 80
-  envs:
-  - key: ASPNETCORE_ENVIRONMENT
-    value: Production
-  - key: ASPNETCORE_URLS
-    value: http://+:80
-  - key: ConnectionStrings__DefaultConnection
-    scope: RUN_TIME
-    value: Host=${db.host};Port=${db.port};Database=${db.name};Username=${db.username};Password=${db.password};SSL Mode=Require;Trust Server Certificate=true
-  - key: JwtSettings__Secret
-    scope: RUN_TIME
-    value: ${JWT_SECRET_KEY}
-  - key: JwtSettings__Issuer
-    value: PlanMorph
-  - key: JwtSettings__Audience
-    value: PlanMorph
-  - key: JwtSettings__ExpiryMinutes
-    value: "60"
-  - key: EmailSettings__SmtpHost
-    scope: RUN_TIME
-    value: ${SMTP_HOST}
-  - key: EmailSettings__SmtpPort
-    scope: RUN_TIME
-    value: ${SMTP_PORT}
-  - key: EmailSettings__SmtpUsername
-    scope: RUN_TIME
-    value: ${SMTP_USERNAME}
-  - key: EmailSettings__SmtpPassword
-    scope: RUN_TIME
-    value: ${SMTP_PASSWORD}
-  - key: EmailSettings__FromEmail
-    scope: RUN_TIME
-    value: ${FROM_EMAIL}
-  - key: EmailSettings__FromName
-    value: PlanMorph
-  - key: Paystack__SecretKey
-    scope: RUN_TIME
-    value: ${PAYSTACK_SECRET_KEY}
-  - key: Paystack__PublicKey
-    scope: RUN_TIME
-    value: ${PAYSTACK_PUBLIC_KEY}
-  - key: Paystack__WebhookSecret
-    scope: RUN_TIME
-    value: ${PAYSTACK_WEBHOOK_SECRET}
-  - key: Paystack__CallbackUrl
-    scope: RUN_TIME
-    value: ${PAYSTACK_CALLBACK_URL}
-  - key: DigitalOcean__SpacesAccessKey
-    scope: RUN_TIME
-    value: ${DO_SPACES_ACCESS_KEY}
-  - key: DigitalOcean__SpacesSecretKey
-    scope: RUN_TIME
-    value: ${DO_SPACES_SECRET_KEY}
-  - key: DigitalOcean__BucketName
-    scope: RUN_TIME
-    value: ${DO_SPACES_BUCKET_NAME}
-  - key: DigitalOcean__Region
-    scope: RUN_TIME
-    value: ${DO_SPACES_REGION}
-  - key: DigitalOcean__SpacesEndpoint
-    scope: RUN_TIME
-    value: ${DO_SPACES_ENDPOINT}
-  health_check:
-    http_path: /health
+  - name: api
+    github:
+      repo: PlanMorph-Org/planmorph
+      branch: main
+      deploy_on_push: true
+    source_dir: .
+    dockerfile_path: PlanMorph.Api/Dockerfile
     http_port: 80
-  http_port: 80
-  instance_count: 1
-  instance_size_slug: basic-s
-  log_destination:
-    name: api_logs
-    production: true
+    instance_count: 1
+    instance_size_slug: apps-s-1vcpu-1gb
+    envs:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://+:80
+      - key: ConnectionStrings__DefaultConnection
+        scope: RUN_TIME
+        value: Host=${db.HOSTNAME};Port=${db.PORT};Database=${db.DATABASE};Username=${db.USERNAME};Password=${db.PASSWORD};SSL Mode=Require;Trust Server Certificate=true
+      - key: JwtSettings__Secret
+        scope: RUN_TIME
+        value: ${JWT_SECRET_KEY}
+      - key: JwtSettings__Issuer
+        value: PlanMorph
+      - key: JwtSettings__Audience
+        value: PlanMorph
+      - key: JwtSettings__ExpiryMinutes
+        value: "60"
+      - key: EmailSettings__SmtpHost
+        scope: RUN_TIME
+        value: ${SMTP_HOST}
+      - key: EmailSettings__SmtpPort
+        scope: RUN_TIME
+        value: ${SMTP_PORT}
+      - key: EmailSettings__SmtpUsername
+        scope: RUN_TIME
+        value: ${SMTP_USERNAME}
+      - key: EmailSettings__SmtpPassword
+        scope: RUN_TIME
+        value: ${SMTP_PASSWORD}
+      - key: EmailSettings__FromEmail
+        scope: RUN_TIME
+        value: ${FROM_EMAIL}
+      - key: EmailSettings__FromName
+        value: PlanMorph
+      - key: Paystack__SecretKey
+        scope: RUN_TIME
+        value: ${PAYSTACK_SECRET_KEY}
+      - key: Paystack__PublicKey
+        scope: RUN_TIME
+        value: ${PAYSTACK_PUBLIC_KEY}
+      - key: Paystack__WebhookSecret
+        scope: RUN_TIME
+        value: ${PAYSTACK_WEBHOOK_SECRET}
+      - key: Paystack__CallbackUrl
+        scope: RUN_TIME
+        value: ${PAYSTACK_CALLBACK_URL}
+      - key: DigitalOcean__SpacesAccessKey
+        scope: RUN_TIME
+        value: ${DO_SPACES_ACCESS_KEY}
+      - key: DigitalOcean__SpacesSecretKey
+        scope: RUN_TIME
+        value: ${DO_SPACES_SECRET_KEY}
+      - key: DigitalOcean__BucketName
+        scope: RUN_TIME
+        value: ${DO_SPACES_BUCKET_NAME}
+      - key: DigitalOcean__Region
+        scope: RUN_TIME
+        value: ${DO_SPACES_REGION}
+      - key: DigitalOcean__SpacesEndpoint
+        scope: RUN_TIME
+        value: ${DO_SPACES_ENDPOINT}
+    health_check:
+      http_path: /health
+      port: 80
 
-- name: client
-  github:
-    repo: your-org/planmorph
-    branch: main
-  build_command: npm ci && npm run build
-  source_dir: planmorph-client
-  dockerfile_path: planmorph-client/Dockerfile
-  http_port: 3000
-  envs:
-  - key: NODE_ENV
-    value: production
-  - key: NEXT_PUBLIC_API_URL
-    scope: RUN_AND_BUILD_TIME
-    value: ${NEXT_PUBLIC_API_URL}
-  health_check:
-    http_path: /
+  - name: client
+    github:
+      repo: PlanMorph-Org/planmorph
+      branch: main
+      deploy_on_push: true
+    source_dir: planmorph-client
+    dockerfile_path: planmorph-client/Dockerfile
     http_port: 3000
-  instance_count: 1
-  instance_size_slug: basic-s
-  log_destination:
-    name: client_logs
-    production: true
+    instance_count: 1
+    instance_size_slug: apps-s-1vcpu-1gb
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_API_URL
+        scope: RUN_AND_BUILD_TIME
+        value: /api
+    health_check:
+      http_path: /
+      port: 3000
 
-- name: admin
-  github:
-    repo: your-org/planmorph
-    branch: main
-  build_command: dotnet publish PlanMorph.Admin/PlanMorph.Admin.csproj -c Release -o out
-  source_dir: .
-  dockerfile_path: PlanMorph.Admin/Dockerfile
-  http_port: 80
-  envs:
-  - key: ASPNETCORE_ENVIRONMENT
-    value: Production
-  - key: ASPNETCORE_URLS
-    value: http://+:80
-  - key: ConnectionStrings__DefaultConnection
-    scope: RUN_TIME
-    value: Host=${db.host};Port=${db.port};Database=${db.name};Username=${db.username};Password=${db.password};SSL Mode=Require;Trust Server Certificate=true
-  - key: ApiSettings__BaseUrl
-    scope: RUN_TIME
-    value: ${API_BASE_URL}
-  health_check:
-    http_path: /
+  - name: admin
+    github:
+      repo: PlanMorph-Org/planmorph
+      branch: main
+      deploy_on_push: true
+    source_dir: .
+    dockerfile_path: PlanMorph.Admin/Dockerfile
     http_port: 80
-  instance_count: 1
-  instance_size_slug: basic-s
-  log_destination:
-    name: admin_logs
-    production: true
+    instance_count: 1
+    instance_size_slug: apps-s-1vcpu-1gb
+    envs:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://+:80
+      - key: ConnectionStrings__DefaultConnection
+        scope: RUN_TIME
+        value: Host=${db.HOSTNAME};Port=${db.PORT};Database=${db.DATABASE};Username=${db.USERNAME};Password=${db.PASSWORD};SSL Mode=Require;Trust Server Certificate=true
+      - key: ApiBaseUrl
+        scope: RUN_TIME
+        value: http://api:80
+    health_check:
+      http_path: /
+      port: 80
 
 databases:
-- engine: PG
-  name: db
-  production: true
-  version: "16"
-
-routes:
-- path: /
-  component:
-    name: client
-- path: /api
-  component:
-    name: api
-- path: /admin
-  component:
-    name: admin
+  - engine: PG
+    name: db
+    version: "16"
 
 envs:
-- key: JWT_SECRET_KEY
-  scope: RUN_TIME
-  value: CHANGEME_STRONG_JWT_SECRET_KEY_32_CHARS_MINIMUM
-- key: SMTP_HOST
-  scope: RUN_TIME
-  value: smtp.gmail.com
-- key: SMTP_PORT
-  scope: RUN_TIME
-  value: "587"
-- key: SMTP_USERNAME
-  scope: RUN_TIME
-  value: CHANGEME_YOUR_EMAIL@gmail.com
-- key: SMTP_PASSWORD
-  scope: RUN_TIME
-  value: CHANGEME_YOUR_APP_PASSWORD
-- key: FROM_EMAIL
-  scope: RUN_TIME
-  value: noreply@yourdomain.com
-- key: PAYSTACK_SECRET_KEY
-  scope: RUN_TIME
-  value: CHANGEME_PAYSTACK_SECRET_KEY
-- key: PAYSTACK_PUBLIC_KEY
-  scope: RUN_TIME
-  value: CHANGEME_PAYSTACK_PUBLIC_KEY
-- key: PAYSTACK_WEBHOOK_SECRET
-  scope: RUN_TIME
-  value: CHANGEME_PAYSTACK_WEBHOOK_SECRET
-- key: PAYSTACK_CALLBACK_URL
-  scope: RUN_TIME
-  value: CHANGEME_PAYSTACK_CALLBACK_URL
-- key: DO_SPACES_ACCESS_KEY
-  scope: RUN_TIME
-  value: CHANGEME_DO_SPACES_ACCESS_KEY
-- key: DO_SPACES_SECRET_KEY
-  scope: RUN_TIME
-  value: CHANGEME_DO_SPACES_SECRET_KEY
-- key: DO_SPACES_BUCKET_NAME
-  scope: RUN_TIME
-  value: planmorph-designs
-- key: DO_SPACES_REGION
-  scope: RUN_TIME
-  value: nyc3
-- key: DO_SPACES_ENDPOINT
-  scope: RUN_TIME
-  value: https://nyc3.digitaloceanspaces.com
-- key: API_BASE_URL
-  scope: RUN_TIME
-  value: CHANGEME_HTTPS_API_URL_WITH_API
-- key: NEXT_PUBLIC_API_URL
-  scope: RUN_AND_BUILD_TIME
-  value: CHANGEME_HTTPS_API_URL_WITH_API
-
-regions:
-- name: nyc
-  primary: true
+  - key: APP_URL
+    scope: RUN_TIME
+    value: https://planmorph-i8sge.ondigitalocean.app
+  - key: JWT_SECRET_KEY
+    scope: RUN_TIME
+    type: SECRET
+    value: CHANGEME_STRONG_JWT_SECRET_KEY_32_CHARS_MINIMUM
+  - key: SMTP_HOST
+    scope: RUN_TIME
+    value: smtp.gmail.com
+  - key: SMTP_PORT
+    scope: RUN_TIME
+    value: "587"
+  - key: SMTP_USERNAME
+    scope: RUN_TIME
+    type: SECRET
+    value: CHANGEME_SMTP_USERNAME
+  - key: SMTP_PASSWORD
+    scope: RUN_TIME
+    type: SECRET
+    value: CHANGEME_SMTP_PASSWORD
+  - key: FROM_EMAIL
+    scope: RUN_TIME
+    value: noreply@yourdomain.com
+  - key: PAYSTACK_SECRET_KEY
+    scope: RUN_TIME
+    type: SECRET
+    value: CHANGEME_PAYSTACK_SECRET_KEY
+  - key: PAYSTACK_PUBLIC_KEY
+    scope: RUN_TIME
+    type: SECRET
+    value: CHANGEME_PAYSTACK_PUBLIC_KEY
+  - key: PAYSTACK_WEBHOOK_SECRET
+    scope: RUN_TIME
+    type: SECRET
+    value: CHANGEME_PAYSTACK_WEBHOOK_SECRET
+  - key: PAYSTACK_CALLBACK_URL
+    scope: RUN_TIME
+    value: ${APP_URL}/payment/callback
+  - key: DO_SPACES_ACCESS_KEY
+    scope: RUN_TIME
+    type: SECRET
+    value: CHANGEME_DO_SPACES_ACCESS_KEY
+  - key: DO_SPACES_SECRET_KEY
+    scope: RUN_TIME
+    type: SECRET
+    value: CHANGEME_DO_SPACES_SECRET_KEY
+  - key: DO_SPACES_BUCKET_NAME
+    scope: RUN_TIME
+    value: planmorph-designs
+  - key: DO_SPACES_REGION
+    scope: RUN_TIME
+    value: nyc3
+  - key: DO_SPACES_ENDPOINT
+    scope: RUN_TIME
+    value: https://nyc3.digitaloceanspaces.com
