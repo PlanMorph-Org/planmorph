@@ -67,7 +67,7 @@
                     : UserRole.Admin;
 
                 await AuthState.LoginAsync(response.Token, response.Email, response.FirstName, response.LastName, parsedRole);
-                Navigation.NavigateTo("/");
+                Navigation.NavigateTo("");
             }
             else
             {
@@ -99,3 +99,4 @@
         public string Role { get; set; } = "";
     }
 }
+

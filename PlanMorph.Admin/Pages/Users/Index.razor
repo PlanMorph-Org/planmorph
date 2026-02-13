@@ -620,13 +620,13 @@ else
 
         if (!AuthState.IsAuthenticated)
         {
-            Navigation.NavigateTo("/login");
+            Navigation.NavigateTo("login");
             return;
         }
 
         if (AuthState.UserRole != UserRole.Admin)
         {
-            Navigation.NavigateTo("/verifications");
+            Navigation.NavigateTo("verifications");
             return;
         }
 
@@ -1153,3 +1153,4 @@ else
         public string Password { get; set; } = "";
     }
 }
+

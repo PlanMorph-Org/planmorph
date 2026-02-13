@@ -1,4 +1,4 @@
-﻿@page "/orders"
+@page "/orders"
 @using PlanMorph.Admin.Services
 @using PlanMorph.Core.Entities
 @inject ApiClient ApiClient
@@ -150,13 +150,13 @@
 
         if (!AuthState.IsAuthenticated)
         {
-            Navigation.NavigateTo("/login");
+            Navigation.NavigateTo("login");
             return;
         }
 
         if (AuthState.UserRole != UserRole.Admin)
         {
-            Navigation.NavigateTo("/verifications");
+            Navigation.NavigateTo("verifications");
             return;
         }
 
@@ -235,3 +235,4 @@
         public string? ContractorName { get; set; }
     }
 }
+

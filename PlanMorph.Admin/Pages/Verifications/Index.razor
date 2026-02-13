@@ -231,7 +231,7 @@ else
 
         if (!AuthState.IsAuthenticated)
         {
-            Navigation.NavigateTo("/login");
+            Navigation.NavigateTo("login");
             return;
         }
 
@@ -240,7 +240,7 @@ else
 
         if (userRole != UserRole.Architect && userRole != UserRole.Engineer && userRole != UserRole.Admin)
         {
-            Navigation.NavigateTo("/");
+            Navigation.NavigateTo("");
             return;
         }
 
@@ -548,3 +548,4 @@ else
         public DateTime CreatedAt { get; set; }
     }
 }
+

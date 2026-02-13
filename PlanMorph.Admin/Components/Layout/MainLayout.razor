@@ -1,4 +1,4 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @implements IDisposable
 
 <div class="page">
@@ -48,7 +48,7 @@
     private async Task Logout()
     {
         await AuthState.LogoutAsync();
-        Navigation.NavigateTo("/login");
+        Navigation.NavigateTo("login");
     }
 
     public void Dispose()
@@ -56,3 +56,4 @@
         AuthState.OnChange -= StateHasChanged;
     }
 }
+

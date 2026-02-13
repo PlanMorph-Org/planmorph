@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @using Microsoft.EntityFrameworkCore
 @using PlanMorph.Core.Entities
 @using PlanMorph.Core.Interfaces
@@ -36,7 +36,7 @@ else
                 <div class="card-body">
                     <h5 class="card-title">Pending Approvals</h5>
                     <p class="card-text display-4">@pendingApprovals</p>
-                    <a href="/designs" class="btn btn-light btn-sm mt-2">Review Now</a>
+                    <a href="designs" class="btn btn-light btn-sm mt-2">Review Now</a>
                 </div>
             </div>
         </div>
@@ -70,7 +70,7 @@ else
             </h5>
             <p>There @(pendingProfessionals > 1 ? "are" : "is") @pendingProfessionals professional application@(pendingProfessionals > 1 ? "s" : "") waiting for your review.</p>
             <hr>
-            <a href="/users" class="btn btn-warning">Review Applications</a>
+            <a href="users" class="btn btn-warning">Review Applications</a>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
@@ -85,7 +85,7 @@ else
             </h5>
             <p>There @(pendingApprovals > 1 ? "are" : "is") @pendingApprovals design@(pendingApprovals > 1 ? "s" : "") submitted by architects waiting for approval.</p>
             <hr>
-            <a href="/designs" class="btn btn-info">Review Designs</a>
+            <a href="designs" class="btn btn-info">Review Designs</a>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     }
@@ -198,7 +198,7 @@ else
                                 </tbody>
                             </table>
                         </div>
-                        <a href="/orders" class="btn btn-primary">Manage Orders</a>
+                        <a href="orders" class="btn btn-primary">Manage Orders</a>
                     }
                 </div>
             </div>
@@ -256,7 +256,7 @@ else
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-secondary" @onclick="ClosePreviousOrders">Close</button>
-                        <a href="/orders" class="btn btn-primary">View All Orders</a>
+                        <a href="orders" class="btn btn-primary">View All Orders</a>
                     </div>
                 </div>
             </div>
@@ -271,16 +271,16 @@ else
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2 d-md-flex">
-                        <a href="/designs" class="btn btn-outline-primary">
+                        <a href="designs" class="btn btn-outline-primary">
                             <i class="bi bi-brush me-2"></i>Manage Designs
                         </a>
-                        <a href="/orders" class="btn btn-outline-success">
+                        <a href="orders" class="btn btn-outline-success">
                             <i class="bi bi-cart me-2"></i>View Orders
                         </a>
-                        <a href="/users" class="btn btn-outline-info">
+                        <a href="users" class="btn btn-outline-info">
                             <i class="bi bi-people me-2"></i>Manage Users
                         </a>
-                        <a href="/contracts" class="btn btn-outline-warning">
+                        <a href="contracts" class="btn btn-outline-warning">
                             <i class="bi bi-document me-2"></i>Construction Contracts
                         </a>
                     </div>
@@ -322,13 +322,13 @@ else
 
         if (!AuthState.IsAuthenticated)
         {
-            Navigation.NavigateTo("/login");
+            Navigation.NavigateTo("login");
             return;
         }
 
         if (AuthState.UserRole != UserRole.Admin)
         {
-            Navigation.NavigateTo("/verifications");
+            Navigation.NavigateTo("verifications");
             return;
         }
         
@@ -461,3 +461,4 @@ else
         public DateTime CreatedAt { get; set; }
     }
 }
+
