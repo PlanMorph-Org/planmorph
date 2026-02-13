@@ -2,12 +2,86 @@
 
 import Layout from '../components/Layout';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import api from '../lib/api';
 import { Design } from '../types';
 import { useCurrencyStore } from '../store/currencyStore';
 import { formatCurrency } from '../lib/currency';
+import { ShieldCheckIcon, DocumentCheckIcon, ArrowDownTrayIcon, UserGroupIcon } from '@heroicons/react/24/outline';
+import { CheckBadgeIcon } from '@heroicons/react/24/solid';
+import { motion, useInView } from 'framer-motion';
 
+/* ────── Animation helpers ────── */
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: (i: number = 0) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] as const },
+  }),
+};
+
+const stagger = {
+  visible: { transition: { staggerChildren: 0.08 } },
+};
+
+function AnimatedSection({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '-60px' });
+  return (
+    <motion.section
+      ref={ref}
+      initial="hidden"
+      animate={inView ? 'visible' : 'hidden'}
+      variants={stagger}
+      className={className}
+    >
+      {children}
+    </motion.section>
+  );
+}
+
+/* ────── Floating Blueprint Particles ────── */
+function BlueprintParticles() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {/* Grid pattern */}
+      <div className="absolute inset-0 blueprint-grid animate-grid-reveal" />
+      {/* Floating geometric shapes */}
+      {[...Array(6)].map((_, i) => (
+        <div
+          key={i}
+          className="absolute opacity-[0.06]"
+          style={{
+            left: `${15 + i * 15}%`,
+            top: `${20 + (i % 3) * 25}%`,
+            animation: `float ${5 + i * 0.8}s ease-in-out ${i * 0.5}s infinite`,
+          }}
+        >
+          {i % 3 === 0 ? (
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <rect x="2" y="2" width="36" height="36" stroke="currentColor" strokeWidth="1" className="text-brand-accent" />
+              <line x1="2" y1="20" x2="38" y2="20" stroke="currentColor" strokeWidth="0.5" className="text-brand-accent" />
+              <line x1="20" y1="2" x2="20" y2="38" stroke="currentColor" strokeWidth="0.5" className="text-brand-accent" />
+            </svg>
+          ) : i % 3 === 1 ? (
+            <svg width="50" height="50" viewBox="0 0 50 50" fill="none">
+              <polygon points="25,2 48,48 2,48" stroke="currentColor" strokeWidth="1" fill="none" className="text-golden" />
+            </svg>
+          ) : (
+            <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+              <circle cx="22" cy="22" r="20" stroke="currentColor" strokeWidth="1" className="text-brand-accent" />
+              <line x1="22" y1="2" x2="22" y2="42" stroke="currentColor" strokeWidth="0.5" className="text-brand-accent" />
+              <line x1="2" y1="22" x2="42" y2="22" stroke="currentColor" strokeWidth="0.5" className="text-brand-accent" />
+            </svg>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ────── Main Page ────── */
 export default function Home() {
   const [featuredDesigns, setFeaturedDesigns] = useState<Design[]>([]);
   const { currency, rates } = useCurrencyStore();
@@ -19,210 +93,418 @@ export default function Home() {
   const loadFeaturedDesigns = async () => {
     try {
       const response = await api.get<Design[]>('/designs');
-      setFeaturedDesigns(response.data.slice(0, 3));
+      setFeaturedDesigns(response.data.slice(0, 4));
     } catch (error) {
       console.error('Failed to load designs:', error);
     }
   };
 
+  const trustSignals = [
+    {
+      icon: ShieldCheckIcon,
+      title: 'Verified by Engineers',
+      description: 'Every design is structurally reviewed before listing',
+      color: 'from-brand-accent/20 to-blue-500/10',
+      iconColor: 'text-brand-accent',
+    },
+    {
+      icon: DocumentCheckIcon,
+      title: 'Complete Packages',
+      description: 'Architectural drawings, structural plans, and BOQ included',
+      color: 'from-golden/20 to-amber-500/10',
+      iconColor: 'text-golden',
+    },
+    {
+      icon: ArrowDownTrayIcon,
+      title: 'Instant Download',
+      description: 'Access all documents immediately after purchase',
+      color: 'from-verified/20 to-emerald-500/10',
+      iconColor: 'text-verified',
+    },
+    {
+      icon: UserGroupIcon,
+      title: 'Licensed Architects',
+      description: 'Every professional is vetted and credentialed',
+      color: 'from-purple-500/20 to-violet-500/10',
+      iconColor: 'text-purple-400',
+    },
+  ];
+
   return (
     <Layout>
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">
-              Build Your Dream Home Anywhere
-            </h1>
-            <p className="text-xl md:text-2xl mb-8 text-blue-100">
-              Browse professional architectural designs from top talent worldwide.
-              Purchase plans instantly. Construction support available in Kenya.
-            </p>
-            <div className="flex justify-center space-x-4">
+      {/* ═══════════ HERO ═══════════ */}
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+        {/* Background layers */}
+        <div className="absolute inset-0 bg-hero-gradient" />
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-accent/5 via-transparent to-transparent" />
+        <BlueprintParticles />
+
+        {/* Decorative structural beam */}
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-brand-accent/30 to-transparent" />
+
+        {/* Radial glow */}
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-brand-accent/[0.03] rounded-full blur-3xl" />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-28 lg:py-40 w-full">
+          <div className="max-w-3xl">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/8 text-xs font-medium text-white/60 mb-8"
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-verified animate-pulse" />
+              Structurally verified designs from licensed professionals
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+              className="text-4xl md:text-5xl lg:text-7xl font-display font-bold tracking-tight leading-[1.08] mb-7"
+            >
+              Every building
+              <br />
+              deserves a{' '}
+              <span className="text-gradient-golden">verified</span> plan.
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="text-lg md:text-xl text-white/40 mb-12 leading-relaxed max-w-2xl"
+            >
+              Browse structurally verified, build-ready architectural designs from licensed professionals.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.45, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="flex flex-wrap gap-4"
+            >
               <Link
                 href="/designs"
-                className="px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-gray-100 transition"
+                className="group px-8 py-3.5 bg-brand-accent text-white font-semibold rounded-xl hover:bg-blue-500 transition-all duration-300 shadow-blue btn-glow inline-flex items-center gap-2"
               >
                 Browse Designs
+                <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 16 16" fill="none">
+                  <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
               </Link>
               <Link
-                href="/about"
-                className="px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-blue-600 transition"
+                href="/architect/register"
+                className="px-8 py-3.5 text-white/50 hover:text-white font-medium transition-all duration-300 inline-flex items-center gap-2 hover:bg-white/5 rounded-xl"
               >
-                Learn More
+                For Professionals
+                <span aria-hidden="true">&rarr;</span>
               </Link>
-            </div>
+            </motion.div>
           </div>
+
+          {/* Decorative architecture illustration (right side on desktop) */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.6, duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            className="hidden lg:block absolute right-8 top-1/2 -translate-y-1/2"
+          >
+            <div className="relative w-80 h-80">
+              {/* Structural wireframe */}
+              <svg viewBox="0 0 320 320" fill="none" className="w-full h-full opacity-[0.08]">
+                {/* Building outline */}
+                <rect x="80" y="60" width="160" height="220" stroke="currentColor" strokeWidth="1" className="text-brand-accent" />
+                <rect x="100" y="80" width="50" height="40" stroke="currentColor" strokeWidth="0.5" className="text-golden" />
+                <rect x="170" y="80" width="50" height="40" stroke="currentColor" strokeWidth="0.5" className="text-golden" />
+                <rect x="100" y="140" width="50" height="40" stroke="currentColor" strokeWidth="0.5" className="text-golden" />
+                <rect x="170" y="140" width="50" height="40" stroke="currentColor" strokeWidth="0.5" className="text-golden" />
+                <rect x="130" y="220" width="60" height="60" stroke="currentColor" strokeWidth="0.5" className="text-golden" />
+                {/* Roof */}
+                <polygon points="60,60 160,10 260,60" stroke="currentColor" strokeWidth="1" fill="none" className="text-brand-accent" />
+                {/* Foundation */}
+                <line x1="60" y1="280" x2="260" y2="280" stroke="currentColor" strokeWidth="1.5" className="text-brand-accent" />
+                {/* Dimension lines */}
+                <line x1="60" y1="295" x2="260" y2="295" stroke="currentColor" strokeWidth="0.5" strokeDasharray="4 4" className="text-steel" />
+                <line x1="60" y1="290" x2="60" y2="300" stroke="currentColor" strokeWidth="0.5" className="text-steel" />
+                <line x1="260" y1="290" x2="260" y2="300" stroke="currentColor" strokeWidth="0.5" className="text-steel" />
+              </svg>
+              {/* Glow behind */}
+              <div className="absolute inset-0 bg-brand-accent/5 rounded-full blur-3xl" />
+            </div>
+          </motion.div>
         </div>
+
+        {/* Bottom fade */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-brand to-transparent" />
       </section>
 
-      {/* Features Section */}
-      <section className="border-t border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <h2 className="text-3xl font-bold text-center mb-12">Why Choose PlanMorph?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Verified Designs</h3>
-              <p className="text-gray-600">
-                All designs are approved by licensed architects and engineers
-              </p>
-            </div>
-
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Instant Download</h3>
-              <p className="text-gray-600">
-                Get your architectural and engineering drawings immediately after purchase
-              </p>
-            </div>
-
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Construction Support</h3>
-              <p className="text-gray-600">
-                Get connected with trusted contractors for project execution (Kenya only for now)
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Designs */}
-      <section className="bg-gray-100 py-16 border-t border-gray-200">
+      {/* ═══════════ TRUST BAR ═══════════ */}
+      <AnimatedSection className="relative py-16 border-y border-white/6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-12">Featured Designs</h2>
-          
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {trustSignals.map((signal, i) => (
+              <motion.div
+                key={signal.title}
+                variants={fadeUp}
+                custom={i}
+                className="glass-card-light rounded-xl p-5 card-hover"
+              >
+                <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${signal.color} flex items-center justify-center mb-3`}>
+                  <signal.icon className={`w-5 h-5 ${signal.iconColor}`} />
+                </div>
+                <h3 className="text-sm font-semibold text-white mb-1">{signal.title}</h3>
+                <p className="text-xs text-white/40 leading-relaxed">{signal.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </AnimatedSection>
+
+      {/* ═══════════ HOW IT WORKS ═══════════ */}
+      <AnimatedSection className="py-24 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div variants={fadeUp} className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-white tracking-tight">
+              Three steps to your{' '}
+              <span className="text-gradient-blue">build-ready</span> plan.
+            </h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+            {/* Connecting line (desktop) */}
+            <div className="hidden md:block absolute top-12 left-[16.67%] right-[16.67%] h-px">
+              <motion.div
+                initial={{ scaleX: 0 }}
+                whileInView={{ scaleX: 1 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.5, duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                className="h-full bg-gradient-to-r from-brand-accent/30 via-golden/30 to-verified/30 origin-left"
+              />
+            </div>
+
+            {[
+              {
+                step: '01',
+                title: 'Browse verified designs',
+                description: 'Explore build-ready designs from licensed architects, each verified by structural engineers.',
+                gradient: 'from-brand-accent to-blue-400',
+              },
+              {
+                step: '02',
+                title: 'Purchase complete packages',
+                description: 'Get instant access to architectural drawings, structural plans, and a bill of quantities.',
+                gradient: 'from-golden to-amber-400',
+              },
+              {
+                step: '03',
+                title: 'Build with confidence',
+                description: 'Use your complete, verified plan set to begin construction with certainty.',
+                gradient: 'from-verified to-emerald-400',
+              },
+            ].map((item, i) => (
+              <motion.div key={item.step} variants={fadeUp} custom={i} className="glass-card-light rounded-2xl p-8 card-hover text-center relative">
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center mx-auto mb-5`}>
+                  <span className="text-white text-sm font-bold font-mono">{item.step}</span>
+                </div>
+                <h3 className="text-lg font-display font-semibold text-white mt-2 mb-3">{item.title}</h3>
+                <p className="text-sm text-white/40 leading-relaxed">{item.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </AnimatedSection>
+
+      {/* ═══════════ FEATURED DESIGNS ═══════════ */}
+      <AnimatedSection className="py-24 border-t border-white/6 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-end mb-12">
+            <motion.div variants={fadeUp}>
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-white tracking-tight">Featured Designs</h2>
+              <p className="text-sm text-white/35 mt-2">Verified and ready to build.</p>
+            </motion.div>
+            <motion.div variants={fadeUp} custom={1}>
+              <Link
+                href="/designs"
+                className="hidden sm:inline-flex items-center text-sm font-medium text-brand-accent hover:text-blue-400 transition-colors duration-300 gap-1.5 hover-underline"
+              >
+                Browse all designs
+                <span aria-hidden="true">&rarr;</span>
+              </Link>
+            </motion.div>
+          </div>
+
           {featuredDesigns.length === 0 ? (
-            <div className="text-center text-gray-600">
-              <p>No designs available yet. Check back soon!</p>
+            <div className="text-center py-16 text-white/30">
+              <p>No designs available yet. Check back soon.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {featuredDesigns.map((design) => (
-                <Link
-                  key={design.id}
-                  href={`/designs/${design.id}`}
-                  className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition"
-                >
-                  <div className="h-48 bg-gray-300 flex items-center justify-center">
-                    {design.previewImages.length > 0 ? (
-                      <img
-                        src={design.previewImages[0]}
-                        alt={design.title}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <span className="text-gray-500">No Image</span>
-                    )}
-                  </div>
-                  <div className="p-6">
-                    <h3 className="text-xl font-semibold mb-2">{design.title}</h3>
-                    <p className="text-gray-600 mb-4 line-clamp-2">{design.description}</p>
-                    <div className="flex justify-between items-center">
-                      <div className="text-sm text-gray-500">
-                        {design.bedrooms} BR • {design.bathrooms} BA
+            <motion.div variants={stagger} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredDesigns.map((design, i) => (
+                <motion.div key={design.id} variants={fadeUp} custom={i}>
+                  <Link
+                    href={`/designs/${design.id}`}
+                    className="group glass-card rounded-xl overflow-hidden card-hover block"
+                  >
+                    <div className="relative h-48 bg-brand-light overflow-hidden">
+                      {design.previewImages.length > 0 ? (
+                        <img
+                          src={design.previewImages[0]}
+                          alt={design.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-white/20 text-sm">
+                          No Preview
+                        </div>
+                      )}
+                      {/* Gradient overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-brand/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <div className="absolute top-3 right-3 flex items-center gap-1 glass-card text-verified text-xs font-semibold px-2.5 py-1 rounded-full">
+                        <CheckBadgeIcon className="h-3.5 w-3.5" />
+                        Verified
                       </div>
-                      <div className="text-xl font-bold text-blue-600">
+                    </div>
+                    <div className="p-5">
+                      <h3 className="text-sm font-semibold text-white mb-1 group-hover:text-brand-accent transition-colors duration-300">{design.title}</h3>
+                      <p className="text-xs text-white/30 font-mono mb-3">
+                        {design.bedrooms} bed &middot; {design.bathrooms} bath &middot; {design.squareFootage?.toLocaleString()} sqft
+                      </p>
+                      <div className="text-lg font-semibold text-gradient-golden">
                         {formatCurrency(design.price, currency, rates)}
                       </div>
                     </div>
-                  </div>
-                </Link>
+                  </Link>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
 
-          <div className="text-center mt-12">
+          <motion.div variants={fadeUp} className="text-center mt-10 sm:hidden">
             <Link
               href="/designs"
-              className="inline-block px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition"
+              className="inline-flex items-center text-sm font-medium text-brand-accent hover:text-blue-400 transition-colors duration-300 gap-1.5"
             >
-              View All Designs
+              Browse all designs
+              <span aria-hidden="true">&rarr;</span>
             </Link>
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </AnimatedSection>
 
-      {/* CTA Section */}
-      <section className="bg-blue-600 text-white py-16 border-t border-blue-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to Start Building?</h2>
-          <p className="text-xl mb-8 text-blue-100">
-            Join thousands of satisfied customers who built their dream homes with PlanMorph worldwide
-          </p>
-          <Link
-            href="/register"
-            className="inline-block px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-gray-100 transition"
-          >
-            Get Started Today
-          </Link>
-        </div>
-      </section>
-
-      {/* Architect Section */}
-      <section className="bg-gray-900 text-white py-16">
+      {/* ═══════════ VERIFICATION EXPLAINER ═══════════ */}
+      <AnimatedSection className="py-24 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold mb-4">Are You an Architect?</h2>
-            <p className="text-xl text-gray-300 mb-8">
-              Join our platform and earn money by selling your architectural designs to thousands of potential clients
-            </p>
-            <div className="flex justify-center space-x-4">
-              <Link
-                href="/architect/register"
-                className="inline-block px-8 py-3 bg-white text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition"
-              >
-                Apply as Architect
-              </Link>
-              <Link
-                href="/architect/login"
-                className="inline-block px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-gray-900 transition"
-              >
-                Architect Login
-              </Link>
+          <div className="max-w-2xl mx-auto text-center">
+            <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-display font-bold text-white tracking-tight mb-8">
+              What &ldquo;verified&rdquo; means on PlanMorph.
+            </motion.h2>
+            <div className="space-y-5 text-left">
+              {[
+                {
+                  num: 1,
+                  title: 'Architect uploads a design',
+                  desc: 'Licensed architects submit complete plan sets including architectural drawings and documentation.',
+                  color: 'from-brand-accent to-blue-400',
+                },
+                {
+                  num: 2,
+                  title: 'Engineer reviews structural integrity',
+                  desc: 'A licensed structural engineer reviews the design for soundness and completeness.',
+                  color: 'from-golden to-amber-400',
+                },
+                {
+                  num: 3,
+                  title: 'Design published with verification badge',
+                  desc: 'Only designs that pass review are published. Every plan you see has completed this process.',
+                  color: 'from-verified to-emerald-400',
+                },
+              ].map((item, i) => (
+                <motion.div key={item.num} variants={fadeUp} custom={i} className="flex gap-4 items-start glass-card-light rounded-xl p-5 card-hover">
+                  <div className={`flex-shrink-0 w-9 h-9 rounded-lg bg-gradient-to-br ${item.color} text-white flex items-center justify-center text-sm font-bold`}>
+                    {item.num}
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-semibold text-white">{item.title}</h3>
+                    <p className="text-sm text-white/40 mt-1">{item.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
             </div>
           </div>
         </div>
-      </section>
+      </AnimatedSection>
 
-      {/* Engineer Section */}
-      <section className="bg-emerald-700 text-white py-16 border-t border-emerald-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold mb-4">Are You an Engineer?</h2>
-            <p className="text-xl text-emerald-100 mb-8">
-              Help verify structural integrity and BOQs for high-quality architectural projects
+      {/* ═══════════ FOR PROFESSIONALS ═══════════ */}
+      <AnimatedSection className="py-24 border-t border-white/6 relative overflow-hidden">
+        {/* Background glow */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-accent/[0.03] rounded-full blur-3xl" />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div variants={fadeUp} className="text-center mb-14">
+            <h2 className="text-3xl md:text-4xl font-display font-bold text-white tracking-tight mb-4">
+              Your expertise deserves a{' '}
+              <span className="text-gradient-golden">professional</span> home.
+            </h2>
+            <p className="text-white/35 max-w-xl mx-auto">
+              Join licensed professionals who list, verify, and sell build-ready designs.
             </p>
-            <div className="flex justify-center space-x-4">
-              <Link
-                href="/engineer/register"
-                className="inline-block px-8 py-3 bg-white text-emerald-700 font-semibold rounded-lg hover:bg-emerald-50 transition"
-              >
-                Apply as Engineer
-              </Link>
-              <Link
-                href="/engineer/login"
-                className="inline-block px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-emerald-700 transition"
-              >
-                Engineer Login
-              </Link>
-            </div>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            {/* Architect Card */}
+            <motion.div variants={fadeUp} custom={0} className="glass-card rounded-2xl p-8 card-hover relative overflow-hidden group">
+              {/* Decorative accent */}
+              <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-brand-accent via-blue-400 to-transparent" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-brand-accent/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-brand-accent/10 transition-colors duration-500" />
+
+              <h3 className="text-lg font-display font-semibold text-white mb-2 relative">Architect Portal</h3>
+              <p className="text-white/40 text-sm mb-6 leading-relaxed relative">
+                Upload your designs and earn 70% on every sale. Build your professional portfolio with verified, commercially proven work.
+              </p>
+              <div className="flex gap-3 relative">
+                <Link
+                  href="/architect/register"
+                  className="px-5 py-2.5 text-sm font-medium bg-brand-accent text-white rounded-lg hover:bg-blue-500 transition-all duration-300 btn-glow"
+                >
+                  Apply
+                </Link>
+                <Link
+                  href="/architect/login"
+                  className="px-5 py-2.5 text-sm font-medium text-white/60 hover:text-white border border-white/10 rounded-lg hover:border-white/20 hover:bg-white/5 transition-all duration-300"
+                >
+                  Sign In
+                </Link>
+              </div>
+            </motion.div>
+
+            {/* Engineer Card */}
+            <motion.div variants={fadeUp} custom={1} className="glass-card rounded-2xl p-8 card-hover relative overflow-hidden group">
+              <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-slate-teal via-emerald-400 to-transparent" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-slate-teal/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 group-hover:bg-slate-teal/10 transition-colors duration-500" />
+
+              <h3 className="text-lg font-display font-semibold text-white mb-2 relative">Engineer Portal</h3>
+              <p className="text-white/40 text-sm mb-6 leading-relaxed relative">
+                Review structural integrity and BOQs. Your verification ensures every published design is build-ready.
+              </p>
+              <div className="flex gap-3 relative">
+                <Link
+                  href="/engineer/register"
+                  className="px-5 py-2.5 text-sm font-medium bg-slate-teal text-white rounded-lg hover:bg-teal-500 transition-all duration-300 btn-glow"
+                >
+                  Apply
+                </Link>
+                <Link
+                  href="/engineer/login"
+                  className="px-5 py-2.5 text-sm font-medium text-white/60 hover:text-white border border-white/10 rounded-lg hover:border-white/20 hover:bg-white/5 transition-all duration-300"
+                >
+                  Sign In
+                </Link>
+              </div>
+            </motion.div>
           </div>
         </div>
-      </section>
+      </AnimatedSection>
     </Layout>
   );
 }

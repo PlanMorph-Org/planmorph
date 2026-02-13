@@ -5,33 +5,26 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/src/lib/api';
 import toast, { Toaster } from 'react-hot-toast';
+import { motion } from 'framer-motion';
 
 export default function ArchitectLoginPage() {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
       const response = await api.post('/auth/login', formData);
       const { token, role, email, firstName, lastName } = response.data;
-
       if (role !== 'Architect') {
         toast.error('This login is for architects only. Please use the client login.');
         setIsLoading(false);
         return;
       }
-
-      // Store token
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify({ email, firstName, lastName, role }));
-
       toast.success('Login successful!');
       router.push('/architect/dashboard');
     } catch (error: any) {
@@ -42,86 +35,99 @@ export default function ArchitectLoginPage() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <Toaster position="top-right" />
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-xl">
-        <div>
-          <div className="text-center">
-            <Link href="/" className="inline-flex items-center gap-2 text-3xl font-bold text-blue-600">
-              <img src="/planmorph.svg" alt="PlanMorph" className="h-9 w-auto" />
-              <span>PlanMorph</span>
-            </Link>
-            <p className="text-sm text-gray-500 mt-1">Architect Portal</p>
-          </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Architect Sign In
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Don't have an account?{' '}
-            <Link href="/architect/register" className="font-medium text-blue-600 hover:text-blue-500">
-              Apply as an architect
-            </Link>
-          </p>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Are you a client?{' '}
-            <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
-              Client login
-            </Link>
-          </p>
-        </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div>
-              <label htmlFor="email" className="sr-only">
-                Email address
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={formData.email}
-                onChange={handleChange}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
-              />
-            </div>
-            <div>
-              <label htmlFor="password" className="sr-only">
-                Password
-              </label>
-              <input
-                id="password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
-              />
-            </div>
-          </div>
+    <div className="min-h-screen bg-brand flex relative overflow-hidden">
+      <Toaster position="top-right" toastOptions={{ style: { background: '#1F2937', color: '#E5E7EB', border: '1px solid rgba(255,255,255,0.08)' } }} />
+      <div className="absolute inset-0 blueprint-grid opacity-20" />
+      <div className="absolute top-1/3 left-1/4 w-[500px] h-[500px] bg-golden/[0.03] rounded-full blur-3xl" />
 
-          <div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400"
-            >
-              {isLoading ? 'Signing in...' : 'Sign in'}
-            </button>
+      {/* Left branding */}
+      <div className="hidden lg:flex flex-1 flex-col justify-center items-center px-12 relative">
+        <motion.div
+          initial={{ opacity: 0, x: -30 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="max-w-md"
+        >
+          <Link href="/" className="inline-flex items-center gap-2.5 mb-10">
+            <img src="/planmorph.svg" alt="PlanMorph" className="h-9 w-auto brightness-0 invert rounded-full" />
+            <span className="text-2xl font-display font-bold text-white">PlanMorph</span>
+            <span className="px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-golden bg-golden/10 rounded-full border border-golden/20">
+              Architect
+            </span>
+          </Link>
+          <h2 className="text-3xl font-display font-bold text-white leading-snug mb-4">
+            Your designs. <br /><span className="text-gradient-golden">Verified</span> and sold.
+          </h2>
+          <p className="text-white/35 leading-relaxed">
+            Upload your architectural designs, have them structurally verified, and earn 70% on every sale. Build your professional portfolio with commercially proven work.
+          </p>
+        </motion.div>
+      </div>
+
+      {/* Right form */}
+      <div className="flex-1 flex items-center justify-center px-6 py-12 relative">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-md"
+        >
+          <div className="glass-card rounded-2xl p-8 shadow-glass-lg">
+            <div className="lg:hidden text-center mb-8">
+              <Link href="/" className="inline-flex items-center gap-2">
+                <img src="/planmorph.svg" alt="PlanMorph" className="h-8 w-auto brightness-0 invert rounded-full" />
+                <span className="text-xl font-display font-bold text-white">PlanMorph</span>
+              </Link>
+              <span className="block mt-2 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-golden bg-golden/10 rounded-full border border-golden/20 w-fit mx-auto">
+                Architect Portal
+              </span>
+            </div>
+
+            <h1 className="text-2xl font-display font-bold text-white mb-1">Architect Sign In</h1>
+            <p className="text-sm text-white/35 mb-8">
+              Don&apos;t have an account?{' '}
+              <Link href="/architect/register" className="text-golden hover:text-golden-light transition-colors">
+                Apply as architect
+              </Link>
+            </p>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div>
+                <label htmlFor="email" className="block text-xs font-medium text-white/40 mb-1.5">Email</label>
+                <input id="email" name="email" type="email" required value={formData.email} onChange={handleChange}
+                  placeholder="you@example.com"
+                  className="w-full px-4 py-3 glass-input rounded-lg text-sm text-white placeholder:text-white/20" />
+              </div>
+              <div>
+                <label htmlFor="password" className="block text-xs font-medium text-white/40 mb-1.5">Password</label>
+                <input id="password" name="password" type="password" required value={formData.password} onChange={handleChange}
+                  placeholder="••••••••"
+                  className="w-full px-4 py-3 glass-input rounded-lg text-sm text-white placeholder:text-white/20" />
+              </div>
+              <button type="submit" disabled={isLoading}
+                className="w-full py-3 bg-golden text-brand font-semibold rounded-lg hover:bg-golden-light transition-all duration-300 shadow-golden btn-glow disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? (
+                  <span className="inline-flex items-center gap-2">
+                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                    Signing in...
+                  </span>
+                ) : 'Sign in'}
+              </button>
+            </form>
+
+            <div className="mt-6 pt-6 border-t border-white/6 text-center space-y-2">
+              <p className="text-xs text-white/25">Are you a client?</p>
+              <Link href="/login" className="text-xs text-brand-accent/70 hover:text-brand-accent transition-colors hover-underline">
+                Client Login
+              </Link>
+            </div>
           </div>
-        </form>
+        </motion.div>
       </div>
     </div>
   );

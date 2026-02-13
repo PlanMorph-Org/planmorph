@@ -1,5 +1,6 @@
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 width="100%" viewBox="0 0 960 960" enable-background="new 0 0 960 960" xml:space="preserve">
+<defs><clipPath id="round"><circle cx="480" cy="480" r="480"/></clipPath></defs><g clip-path="url(#round)">
 <path fill="#B3C8DD" opacity="1.000000" stroke="none" 
 	d="
 M581.301941,960.755005 
@@ -31199,4 +31200,5 @@ M647.953918,708.033569
 	C656.696411,709.952515 655.266968,710.195374 653.952820,709.898987 
 	C652.043701,709.468445 650.213562,708.687500 647.953918,708.033569 
 z"/>
+</g>
 </svg>

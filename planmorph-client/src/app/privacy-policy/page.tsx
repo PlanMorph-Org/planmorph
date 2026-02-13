@@ -6,299 +6,131 @@ export default function PrivacyPolicyPage() {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-        <div className="bg-white shadow-sm rounded-lg p-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Privacy Policy</h1>
-          <p className="text-sm text-gray-600 mb-8">Last Updated: February 11, 2026</p>
+        <div className="glass-card rounded-2xl p-8 border border-white/10">
+          <h1 className="text-3xl font-display font-bold text-white mb-2">Privacy Policy</h1>
+          <p className="text-xs text-white/30 mb-8">Last Updated: February 11, 2026</p>
 
-          <div className="prose prose-blue max-w-none space-y-8">
-            {/* Introduction */}
+          <div className="max-w-none space-y-8 text-sm">
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">1. Introduction</h2>
-              <p className="text-gray-700 leading-relaxed">
+              <h2 className="text-lg font-semibold text-white mt-6 mb-3">1. Introduction</h2>
+              <p className="text-white/50 leading-relaxed">
                 Welcome to PlanMorph (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). PlanMorph operates an online marketplace connecting
                 architects and engineers with clients seeking architectural designs and construction services. We are
                 committed to protecting your personal information and your right to privacy.
               </p>
-              <p className="text-gray-700 leading-relaxed mt-4">
+              <p className="text-white/50 leading-relaxed mt-3">
                 This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use
-                our platform at planmorph.com (the &quot;Platform&quot;). Please read this privacy policy carefully. If you do
-                not agree with the terms of this privacy policy, please do not access the Platform.
+                our platform at planmorph.com (the &quot;Platform&quot;). Please read this privacy policy carefully.
               </p>
             </section>
 
-            {/* Information We Collect */}
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">2. Information We Collect</h2>
+              <h2 className="text-lg font-semibold text-white mt-6 mb-3">2. Information We Collect</h2>
+              <h3 className="text-base font-semibold text-white/70 mt-4 mb-2">2.1 Personal Information You Provide</h3>
 
-              <h3 className="text-xl font-semibold text-gray-900 mt-6 mb-3">2.1 Personal Information You Provide</h3>
-
-              <div className="bg-gray-50 rounded-lg p-4 my-4">
-                <h4 className="font-semibold text-gray-900 mb-2">All Users (Clients, Architects, Engineers, Contractors)</h4>
-                <ul className="list-disc list-inside space-y-1 text-gray-700">
-                  <li>Full name (first name and last name)</li>
-                  <li>Email address</li>
-                  <li>Phone number</li>
-                  <li>Password (encrypted and securely stored)</li>
-                  <li>Account preferences and settings</li>
-                  <li>User role and account status</li>
-                </ul>
+              <div className="glass-card-light rounded-lg p-4 my-3">
+                <h4 className="font-semibold text-white/60 text-xs uppercase tracking-widest mb-2">All Users</h4>
+                <ul className="list-disc list-inside space-y-1 text-white/40"><li>Full name</li><li>Email address</li><li>Phone number</li><li>Password (encrypted)</li><li>Account preferences</li><li>User role and status</li></ul>
               </div>
-
-              <div className="bg-blue-50 rounded-lg p-4 my-4">
-                <h4 className="font-semibold text-gray-900 mb-2">Professional Users (Architects & Engineers)</h4>
-                <ul className="list-disc list-inside space-y-1 text-gray-700">
-                  <li>Professional license number and documentation</li>
-                  <li>Years of professional experience</li>
-                  <li>Portfolio URL (if provided)</li>
-                  <li>Specialization and areas of expertise</li>
-                  <li>Professional documents (CV, cover letter, work experience)</li>
-                  <li>Document metadata (file size, upload timestamps)</li>
-                </ul>
+              <div className="glass-card-light rounded-lg p-4 my-3 border border-golden/10">
+                <h4 className="font-semibold text-golden/60 text-xs uppercase tracking-widest mb-2">Professional Users (Architects & Engineers)</h4>
+                <ul className="list-disc list-inside space-y-1 text-white/40"><li>Professional license number</li><li>Years of experience</li><li>Portfolio URL</li><li>Specialization</li><li>Professional documents (CV, cover letter, work experience)</li><li>Document metadata</li></ul>
               </div>
             </section>
 
-            {/* How We Use Your Information */}
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">3. How We Use Your Information</h2>
-
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">To Provide and Maintain Our Services</h4>
-                  <ul className="list-disc list-inside space-y-1 text-gray-700">
-                    <li>Process user registrations and manage accounts</li>
-                    <li>Authenticate users and maintain security</li>
-                    <li>Enable design browsing, filtering, and purchasing</li>
-                    <li>Facilitate construction service requests (Kenya only)</li>
-                    <li>Process payments through our payment partners</li>
-                    <li>Deliver purchased design files and documentation</li>
-                  </ul>
+              <h2 className="text-lg font-semibold text-white mt-6 mb-3">3. How We Use Your Information</h2>
+              <div className="space-y-3">
+                <div><h4 className="font-semibold text-white/60 mb-1">To Provide and Maintain Our Services</h4>
+                  <ul className="list-disc list-inside space-y-1 text-white/40"><li>Process registrations and manage accounts</li><li>Authenticate users and maintain security</li><li>Enable design browsing, filtering, and purchasing</li><li>Facilitate construction requests (Kenya only)</li><li>Process payments</li><li>Deliver purchased files</li></ul>
                 </div>
-
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-2">To Communicate With You</h4>
-                  <ul className="list-disc list-inside space-y-1 text-gray-700">
-                    <li>Send order confirmations and receipts</li>
-                    <li>Notify architects of design approval or rejection decisions</li>
-                    <li>Notify professionals of account approval status</li>
-                    <li>Send password reset instructions</li>
-                    <li>Provide customer support and respond to inquiries</li>
-                  </ul>
+                <div><h4 className="font-semibold text-white/60 mb-1">To Communicate With You</h4>
+                  <ul className="list-disc list-inside space-y-1 text-white/40"><li>Order confirmations and receipts</li><li>Design approval/rejection notifications</li><li>Account approval status</li><li>Password reset instructions</li><li>Customer support</li></ul>
                 </div>
               </div>
             </section>
 
-            {/* How We Share Your Information */}
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">4. How We Share Your Information</h2>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                <strong>We do not sell, rent, or trade your personal information to third parties.</strong> We may share
-                your information in the following circumstances:
-              </p>
-
-              <div className="space-y-4">
-                <div className="border-l-4 border-blue-500 pl-4">
-                  <h4 className="font-semibold text-gray-900 mb-2">Paystack (Payment Processing)</h4>
-                  <p className="text-gray-700 text-sm">
-                    We use Paystack to process payments securely. Paystack is PCI-DSS compliant and handles all payment
-                    card data. We never store credit card numbers on our servers.
-                  </p>
-                </div>
-
-                <div className="border-l-4 border-green-500 pl-4">
-                  <h4 className="font-semibold text-gray-900 mb-2">DigitalOcean Spaces (File Storage)</h4>
-                  <p className="text-gray-700 text-sm">
-                    Design files and professional documents are stored on DigitalOcean Spaces. Download URLs are
-                    time-limited and cryptographically signed (60-minute expiration).
-                  </p>
-                </div>
-
-                <div className="border-l-4 border-purple-500 pl-4">
-                  <h4 className="font-semibold text-gray-900 mb-2">Email Service Providers</h4>
-                  <p className="text-gray-700 text-sm">
-                    We use email service providers to send transactional emails including order confirmations,
-                    account notifications, and password resets.
-                  </p>
-                </div>
+              <h2 className="text-lg font-semibold text-white mt-6 mb-3">4. How We Share Your Information</h2>
+              <p className="text-white/50 leading-relaxed mb-3"><strong className="text-white/70">We do not sell, rent, or trade your personal information.</strong></p>
+              <div className="space-y-3">
+                {[
+                  { color: 'border-brand-accent/40', title: 'Paystack (Payment Processing)', desc: 'PCI-DSS compliant. We never store credit card numbers.' },
+                  { color: 'border-verified/40', title: 'DigitalOcean Spaces (File Storage)', desc: 'Time-limited, cryptographically signed URLs (60-min expiration).' },
+                  { color: 'border-purple-500/40', title: 'Email Service Providers', desc: 'Transactional emails: confirmations, notifications, resets.' },
+                ].map(item => (
+                  <div key={item.title} className={`border-l-2 ${item.color} pl-4`}>
+                    <h4 className="font-semibold text-white/60 mb-1">{item.title}</h4>
+                    <p className="text-white/40 text-xs">{item.desc}</p>
+                  </div>
+                ))}
               </div>
             </section>
 
-            {/* Data Security */}
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">5. Data Security</h2>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                We implement appropriate technical and organizational security measures to protect your personal information:
-              </p>
-
-              <div className="bg-green-50 rounded-lg p-4 space-y-2">
-                <div className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
-                  <span className="text-gray-700"><strong>Encryption:</strong> Passwords are securely hashed using ASP.NET Identity</span>
-                </div>
-                <div className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
-                  <span className="text-gray-700"><strong>HTTPS/TLS:</strong> All data transmission is encrypted in transit</span>
-                </div>
-                <div className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
-                  <span className="text-gray-700"><strong>JWT Authentication:</strong> Secure, stateless authentication (60-minute expiration)</span>
-                </div>
-                <div className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
-                  <span className="text-gray-700"><strong>Signed URLs:</strong> File downloads are cryptographically signed with limited validity</span>
-                </div>
-                <div className="flex items-start">
-                  <span className="text-green-600 mr-2">✓</span>
-                  <span className="text-gray-700"><strong>Role-Based Access:</strong> Strict access controls restrict data access</span>
-                </div>
+              <h2 className="text-lg font-semibold text-white mt-6 mb-3">5. Data Security</h2>
+              <div className="glass-card-light rounded-lg p-4 space-y-2 border border-verified/10">
+                {['Encryption: Passwords securely hashed via ASP.NET Identity', 'HTTPS/TLS: All data encrypted in transit', 'JWT Authentication: Secure, stateless (60-min expiry)', 'Signed URLs: Cryptographically signed file downloads', 'Role-Based Access: Strict access controls'].map(item => (
+                  <div key={item} className="flex items-start"><span className="text-verified mr-2 text-xs">✓</span><span className="text-white/40 text-xs">{item}</span></div>
+                ))}
               </div>
-
-              <p className="text-gray-600 text-sm mt-4 italic">
-                Despite our efforts, no electronic transmission or storage system is 100% secure. We cannot guarantee
-                absolute security of your information.
-              </p>
+              <p className="text-white/20 text-xs mt-2 italic">No system is 100% secure. We cannot guarantee absolute security.</p>
             </section>
 
-            {/* Your Privacy Rights */}
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">6. Your Privacy Rights</h2>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                Depending on your location, you may have the following rights regarding your personal information:
-              </p>
-
-              <ul className="space-y-2 text-gray-700">
-                <li className="flex items-start">
-                  <span className="text-blue-600 mr-2">•</span>
-                  <span><strong>Access:</strong> Request a copy of the personal information we hold about you</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-blue-600 mr-2">•</span>
-                  <span><strong>Correction:</strong> Request correction of inaccurate or incomplete information</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-blue-600 mr-2">•</span>
-                  <span><strong>Deletion:</strong> Request deletion of your personal information (subject to legal obligations)</span>
-                </li>
-                <li className="flex items-start">
-                  <span className="text-blue-600 mr-2">•</span>
-                  <span><strong>Data Portability:</strong> Request transfer of your information to another service</span>
-                </li>
+              <h2 className="text-lg font-semibold text-white mt-6 mb-3">6. Your Privacy Rights</h2>
+              <ul className="space-y-1.5 text-white/40">
+                {['Access: Request a copy of your personal information', 'Correction: Request correction of inaccurate data', 'Deletion: Request deletion (subject to legal obligations)', 'Data Portability: Request transfer to another service'].map(item => (
+                  <li key={item} className="flex items-start"><span className="text-golden mr-2">•</span><span>{item}</span></li>
+                ))}
               </ul>
-
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                <h4 className="font-semibold text-gray-900 mb-2">How to Exercise Your Rights</h4>
-                <p className="text-gray-700 text-sm mb-2">To exercise any of these rights, please contact us at:</p>
-                <p className="text-gray-700 text-sm">
-                  <strong>Email:</strong> privacy@planmorph.com<br />
-                  <strong>Subject Line:</strong> &quot;Privacy Rights Request&quot;
-                </p>
-                <p className="text-gray-700 text-sm mt-2">
-                  We will respond to your request within 30 days.
-                </p>
+              <div className="glass-card-light rounded-lg p-4 mt-3 border border-golden/10">
+                <h4 className="font-semibold text-golden/60 text-xs uppercase tracking-widest mb-1">How to Exercise Your Rights</h4>
+                <p className="text-white/40 text-xs">Email: privacy@planmorph.com — Subject: &quot;Privacy Rights Request&quot; — Response within 30 days.</p>
               </div>
             </section>
 
-            {/* Regional Privacy Rights */}
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">7. Regional Privacy Rights</h2>
-
-              <div className="space-y-4">
-                <div className="border rounded-lg p-4">
-                  <h4 className="font-semibold text-gray-900 mb-2">European Economic Area (EEA) - GDPR</h4>
-                  <p className="text-gray-700 text-sm">
-                    If you are located in the EEA, you have additional rights under the General Data Protection
-                    Regulation (GDPR) including the right to lodge a complaint with your local supervisory authority
-                    and the right to data portability in a structured, machine-readable format.
-                  </p>
-                  <p className="text-gray-700 text-sm mt-2">
-                    <strong>Data Protection Officer:</strong> dpo@planmorph.com
-                  </p>
-                </div>
-
-                <div className="border rounded-lg p-4">
-                  <h4 className="font-semibold text-gray-900 mb-2">California - CCPA/CPRA</h4>
-                  <p className="text-gray-700 text-sm">
-                    If you are a California resident, you have rights under the California Consumer Privacy Act
-                    (CCPA) including the right to know what personal information is collected and the right to
-                    deletion.
-                  </p>
-                  <p className="text-gray-700 text-sm mt-2 font-semibold">
-                    We Do NOT Sell Personal Information.
-                  </p>
-                </div>
-
-                <div className="border rounded-lg p-4">
-                  <h4 className="font-semibold text-gray-900 mb-2">Kenya - Data Protection Act</h4>
-                  <p className="text-gray-700 text-sm">
-                    If you are located in Kenya, you have rights under the Kenya Data Protection Act (2019)
-                    including the right to access, object to processing, correct, delete, restrict processing,
-                    and data portability. You may lodge a complaint with the Office of the Data Protection Commissioner.
-                  </p>
-                  <p className="text-gray-700 text-sm mt-2">
-                    <strong>Kenya Contact:</strong> kenya@planmorph.com
-                  </p>
-                </div>
+              <h2 className="text-lg font-semibold text-white mt-6 mb-3">7. Regional Privacy Rights</h2>
+              <div className="space-y-3">
+                {[
+                  { region: 'European Economic Area (EEA) — GDPR', text: 'Additional rights under GDPR. DPO: dpo@planmorph.com' },
+                  { region: 'California — CCPA/CPRA', text: 'Right to know and delete. We Do NOT Sell Personal Information.' },
+                  { region: 'Kenya — Data Protection Act', text: 'Rights under Kenya DPA (2019). Contact: kenya@planmorph.com' },
+                ].map(item => (
+                  <div key={item.region} className="glass-card-light rounded-lg p-4 border border-white/6">
+                    <h4 className="font-semibold text-white/60 mb-1 text-xs">{item.region}</h4>
+                    <p className="text-white/40 text-xs">{item.text}</p>
+                  </div>
+                ))}
               </div>
             </section>
 
-            {/* Children's Privacy */}
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">8. Children's Privacy</h2>
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-                <p className="text-gray-700 leading-relaxed">
-                  PlanMorph is not intended for individuals under the age of 18. We do not knowingly collect personal
-                  information from children under 18. If you are a parent or guardian and believe your child has
-                  provided us with personal information, please contact us at privacy@planmorph.com, and we will
-                  delete such information.
-                </p>
+              <h2 className="text-lg font-semibold text-white mt-6 mb-3">8. Children&apos;s Privacy</h2>
+              <div className="glass-card-light rounded-lg p-4 border border-rose-500/10">
+                <p className="text-white/40 text-xs">PlanMorph is not intended for individuals under 18. Contact privacy@planmorph.com if a child has provided personal information.</p>
               </div>
             </section>
 
-            {/* Changes to Privacy Policy */}
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">9. Changes to This Privacy Policy</h2>
-              <p className="text-gray-700 leading-relaxed">
-                We may update this Privacy Policy from time to time. The &quot;Last Updated&quot; date at the top of this policy
-                indicates when it was last revised. We will notify you of material changes by posting a prominent
-                notice on our Platform or sending an email to your registered email address.
-              </p>
+              <h2 className="text-lg font-semibold text-white mt-6 mb-3">9. Changes to This Privacy Policy</h2>
+              <p className="text-white/40">We may update this policy. The &quot;Last Updated&quot; date indicates the last revision. Material changes will be communicated via Platform notice or email.</p>
             </section>
 
-            {/* Contact Us */}
             <section>
-              <h2 className="text-2xl font-bold text-gray-900 mt-8 mb-4">10. Contact Us</h2>
-              <p className="text-gray-700 leading-relaxed mb-4">
-                If you have questions, concerns, or requests regarding this Privacy Policy or our privacy practices,
-                please contact us:
-              </p>
-
-              <div className="bg-gray-100 rounded-lg p-6 space-y-2">
-                <div>
-                  <strong className="text-gray-900">General Privacy Inquiries:</strong>
-                  <p className="text-gray-700">Email: privacy@planmorph.com</p>
-                  <p className="text-gray-700">Support Email: support@planmorph.com</p>
-                  <p className="text-gray-700">Website: https://planmorph.com/contact</p>
-                </div>
-                <div className="mt-4">
-                  <strong className="text-gray-900">Data Protection Officer:</strong>
-                  <p className="text-gray-700">Email: dpo@planmorph.com</p>
-                </div>
-                <div className="mt-4">
-                  <strong className="text-gray-900">Response Time:</strong>
-                  <p className="text-gray-700">
-                    We aim to respond to all privacy inquiries within 5 business days and fulfill rights requests
-                    within 30 days.
-                  </p>
-                </div>
+              <h2 className="text-lg font-semibold text-white mt-6 mb-3">10. Contact Us</h2>
+              <div className="glass-card-light rounded-lg p-5 space-y-2 text-xs">
+                <div><strong className="text-white/60">General Privacy:</strong> <span className="text-white/40">privacy@planmorph.com</span></div>
+                <div><strong className="text-white/60">Support:</strong> <span className="text-white/40">support@planmorph.com</span></div>
+                <div><strong className="text-white/60">Data Protection Officer:</strong> <span className="text-white/40">dpo@planmorph.com</span></div>
+                <div><strong className="text-white/60">Response Time:</strong> <span className="text-white/40">5 business days (inquiries), 30 days (rights requests)</span></div>
               </div>
             </section>
 
-            {/* Footer Note */}
-            <div className="mt-12 pt-8 border-t border-gray-200">
-              <p className="text-sm text-gray-600 text-center">
-                For the most current version of this policy, please visit:{' '}
-                <a href="/privacy-policy" className="text-blue-600 hover:underline">
-                  https://planmorph.com/privacy-policy
-                </a>
+            <div className="mt-10 pt-6 border-t border-white/6">
+              <p className="text-xs text-white/20 text-center">
+                Current version: <a href="/privacy-policy" className="text-golden/40 hover:text-golden transition-colors">planmorph.com/privacy-policy</a>
               </p>
             </div>
           </div>

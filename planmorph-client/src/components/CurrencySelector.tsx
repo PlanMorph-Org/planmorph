@@ -17,16 +17,16 @@ export default function CurrencySelector({ className }: CurrencySelectorProps) {
 
   return (
     <div className={`flex items-center gap-2 ${className ?? ''}`}>
-      <span className="text-xs text-gray-500">Currency</span>
+      <span className="text-xs text-white/40">Currency</span>
       <select
         value={currency}
         onChange={(e) => setCurrency(e.target.value)}
-        className="border border-gray-300 rounded-md text-xs px-2 py-1 text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="border border-white/10 bg-white/10 backdrop-blur-sm rounded-lg text-xs px-2 py-1.5 text-white focus:outline-none focus:ring-1 focus:ring-white/30"
         aria-label="Select currency"
         disabled={isLoading}
       >
         {SUPPORTED_CURRENCIES.map((code) => (
-          <option key={code} value={code}>
+          <option key={code} value={code} className="text-gray-900 bg-white">
             {code}
           </option>
         ))}
