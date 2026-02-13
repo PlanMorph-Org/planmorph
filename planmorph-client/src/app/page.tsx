@@ -102,15 +102,15 @@ export default function Home() {
   const trustSignals = [
     {
       icon: ShieldCheckIcon,
-      title: 'Verified by Engineers',
-      description: 'Every design is structurally reviewed before listing',
+      title: 'Engineer-Reviewed',
+      description: 'Structural integrity is reviewed before a design is published',
       color: 'from-brand-accent/20 to-blue-500/10',
       iconColor: 'text-brand-accent',
     },
     {
       icon: DocumentCheckIcon,
       title: 'Complete Packages',
-      description: 'Architectural drawings, structural plans, and BOQ included',
+      description: 'Architectural drawings, structural plans, and BOQ in one purchase',
       color: 'from-golden/20 to-amber-500/10',
       iconColor: 'text-golden',
     },
@@ -123,8 +123,8 @@ export default function Home() {
     },
     {
       icon: UserGroupIcon,
-      title: 'Licensed Architects',
-      description: 'Every professional is vetted and credentialed',
+      title: 'Vetted Professionals',
+      description: 'Professionals are reviewed before they can sell on PlanMorph',
       color: 'from-purple-500/20 to-violet-500/10',
       iconColor: 'text-purple-400',
     },
@@ -154,7 +154,7 @@ export default function Home() {
               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/8 text-xs font-medium text-white/60 mb-8"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-verified animate-pulse" />
-              Structurally verified designs from licensed professionals
+              Verified plan sets from licensed professionals
             </motion.div>
 
             <motion.h1
@@ -175,7 +175,7 @@ export default function Home() {
               transition={{ delay: 0.3, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               className="text-lg md:text-xl text-white/40 mb-12 leading-relaxed max-w-2xl"
             >
-              Browse structurally verified, build-ready architectural designs from licensed professionals.
+              Buy build-ready plan sets you can actually act on: architectural drawings, structural plans, and BOQ—delivered instantly after purchase.
             </motion.p>
 
             <motion.div
@@ -188,7 +188,7 @@ export default function Home() {
                 href="/designs"
                 className="group px-8 py-3.5 bg-brand-accent text-white font-semibold rounded-xl hover:bg-blue-500 transition-all duration-300 shadow-blue btn-glow inline-flex items-center gap-2"
               >
-                Browse Designs
+                Browse Verified Designs
                 <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 16 16" fill="none">
                   <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -197,7 +197,7 @@ export default function Home() {
                 href="/architect/register"
                 className="px-8 py-3.5 text-white/50 hover:text-white font-medium transition-all duration-300 inline-flex items-center gap-2 hover:bg-white/5 rounded-xl"
               >
-                For Professionals
+                Sell as a Professional
                 <span aria-hidden="true">&rarr;</span>
               </Link>
             </motion.div>
@@ -321,7 +321,7 @@ export default function Home() {
           <div className="flex justify-between items-end mb-12">
             <motion.div variants={fadeUp}>
               <h2 className="text-3xl md:text-4xl font-display font-bold text-white tracking-tight">Featured Designs</h2>
-              <p className="text-sm text-white/35 mt-2">Verified and ready to build.</p>
+              <p className="text-sm text-white/35 mt-2">Verified packages, ready to download.</p>
             </motion.div>
             <motion.div variants={fadeUp} custom={1}>
               <Link
@@ -431,6 +431,86 @@ export default function Home() {
                 </motion.div>
               ))}
             </div>
+          </div>
+        </div>
+      </AnimatedSection>
+
+      {/* ═══════════ CLIENT HOME ═══════════ */}
+      <AnimatedSection className="py-24 border-t border-white/6 relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-golden/[0.03] rounded-full blur-3xl" />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+            <motion.div variants={fadeUp}>
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-white tracking-tight mb-4">
+                Clients get a <span className="text-gradient-golden">home</span> for every project.
+              </h2>
+              <p className="text-white/35 max-w-xl leading-relaxed">
+                Your purchases, files, and next steps live in one place—so you can move from browsing to building without chaos.
+              </p>
+
+              <div className="mt-7 space-y-3">
+                {[
+                  'Access purchased files anytime in My Orders',
+                  'Preview PDFs, images, and videos in-browser before downloading',
+                  'Request construction services (Kenya only) when available for your order',
+                ].map((item) => (
+                  <div key={item} className="flex items-start gap-3">
+                    <div className="mt-0.5 h-5 w-5 rounded-full bg-white/5 border border-white/10 flex items-center justify-center">
+                      <CheckBadgeIcon className="h-4 w-4 text-verified" />
+                    </div>
+                    <p className="text-sm text-white/45">{item}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-9 flex flex-wrap gap-3">
+                <Link
+                  href="/register"
+                  className="px-6 py-3 text-sm font-semibold bg-brand-accent text-white rounded-xl hover:bg-blue-500 transition-all duration-300 btn-glow"
+                >
+                  Create a Client Account
+                </Link>
+                <Link
+                  href="/my-orders"
+                  className="px-6 py-3 text-sm font-medium text-white/60 hover:text-white border border-white/10 rounded-xl hover:border-white/20 hover:bg-white/5 transition-all duration-300"
+                >
+                  Go to My Orders
+                </Link>
+              </div>
+            </motion.div>
+
+            <motion.div variants={fadeUp} custom={1} className="glass-card rounded-2xl p-8 relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-golden/10 via-transparent to-brand-accent/10" />
+              <div className="relative">
+                <div className="flex items-center justify-between gap-4 mb-6">
+                  <div>
+                    <p className="text-xs uppercase tracking-widest text-white/35">Client Portal</p>
+                    <h3 className="text-lg font-display font-semibold text-white">My Orders</h3>
+                  </div>
+                  <div className="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                    <ArrowDownTrayIcon className="h-5 w-5 text-golden" />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {[
+                    { label: 'Order status', value: 'Paid • Files ready' },
+                    { label: 'Files', value: 'Plan set • BOQ (as listed)' },
+                    { label: 'Next step', value: 'Download • Share with contractor' },
+                  ].map((row) => (
+                    <div key={row.label} className="flex items-center justify-between glass-card-light rounded-xl px-4 py-3">
+                      <span className="text-xs text-white/35">{row.label}</span>
+                      <span className="text-xs text-white/65 font-medium">{row.value}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <p className="text-[11px] text-white/25 mt-6 leading-relaxed">
+                  Sales accuracy matters: your order shows what you purchased, what was delivered, and your verification context—clearly and in one place.
+                </p>
+              </div>
+            </motion.div>
           </div>
         </div>
       </AnimatedSection>
