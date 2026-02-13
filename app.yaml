@@ -37,7 +37,7 @@ services:
         value: http://+:80
       - key: ConnectionStrings__DefaultConnection
         scope: RUN_TIME
-        value: Host=${db.HOSTNAME};Port=${db.PORT};Database=${db.DATABASE};Username=${db.USERNAME};Password=${db.PASSWORD};SSL Mode=Require;Trust Server Certificate=true
+        value: Host=planmorph-do-user-30645514-0.h.db.ondigitalocean.com;Port=25060;Database=planmorphdb;Username=doadmin;Password=AVNS_ks1_9lUcdQw3jqD3bL8;SSL Mode=Require;Trust Server Certificate=true
       - key: JwtSettings__Secret
         scope: RUN_TIME
         value: ${JWT_SECRET_KEY}
@@ -132,18 +132,13 @@ services:
         value: http://+:80
       - key: ConnectionStrings__DefaultConnection
         scope: RUN_TIME
-        value: Host=${db.HOSTNAME};Port=${db.PORT};Database=${db.DATABASE};Username=${db.USERNAME};Password=${db.PASSWORD};SSL Mode=Require;Trust Server Certificate=true
+        value: Host=planmorph-do-user-30645514-0.h.db.ondigitalocean.com;Port=25060;Database=planmorphdb;Username=doadmin;Password=AVNS_ks1_9lUcdQw3jqD3bL8;SSL Mode=Require;Trust Server Certificate=true
       - key: ApiBaseUrl
         scope: RUN_TIME
         value: http://api:80
     health_check:
       http_path: /
       port: 80
-
-databases:
-  - engine: PG
-    name: db
-    version: "16"
 
 envs:
   - key: APP_URL
