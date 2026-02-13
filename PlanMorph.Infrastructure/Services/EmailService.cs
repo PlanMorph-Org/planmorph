@@ -22,12 +22,37 @@ public class EmailService : IEmailService
         _configuration = configuration;
         _logger = logger;
 
-        _smtpHost = _configuration["EmailSettings:SmtpHost"] ?? "smtp.gmail.com";
-        _smtpPort = int.Parse(_configuration["EmailSettings:SmtpPort"] ?? "587");
-        _smtpUsername = _configuration["EmailSettings:SmtpUsername"] ?? "";
-        _smtpPassword = _configuration["EmailSettings:SmtpPassword"] ?? "";
-        _fromEmail = _configuration["EmailSettings:FromEmail"] ?? "noreply@planmorph.com";
-        _fromName = _configuration["EmailSettings:FromName"] ?? "PlanMorph";
+        _smtpHost = NormalizeValue(_configuration["EmailSettings:SmtpHost"], "smtp.gmail.com");
+
+        var smtpPortRaw = NormalizeValue(_configuration["EmailSettings:SmtpPort"], "587");
+        if (!int.TryParse(smtpPortRaw, out _smtpPort))
+        {
+            _logger.LogWarning(
+                "Invalid EmailSettings:SmtpPort value '{SmtpPort}'. Falling back to 587.",
+                smtpPortRaw);
+            _smtpPort = 587;
+        }
+
+        _smtpUsername = NormalizeValue(_configuration["EmailSettings:SmtpUsername"], "");
+        _smtpPassword = NormalizeValue(_configuration["EmailSettings:SmtpPassword"], "");
+        _fromEmail = NormalizeValue(_configuration["EmailSettings:FromEmail"], "noreply@planmorph.com");
+        _fromName = NormalizeValue(_configuration["EmailSettings:FromName"], "PlanMorph");
+    }
+
+    private static string NormalizeValue(string? value, string fallback)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            return fallback;
+
+        var trimmed = value.Trim();
+        if (string.Equals(trimmed, "<set-in-env>", StringComparison.OrdinalIgnoreCase))
+            return fallback;
+
+        // Protect against unresolved app-spec placeholders like `${SMTP_PORT}`.
+        if (trimmed.StartsWith("${", StringComparison.Ordinal) && trimmed.EndsWith("}", StringComparison.Ordinal))
+            return fallback;
+
+        return trimmed;
     }
 
     private async Task SendEmailAsync(string toEmail, string subject, string htmlBody)

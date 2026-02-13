@@ -40,7 +40,7 @@ services:
         value: Host=planmorph-do-user-30645514-0.h.db.ondigitalocean.com;Port=25060;Database=planmorphdb;Username=doadmin;Password=AVNS_ks1_9lUcdQw3jqD3bL8;SSL Mode=Require;Trust Server Certificate=true
       - key: JwtSettings__Secret
         scope: RUN_TIME
-        value: ${JWT_SECRET_KEY}
+        value: PlanMorph_JWT_Prod_2026_SuperSecretKey_ChangeMe123!
       - key: JwtSettings__Issuer
         value: PlanMorph
       - key: JwtSettings__Audience
@@ -49,48 +49,69 @@ services:
         value: "60"
       - key: EmailSettings__SmtpHost
         scope: RUN_TIME
-        value: ${SMTP_HOST}
+        value: smtp.gmail.com
       - key: EmailSettings__SmtpPort
         scope: RUN_TIME
-        value: ${SMTP_PORT}
+        value: "587"
       - key: EmailSettings__SmtpUsername
         scope: RUN_TIME
-        value: ${SMTP_USERNAME}
+        value: lawravasco@gmail.com
       - key: EmailSettings__SmtpPassword
         scope: RUN_TIME
-        value: ${SMTP_PASSWORD}
+        value: iyst dhcl wepo uitp
       - key: EmailSettings__FromEmail
         scope: RUN_TIME
-        value: ${FROM_EMAIL}
+        value: noreply@planmorph.com
       - key: EmailSettings__FromName
         value: PlanMorph
+      - key: Currency__Base
+        scope: RUN_TIME
+        value: KES
+      - key: Currency__ProviderUrl
+        scope: RUN_TIME
+        value: https://api.exchangerate.host/latest?base={BASE}
+      - key: Currency__CacheMinutes
+        scope: RUN_TIME
+        value: "720"
+      - key: Paystack__BaseUrl
+        scope: RUN_TIME
+        value: https://api.paystack.co
       - key: Paystack__SecretKey
         scope: RUN_TIME
-        value: ${PAYSTACK_SECRET_KEY}
-      - key: Paystack__PublicKey
-        scope: RUN_TIME
-        value: ${PAYSTACK_PUBLIC_KEY}
+        value: sk_live_a1682f30dcaebe86c73819607c241a176ac7d12d
       - key: Paystack__WebhookSecret
         scope: RUN_TIME
-        value: ${PAYSTACK_WEBHOOK_SECRET}
+        value: thisisplanmorphspaymentsystemcominginthroughpaystackbutusingtalosysasthecompanyuntilregistrationcanbecompleted
       - key: Paystack__CallbackUrl
         scope: RUN_TIME
-        value: ${PAYSTACK_CALLBACK_URL}
+        value: https://planmorph-i8sge.ondigitalocean.app/payment/callback
+      - key: Paystack__Currency
+        scope: RUN_TIME
+        value: KES
       - key: DigitalOcean__SpacesAccessKey
         scope: RUN_TIME
-        value: ${DO_SPACES_ACCESS_KEY}
+        value: DO801HR4Q8VLDVZZ7VJJ
       - key: DigitalOcean__SpacesSecretKey
         scope: RUN_TIME
-        value: ${DO_SPACES_SECRET_KEY}
+        value: 0izQLJdg7EvVzJ/U1YKymltRA6V63cHR73LJUdP3n5M
       - key: DigitalOcean__BucketName
         scope: RUN_TIME
-        value: ${DO_SPACES_BUCKET_NAME}
+        value: planmorph
       - key: DigitalOcean__Region
         scope: RUN_TIME
-        value: ${DO_SPACES_REGION}
+        value: fra1
       - key: DigitalOcean__SpacesEndpoint
         scope: RUN_TIME
-        value: ${DO_SPACES_ENDPOINT}
+        value: https://fra1.digitaloceanspaces.com
+      - key: Cors__AllowedOrigins__0
+        scope: RUN_TIME
+        value: https://planmorph-i8sge.ondigitalocean.app
+      - key: Cors__AllowedOrigins__1
+        scope: RUN_TIME
+        value: http://localhost:3000
+      - key: Cors__AllowedOrigins__2
+        scope: RUN_TIME
+        value: http://localhost:5059
     health_check:
       http_path: /health
       port: 80
@@ -110,7 +131,7 @@ services:
         value: production
       - key: NEXT_PUBLIC_API_URL
         scope: RUN_AND_BUILD_TIME
-        value: /api
+        value: /api/api
     health_check:
       http_path: /
       port: 3000
@@ -139,61 +160,3 @@ services:
     health_check:
       http_path: /
       port: 80
-
-envs:
-  - key: APP_URL
-    scope: RUN_TIME
-    value: https://planmorph-i8sge.ondigitalocean.app
-  - key: JWT_SECRET_KEY
-    scope: RUN_TIME
-    type: SECRET
-    value: CHANGEME_STRONG_JWT_SECRET_KEY_32_CHARS_MINIMUM
-  - key: SMTP_HOST
-    scope: RUN_TIME
-    value: smtp.gmail.com
-  - key: SMTP_PORT
-    scope: RUN_TIME
-    value: "587"
-  - key: SMTP_USERNAME
-    scope: RUN_TIME
-    type: SECRET
-    value: CHANGEME_SMTP_USERNAME
-  - key: SMTP_PASSWORD
-    scope: RUN_TIME
-    type: SECRET
-    value: CHANGEME_SMTP_PASSWORD
-  - key: FROM_EMAIL
-    scope: RUN_TIME
-    value: noreply@yourdomain.com
-  - key: PAYSTACK_SECRET_KEY
-    scope: RUN_TIME
-    type: SECRET
-    value: CHANGEME_PAYSTACK_SECRET_KEY
-  - key: PAYSTACK_PUBLIC_KEY
-    scope: RUN_TIME
-    type: SECRET
-    value: CHANGEME_PAYSTACK_PUBLIC_KEY
-  - key: PAYSTACK_WEBHOOK_SECRET
-    scope: RUN_TIME
-    type: SECRET
-    value: CHANGEME_PAYSTACK_WEBHOOK_SECRET
-  - key: PAYSTACK_CALLBACK_URL
-    scope: RUN_TIME
-    value: ${APP_URL}/payment/callback
-  - key: DO_SPACES_ACCESS_KEY
-    scope: RUN_TIME
-    type: SECRET
-    value: CHANGEME_DO_SPACES_ACCESS_KEY
-  - key: DO_SPACES_SECRET_KEY
-    scope: RUN_TIME
-    type: SECRET
-    value: CHANGEME_DO_SPACES_SECRET_KEY
-  - key: DO_SPACES_BUCKET_NAME
-    scope: RUN_TIME
-    value: planmorph-designs
-  - key: DO_SPACES_REGION
-    scope: RUN_TIME
-    value: nyc3
-  - key: DO_SPACES_ENDPOINT
-    scope: RUN_TIME
-    value: https://nyc3.digitaloceanspaces.com
