@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using PlanMorph.Application.DTOs;
 using PlanMorph.Core.Entities;
 using PlanMorph.Core.Entities.Mentorship;
+using PlanMorph.Core.Interfaces;
 using PlanMorph.Core.Interfaces.Services;
 
 namespace PlanMorph.Api.Controllers;
@@ -16,36 +17,49 @@ public class StudentController : ControllerBase
     private readonly IStudentOnboardingService _onboardingService;
     private readonly IMentorshipService _mentorshipService;
     private readonly UserManager<User> _userManager;
+    private readonly IFileStorageService _fileStorageService;
 
     public StudentController(
         IStudentOnboardingService onboardingService,
         IMentorshipService mentorshipService,
-        UserManager<User> userManager)
+        UserManager<User> userManager,
+        IFileStorageService fileStorageService)
     {
         _onboardingService = onboardingService;
         _mentorshipService = mentorshipService;
         _userManager = userManager;
+        _fileStorageService = fileStorageService;
     }
 
     /// <summary>
     /// Submit a new student application (public - no auth required).
     /// </summary>
     [HttpPost("apply")]
-    public async Task<IActionResult> Apply([FromBody] CreateStudentApplicationDto dto)
+    public async Task<IActionResult> Apply([FromForm] CreateStudentApplicationDto dto, IFormFile? schoolIdFile)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
         try
         {
+            // Upload school ID if provided
+            string? schoolIdUrl = null;
+            if (schoolIdFile != null && schoolIdFile.Length > 0)
+            {
+                using var stream = schoolIdFile.OpenReadStream();
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(schoolIdFile.FileName)}";
+                schoolIdUrl = await _fileStorageService.UploadFileAsync(
+                    stream, fileName, "student-applications/school-ids", schoolIdFile.ContentType);
+            }
+
             var application = await _onboardingService.SubmitApplicationAsync(
-                dto.FirstName, dto.LastName, dto.Email, dto.Password,
+                dto.FirstName, dto.LastName, dto.Email,
                 dto.PhoneNumber ?? "", dto.StudentType, dto.UniversityName,
-                dto.StudentIdNumber, dto.PortfolioUrl);
+                dto.StudentIdNumber, dto.PortfolioUrl, schoolIdUrl);
 
             return Ok(new
             {
-                message = "Application submitted successfully. You will be notified once it is reviewed.",
+                message = "Application submitted successfully. Your credentials will be sent to your email once your application is approved.",
                 applicationId = application.Id
             });
         }
@@ -59,7 +73,7 @@ public class StudentController : ControllerBase
     /// Submit an application via mentor invitation (public - no auth required).
     /// </summary>
     [HttpPost("apply/invited")]
-    public async Task<IActionResult> ApplyInvited([FromBody] CreateStudentApplicationDto dto, [FromQuery] Guid mentorId)
+    public async Task<IActionResult> ApplyInvited([FromForm] CreateStudentApplicationDto dto, IFormFile? schoolIdFile, [FromQuery] Guid mentorId)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
@@ -69,14 +83,24 @@ public class StudentController : ControllerBase
 
         try
         {
+            // Upload school ID if provided
+            string? schoolIdUrl = null;
+            if (schoolIdFile != null && schoolIdFile.Length > 0)
+            {
+                using var stream = schoolIdFile.OpenReadStream();
+                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(schoolIdFile.FileName)}";
+                schoolIdUrl = await _fileStorageService.UploadFileAsync(
+                    stream, fileName, "student-applications/school-ids", schoolIdFile.ContentType);
+            }
+
             var application = await _onboardingService.SubmitInvitedApplicationAsync(
-                dto.FirstName, dto.LastName, dto.Email, dto.Password,
+                dto.FirstName, dto.LastName, dto.Email,
                 dto.PhoneNumber ?? "", dto.StudentType, dto.UniversityName,
-                dto.StudentIdNumber, dto.PortfolioUrl, mentorId);
+                dto.StudentIdNumber, dto.PortfolioUrl, schoolIdUrl, mentorId);
 
             return Ok(new
             {
-                message = "Application submitted successfully. You will be notified once it is reviewed.",
+                message = "Application submitted successfully. Your credentials will be sent to your email once your application is approved.",
                 applicationId = application.Id
             });
         }
@@ -442,6 +466,7 @@ public class StudentController : ControllerBase
                 StudentType = app.StudentType,
                 UniversityName = app.UniversityName,
                 StudentIdNumber = app.StudentIdNumber,
+                SchoolIdUrl = app.SchoolIdUrl,
                 PortfolioUrl = app.PortfolioUrl,
                 Status = app.Status,
                 ReviewNotes = app.ReviewNotes,
@@ -493,6 +518,7 @@ public class StudentController : ControllerBase
                 StudentType = app.StudentType,
                 UniversityName = app.UniversityName,
                 StudentIdNumber = app.StudentIdNumber,
+                SchoolIdUrl = app.SchoolIdUrl,
                 PortfolioUrl = app.PortfolioUrl,
                 Status = app.Status,
                 ReviewNotes = app.ReviewNotes,
@@ -571,6 +597,7 @@ public class StudentController : ControllerBase
             StudentType = application.StudentType,
             UniversityName = application.UniversityName,
             StudentIdNumber = application.StudentIdNumber,
+            SchoolIdUrl = application.SchoolIdUrl,
             PortfolioUrl = application.PortfolioUrl,
             Status = application.Status,
             ReviewNotes = application.ReviewNotes,

@@ -6,14 +6,14 @@ public interface IStudentOnboardingService
 {
     // Student application
     Task<StudentApplication> SubmitApplicationAsync(
-        string firstName, string lastName, string email, string password,
+        string firstName, string lastName, string email,
         string phoneNumber, StudentType studentType, string universityName,
-        string? studentIdNumber, string? portfolioUrl);
+        string? studentIdNumber, string? portfolioUrl, string? schoolIdUrl);
 
     Task<StudentApplication> SubmitInvitedApplicationAsync(
-        string firstName, string lastName, string email, string password,
+        string firstName, string lastName, string email,
         string phoneNumber, StudentType studentType, string universityName,
-        string? studentIdNumber, string? portfolioUrl, Guid mentorId);
+        string? studentIdNumber, string? portfolioUrl, string? schoolIdUrl, Guid mentorId);
 
     // Admin review
     Task<StudentApplication?> GetApplicationByIdAsync(Guid applicationId);

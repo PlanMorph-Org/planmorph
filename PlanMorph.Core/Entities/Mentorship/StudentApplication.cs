@@ -15,6 +15,7 @@ public class StudentApplication : BaseEntity
     public StudentType StudentType { get; set; }
     public string UniversityName { get; set; } = string.Empty;
     public string? StudentIdNumber { get; set; }
+    public string? SchoolIdUrl { get; set; }
     public string? TranscriptUrl { get; set; }
     public string? PortfolioUrl { get; set; }
     public string? CoverLetterUrl { get; set; }

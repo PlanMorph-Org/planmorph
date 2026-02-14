@@ -31,6 +31,7 @@ public interface IEmailService
     Task SendAdminNewStudentApplicationEmailAsync(string studentName, string studentType, string universityName);
     Task SendStudentApplicationApprovedEmailAsync(string toEmail, string studentName);
     Task SendStudentApplicationRejectedEmailAsync(string toEmail, string studentName, string? reason = null);
+    Task SendStudentCredentialsEmailAsync(string toEmail, string studentName, string temporaryPassword);
     Task SendMentorStudentInvitationEmailAsync(string toEmail, string studentName, string mentorName);
 
     // Mentorship Payment Emails

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import Link from 'next/link';
 import api from '@/src/lib/api';
 import toast, { Toaster } from 'react-hot-toast';
@@ -11,8 +11,6 @@ interface ApplicationForm {
   lastName: string;
   email: string;
   phoneNumber: string;
-  password: string;
-  confirmPassword: string;
   studentType: string;
   universityName: string;
   studentIdNumber: string;
@@ -25,13 +23,13 @@ export default function StudentRegisterPage() {
     lastName: '',
     email: '',
     phoneNumber: '',
-    password: '',
-    confirmPassword: '',
     studentType: '',
     universityName: '',
     studentIdNumber: '',
     portfolioUrl: '',
   });
+  const [schoolIdFile, setSchoolIdFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -39,13 +37,25 @@ export default function StudentRegisterPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    if (file) {
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        toast.error('File size must be less than 10MB.');
+        return;
+      }
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+      if (!allowedTypes.includes(file.type)) {
+        toast.error('Please upload a JPG, PNG, WebP, or PDF file.');
+        return;
+      }
+    }
+    setSchoolIdFile(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match.');
-      return;
-    }
 
     if (!formData.studentType) {
       toast.error('Please select your student type.');
@@ -54,20 +64,21 @@ export default function StudentRegisterPage() {
 
     setIsLoading(true);
     try {
-      const payload: Record<string, string> = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        password: formData.password,
-        studentType: formData.studentType,
-        universityName: formData.universityName,
-      };
+      const data = new FormData();
+      data.append('firstName', formData.firstName);
+      data.append('lastName', formData.lastName);
+      data.append('email', formData.email);
+      data.append('studentType', formData.studentType);
+      data.append('universityName', formData.universityName);
 
-      if (formData.phoneNumber) payload.phoneNumber = formData.phoneNumber;
-      if (formData.studentIdNumber) payload.studentIdNumber = formData.studentIdNumber;
-      if (formData.portfolioUrl) payload.portfolioUrl = formData.portfolioUrl;
+      if (formData.phoneNumber) data.append('phoneNumber', formData.phoneNumber);
+      if (formData.studentIdNumber) data.append('studentIdNumber', formData.studentIdNumber);
+      if (formData.portfolioUrl) data.append('portfolioUrl', formData.portfolioUrl);
+      if (schoolIdFile) data.append('schoolIdFile', schoolIdFile);
 
-      await api.post('/student/apply', payload);
+      await api.post('/student/apply', data, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
       setSubmitted(true);
       toast.success('Application submitted successfully!', { duration: 6000 });
     } catch (error: any) {
@@ -104,7 +115,7 @@ export default function StudentRegisterPage() {
           </div>
           <h2 className="text-2xl font-display font-bold text-white mb-3">Application Submitted</h2>
           <p className="text-white/40 leading-relaxed mb-6">
-            Thank you for applying to the PlanMorph Student Program. Our team will review your application within 24-48 hours. You&apos;ll receive an email once your application has been reviewed.
+            Thank you for applying to the PlanMorph Student Program. Our team will review your application and school ID within 24-48 hours. Once approved, your login credentials will be sent to your email automatically.
           </p>
           <Link
             href="/student/login"
@@ -182,7 +193,7 @@ export default function StudentRegisterPage() {
               {[
                 'Must be enrolled in or graduated from an accredited Architecture or Engineering program',
                 'Architecture students work under Licensed Architects, Engineering students under Licensed Engineers',
-                'Valid university or institution ID, or proof of enrollment/graduation',
+                'Valid school ID with visible expiry date, or an .edu email address',
                 'Portfolio demonstrating design or technical skills (recommended)',
               ].map((req, idx) => (
                 <li key={idx} className="flex items-start gap-2.5 text-sm text-white/40">
@@ -200,10 +211,10 @@ export default function StudentRegisterPage() {
             <h3 className="text-sm font-semibold text-indigo uppercase tracking-wider mb-3">How It Works</h3>
             <div className="flex flex-col sm:flex-row gap-3">
               {[
-                { step: '1', title: 'Apply', desc: 'Submit your application with required details' },
-                { step: '2', title: 'Review', desc: 'Admin reviews your application (24-48 hours)' },
-                { step: '3', title: 'Match', desc: 'Get matched with a licensed professional mentor' },
-                { step: '4', title: 'Earn', desc: 'Start working on real client projects' },
+                { step: '1', title: 'Apply', desc: 'Submit your application with school ID' },
+                { step: '2', title: 'Review', desc: 'Admin verifies your student status (24-48 hours)' },
+                { step: '3', title: 'Credentials', desc: 'Login credentials sent to your email' },
+                { step: '4', title: 'Earn', desc: 'Get matched with a mentor and start working' },
               ].map((item) => (
                 <div key={item.step} className="flex-1 p-3 rounded-lg bg-white/[0.02] text-center">
                   <div className="w-8 h-8 mx-auto mb-2 rounded-full bg-indigo/15 flex items-center justify-center text-sm font-bold text-indigo">
@@ -255,23 +266,12 @@ export default function StudentRegisterPage() {
                   <input id="email" name="email" type="email" required value={formData.email} onChange={handleChange}
                     placeholder="you@example.com"
                     className="w-full px-4 py-3 glass-input rounded-lg text-sm text-white placeholder:text-white/20" />
+                  <p className="text-[10px] text-white/25 mt-1">Use your .edu email if available for faster verification</p>
                 </div>
                 <div>
                   <label htmlFor="phoneNumber" className="block text-xs font-medium text-white/40 mb-1.5">Phone Number</label>
                   <input id="phoneNumber" name="phoneNumber" type="tel" value={formData.phoneNumber} onChange={handleChange}
                     placeholder="+254 7XX XXX XXX"
-                    className="w-full px-4 py-3 glass-input rounded-lg text-sm text-white placeholder:text-white/20" />
-                </div>
-                <div>
-                  <label htmlFor="password" className="block text-xs font-medium text-white/40 mb-1.5">Password *</label>
-                  <input id="password" name="password" type="password" required minLength={8} value={formData.password} onChange={handleChange}
-                    placeholder="Min. 8 characters"
-                    className="w-full px-4 py-3 glass-input rounded-lg text-sm text-white placeholder:text-white/20" />
-                </div>
-                <div>
-                  <label htmlFor="confirmPassword" className="block text-xs font-medium text-white/40 mb-1.5">Confirm Password *</label>
-                  <input id="confirmPassword" name="confirmPassword" type="password" required minLength={8} value={formData.confirmPassword} onChange={handleChange}
-                    placeholder="••••••••"
                     className="w-full px-4 py-3 glass-input rounded-lg text-sm text-white placeholder:text-white/20" />
                 </div>
               </div>
@@ -312,8 +312,75 @@ export default function StudentRegisterPage() {
               </div>
             </div>
 
+            {/* School ID Upload */}
+            <div className="border-t border-white/6 pt-6">
+              <h3 className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-4">Identity Verification</h3>
+              <div>
+                <label className="block text-xs font-medium text-white/40 mb-1.5">School ID Photo</label>
+                <p className="text-[10px] text-white/25 mb-3">
+                  Upload a clear photo of your student ID card showing your name and expiry date. Accepts JPG, PNG, WebP, or PDF (max 10MB).
+                </p>
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className={`relative w-full border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all duration-300 ${
+                    schoolIdFile
+                      ? 'border-indigo/40 bg-indigo/5'
+                      : 'border-white/10 hover:border-white/20 hover:bg-white/[0.02]'
+                  }`}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,application/pdf"
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+                  {schoolIdFile ? (
+                    <div className="flex items-center justify-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-indigo/15 flex items-center justify-center">
+                        <svg className="w-5 h-5 text-indigo" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                      </div>
+                      <div className="text-left">
+                        <p className="text-sm text-white/70 font-medium">{schoolIdFile.name}</p>
+                        <p className="text-[10px] text-white/30">{(schoolIdFile.size / 1024 / 1024).toFixed(2)} MB</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); setSchoolIdFile(null); }}
+                        className="ml-auto text-white/30 hover:text-white/60 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-white/5 flex items-center justify-center">
+                        <svg className="w-6 h-6 text-white/25" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
+                        </svg>
+                      </div>
+                      <p className="text-sm text-white/40">Click to upload your school ID</p>
+                      <p className="text-[10px] text-white/20 mt-1">Make sure the expiry date is clearly visible</p>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {/* Submit */}
             <div className="border-t border-white/6 pt-6">
+              <div className="bg-indigo/5 border border-indigo/15 rounded-lg p-3 mb-4">
+                <p className="text-xs text-indigo/80 flex items-start gap-2">
+                  <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={1.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                  </svg>
+                  No password needed. Once your application is approved, your login credentials will be sent to your email automatically.
+                </p>
+              </div>
               <button type="submit" disabled={isLoading}
                 className="w-full py-3 bg-indigo text-white font-semibold rounded-lg hover:bg-indigo-light transition-all duration-300 btn-glow disabled:opacity-50 disabled:cursor-not-allowed"
               >

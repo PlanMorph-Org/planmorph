@@ -1334,6 +1334,68 @@ public class EmailService : IEmailService
         await SendEmailAsync(toEmail, subject, htmlBody);
     }
 
+    public async Task SendStudentCredentialsEmailAsync(string toEmail, string studentName, string temporaryPassword)
+    {
+        var subject = "Your PlanMorph Student Account Credentials";
+        var htmlBody = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #10b981; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
+        .content {{ background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+        .credentials-box {{ background-color: #fff; border: 2px solid #6366f1; border-radius: 8px; padding: 20px; margin: 20px 0; }}
+        .credentials-box p {{ margin: 8px 0; }}
+        .password {{ font-family: monospace; font-size: 18px; background-color: #f3f4f6; padding: 8px 12px; border-radius: 4px; display: inline-block; letter-spacing: 1px; }}
+        .button {{ display: inline-block; padding: 12px 24px; background-color: #6366f1; color: white; text-decoration: none; border-radius: 6px; margin-top: 20px; }}
+        .warning {{ background-color: #fef3c7; border-left: 4px solid #f59e0b; padding: 12px; margin: 20px 0; border-radius: 4px; }}
+        .footer {{ text-align: center; margin-top: 20px; color: #6b7280; font-size: 14px; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>Welcome to PlanMorph!</h1>
+        </div>
+        <div class=""content"">
+            <p>Hi {studentName},</p>
+
+            <p>Congratulations! Your application to the <strong>PlanMorph Learn While You Earn</strong> mentorship program has been approved.</p>
+
+            <p>Your student account has been created. Use the credentials below to log in:</p>
+
+            <div class=""credentials-box"">
+                <h3 style=""margin-top: 0; color: #6366f1;"">Your Login Credentials</h3>
+                <p><strong>Email:</strong> {toEmail}</p>
+                <p><strong>Temporary Password:</strong> <span class=""password"">{temporaryPassword}</span></p>
+            </div>
+
+            <div class=""warning"">
+                <strong>Important:</strong> Please change your password after your first login for security purposes. Keep these credentials safe and do not share them with anyone.
+            </div>
+
+            <p><strong>Next steps:</strong></p>
+            <ul>
+                <li>Log in to your student dashboard using the credentials above</li>
+                <li>Complete your profile</li>
+                <li>Wait for a mentor to assign you to a project</li>
+                <li>Start earning while you learn!</li>
+            </ul>
+
+            <a href=""https://planmorph.com/student/login"" class=""button"">Log In to Student Portal</a>
+        </div>
+        <div class=""footer"">
+            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+        await SendEmailAsync(toEmail, subject, htmlBody);
+    }
+
     public async Task SendMentorStudentInvitationEmailAsync(string toEmail, string studentName, string mentorName)
     {
         var subject = $"You've Been Invited to PlanMorph by {mentorName}!";

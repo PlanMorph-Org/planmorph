@@ -28,31 +28,31 @@ public class StudentOnboardingService : IStudentOnboardingService
     }
 
     public async Task<StudentApplication> SubmitApplicationAsync(
-        string firstName, string lastName, string email, string password,
+        string firstName, string lastName, string email,
         string phoneNumber, StudentType studentType, string universityName,
-        string? studentIdNumber, string? portfolioUrl)
+        string? studentIdNumber, string? portfolioUrl, string? schoolIdUrl)
     {
         return await CreateApplicationAsync(
-            firstName, lastName, email, password, phoneNumber,
+            firstName, lastName, email, phoneNumber,
             studentType, universityName, studentIdNumber, portfolioUrl,
-            ApplicationType.SelfApply, null);
+            schoolIdUrl, ApplicationType.SelfApply, null);
     }
 
     public async Task<StudentApplication> SubmitInvitedApplicationAsync(
-        string firstName, string lastName, string email, string password,
+        string firstName, string lastName, string email,
         string phoneNumber, StudentType studentType, string universityName,
-        string? studentIdNumber, string? portfolioUrl, Guid mentorId)
+        string? studentIdNumber, string? portfolioUrl, string? schoolIdUrl, Guid mentorId)
     {
         return await CreateApplicationAsync(
-            firstName, lastName, email, password, phoneNumber,
+            firstName, lastName, email, phoneNumber,
             studentType, universityName, studentIdNumber, portfolioUrl,
-            ApplicationType.MentorInvite, mentorId);
+            schoolIdUrl, ApplicationType.MentorInvite, mentorId);
     }
 
     private async Task<StudentApplication> CreateApplicationAsync(
-        string firstName, string lastName, string email, string password,
+        string firstName, string lastName, string email,
         string phoneNumber, StudentType studentType, string universityName,
-        string? studentIdNumber, string? portfolioUrl,
+        string? studentIdNumber, string? portfolioUrl, string? schoolIdUrl,
         ApplicationType applicationType, Guid? mentorId)
     {
         // Check if email already exists
@@ -74,7 +74,7 @@ public class StudentOnboardingService : IStudentOnboardingService
             CreatedAt = DateTime.UtcNow
         };
 
-        var createResult = await _userManager.CreateAsync(user, password);
+        var createResult = await _userManager.CreateAsync(user);
         if (!createResult.Succeeded)
         {
             var errors = string.Join(", ", createResult.Errors.Select(e => e.Description));
@@ -92,6 +92,7 @@ public class StudentOnboardingService : IStudentOnboardingService
             StudentType = studentType,
             UniversityName = universityName,
             StudentIdNumber = studentIdNumber,
+            SchoolIdUrl = schoolIdUrl,
             PortfolioUrl = portfolioUrl,
             Status = ApplicationStatus.Pending,
             CreatedAt = DateTime.UtcNow,
@@ -145,12 +146,25 @@ public class StudentOnboardingService : IStudentOnboardingService
 
         await _unitOfWork.StudentApplications.UpdateAsync(application);
 
-        // Activate the user account
+        // Activate the user account and generate credentials
         var user = await _userManager.FindByIdAsync(application.UserId.ToString());
         if (user != null)
         {
             user.IsActive = true;
             await _userManager.UpdateAsync(user);
+
+            // Generate a secure temporary password
+            var generatedPassword = GenerateSecurePassword();
+            var addPasswordResult = await _userManager.AddPasswordAsync(user, generatedPassword);
+            if (!addPasswordResult.Succeeded)
+            {
+                _logger.LogError("Failed to set generated password for student {UserId}: {Errors}",
+                    user.Id, string.Join(", ", addPasswordResult.Errors.Select(e => e.Description)));
+            }
+
+            // Send credentials email instead of generic approval email
+            await _emailService.SendStudentCredentialsEmailAsync(
+                user.Email!, user.FirstName, generatedPassword);
         }
 
         // Create student profile
@@ -188,13 +202,6 @@ public class StudentOnboardingService : IStudentOnboardingService
         }
 
         await _unitOfWork.SaveChangesAsync();
-
-        // Send approval email
-        if (user != null)
-        {
-            await _emailService.SendStudentApplicationApprovedEmailAsync(
-                user.Email!, user.FirstName);
-        }
 
         _logger.LogInformation("Student application {Id} approved by admin {AdminId}", applicationId, adminId);
 
@@ -268,5 +275,39 @@ public class StudentOnboardingService : IStudentOnboardingService
     public async Task<bool> HasPendingApplicationAsync(Guid userId)
     {
         return await _unitOfWork.StudentApplicationRepository.HasPendingApplicationAsync(userId);
+    }
+
+    private static string GenerateSecurePassword(int length = 16)
+    {
+        const string upperChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const string lowerChars = "abcdefghijklmnopqrstuvwxyz";
+        const string digitChars = "0123456789";
+        const string specialChars = "!@#$%&*";
+        const string allChars = upperChars + lowerChars + digitChars + specialChars;
+
+        var random = System.Security.Cryptography.RandomNumberGenerator.Create();
+        var bytes = new byte[length];
+        random.GetBytes(bytes);
+
+        var chars = new char[length];
+        // Guarantee at least one of each required type
+        chars[0] = upperChars[bytes[0] % upperChars.Length];
+        chars[1] = lowerChars[bytes[1] % lowerChars.Length];
+        chars[2] = digitChars[bytes[2] % digitChars.Length];
+        chars[3] = specialChars[bytes[3] % specialChars.Length];
+
+        for (int i = 4; i < length; i++)
+            chars[i] = allChars[bytes[i] % allChars.Length];
+
+        // Shuffle the result
+        for (int i = chars.Length - 1; i > 0; i--)
+        {
+            var swapBytes = new byte[1];
+            random.GetBytes(swapBytes);
+            int j = swapBytes[0] % (i + 1);
+            (chars[i], chars[j]) = (chars[j], chars[i]);
+        }
+
+        return new string(chars);
     }
 }

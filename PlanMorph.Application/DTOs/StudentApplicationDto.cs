@@ -17,6 +17,7 @@ public record StudentApplicationDto
     public string UniversityName { get; init; } = string.Empty;
     public string? StudentIdNumber { get; init; }
     public string? TranscriptUrl { get; init; }
+    public string? SchoolIdUrl { get; init; }
     public string? PortfolioUrl { get; init; }
     public string? CoverLetterUrl { get; init; }
     public ApplicationStatus Status { get; init; }
@@ -38,10 +39,6 @@ public record CreateStudentApplicationDto
     [Required]
     [EmailAddress]
     public string Email { get; init; } = string.Empty;
-
-    [Required]
-    [StringLength(100, MinimumLength = 8)]
-    public string Password { get; init; } = string.Empty;
 
     [Required]
     public StudentType StudentType { get; init; }
