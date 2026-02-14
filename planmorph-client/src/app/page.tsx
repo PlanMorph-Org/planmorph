@@ -163,9 +163,9 @@ export default function Home() {
               transition={{ delay: 0.15, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
               className="text-4xl md:text-5xl lg:text-7xl font-display font-bold tracking-tight leading-[1.08] mb-7"
             >
-              Build-ready design packages.
+              Build-ready architectural and structural design packages.
               <br />
-              Distributed like{' '}
+              Delivered with professional oversight. Distributed like{' '}
               <span className="text-gradient-golden">infrastructure</span>.
             </motion.h1>
 
@@ -175,7 +175,7 @@ export default function Home() {
               transition={{ delay: 0.3, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               className="text-lg md:text-xl text-white/40 mb-12 leading-relaxed max-w-2xl"
             >
-              PlanMorph is the publishing and distribution layer for architectural and civil plan sets—engineer-reviewed, packaged with complete documentation, and delivered instantly.
+              PlanMorph is a construction technology company operating a verified marketplace for architectural and civil design packages engineer-reviewed, fully documented, and delivered instantly.
             </motion.p>
 
             <motion.div
