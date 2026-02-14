@@ -53,5 +53,6 @@ public enum UserRole
     Architect,
     Contractor,
     Admin,
-    Engineer
+    Engineer,
+    Student
 }

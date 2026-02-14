@@ -7,7 +7,7 @@ public static class DbInitializer
 {
     public static async Task SeedRolesAsync(RoleManager<IdentityRole<Guid>> roleManager)
     {
-        var roles = new[] { "Admin", "Client", "Architect", "Contractor", "Engineer" };
+        var roles = new[] { "Admin", "Client", "Architect", "Contractor", "Engineer", "Student" };
 
         foreach (var role in roles)
         {

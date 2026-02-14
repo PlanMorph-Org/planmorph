@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
 using PlanMorph.Core.Entities;
+using PlanMorph.Core.Entities.Mentorship;
 using PlanMorph.Core.Interfaces;
 using PlanMorph.Core.Interfaces.Repositories;
 using PlanMorph.Infrastructure.Data;
@@ -25,6 +26,21 @@ public class UnitOfWork : IUnitOfWork
     public ITicketRepository TicketRepository { get; }
     public ITicketMessageRepository TicketMessageRepository { get; }
 
+    // Mentorship repositories
+    public IRepository<MentorProfile> MentorProfiles { get; }
+    public IRepository<StudentProfile> StudentProfiles { get; }
+    public IRepository<MentorshipProject> MentorshipProjects { get; }
+    public IRepository<ProjectIteration> ProjectIterations { get; }
+    public IRepository<ProjectFile> ProjectFiles { get; }
+    public IRepository<ProjectMessage> ProjectMessages { get; }
+    public IRepository<ClientDeliverable> ClientDeliverables { get; }
+    public IRepository<StudentApplication> StudentApplications { get; }
+    public IRepository<ProjectDispute> ProjectDisputes { get; }
+    public IRepository<MentorStudentRelationship> MentorStudentRelationships { get; }
+    public IRepository<ProjectAuditLog> ProjectAuditLogs { get; }
+    public IMentorshipProjectRepository MentorshipProjectRepository { get; }
+    public IStudentApplicationRepository StudentApplicationRepository { get; }
+
     public UnitOfWork(ApplicationDbContext context)
     {
         _context = context;
@@ -41,6 +57,21 @@ public class UnitOfWork : IUnitOfWork
         // Initialize specific ticket repositories
         TicketRepository = new TicketRepository(context);
         TicketMessageRepository = new TicketMessageRepository(context);
+
+        // Initialize mentorship repositories
+        MentorProfiles = new Repository<MentorProfile>(context);
+        StudentProfiles = new Repository<StudentProfile>(context);
+        MentorshipProjects = new Repository<MentorshipProject>(context);
+        ProjectIterations = new Repository<ProjectIteration>(context);
+        ProjectFiles = new Repository<ProjectFile>(context);
+        ProjectMessages = new Repository<ProjectMessage>(context);
+        ClientDeliverables = new Repository<ClientDeliverable>(context);
+        StudentApplications = new Repository<StudentApplication>(context);
+        ProjectDisputes = new Repository<ProjectDispute>(context);
+        MentorStudentRelationships = new Repository<MentorStudentRelationship>(context);
+        ProjectAuditLogs = new Repository<ProjectAuditLog>(context);
+        MentorshipProjectRepository = new MentorshipProjectRepository(context);
+        StudentApplicationRepository = new StudentApplicationRepository(context);
     }
 
     public async Task<int> SaveChangesAsync()

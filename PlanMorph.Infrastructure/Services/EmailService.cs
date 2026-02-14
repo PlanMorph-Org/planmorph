@@ -1164,4 +1164,346 @@ public class EmailService : IEmailService
 
         await SendEmailAsync(toEmail, emailSubject, htmlBody);
     }
+
+    // === STUDENT MENTORSHIP EMAILS ===
+
+    public async Task SendStudentApplicationReceivedEmailAsync(string toEmail, string studentName)
+    {
+        var subject = "Application Received - PlanMorph Mentorship Program";
+        var htmlBody = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #6366f1; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
+        .content {{ background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+        .footer {{ text-align: center; margin-top: 20px; color: #6b7280; font-size: 14px; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>Application Received</h1>
+        </div>
+        <div class=""content"">
+            <p>Hi {studentName},</p>
+            <p>Thank you for applying to the <strong>PlanMorph Learn While You Earn</strong> mentorship program.</p>
+            <p>Your application has been received and is being reviewed by our team. We'll notify you once a decision has been made.</p>
+            <p><strong>What to expect:</strong></p>
+            <ul>
+                <li>Our team will review your credentials and qualifications</li>
+                <li>You'll receive an email with the outcome</li>
+                <li>If approved, you'll gain access to the student portal</li>
+            </ul>
+        </div>
+        <div class=""footer"">
+            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+        await SendEmailAsync(toEmail, subject, htmlBody);
+    }
+
+    public async Task SendAdminNewStudentApplicationEmailAsync(string studentName, string studentType, string universityName)
+    {
+        var subject = $"New Student Application - {studentName}";
+        var htmlBody = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #dc2626; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
+        .content {{ background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+        .info-box {{ background-color: #fff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 15px; margin: 15px 0; }}
+        .button {{ display: inline-block; padding: 12px 24px; background-color: #6366f1; color: white; text-decoration: none; border-radius: 6px; margin-top: 20px; }}
+        .footer {{ text-align: center; margin-top: 20px; color: #6b7280; font-size: 14px; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>New Student Application</h1>
+        </div>
+        <div class=""content"">
+            <p>A new student has applied to the mentorship program.</p>
+            <div class=""info-box"">
+                <p><strong>Name:</strong> {studentName}</p>
+                <p><strong>Type:</strong> {studentType}</p>
+                <p><strong>University:</strong> {universityName}</p>
+            </div>
+            <a href=""https://planmorph.com/admin"" class=""button"">Review Application</a>
+        </div>
+        <div class=""footer"">
+            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+        await SendEmailAsync("admin@planmorph.com", subject, htmlBody);
+    }
+
+    public async Task SendStudentApplicationApprovedEmailAsync(string toEmail, string studentName)
+    {
+        var subject = "Welcome to PlanMorph Mentorship Program!";
+        var htmlBody = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #10b981; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
+        .content {{ background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+        .button {{ display: inline-block; padding: 12px 24px; background-color: #6366f1; color: white; text-decoration: none; border-radius: 6px; margin-top: 20px; }}
+        .footer {{ text-align: center; margin-top: 20px; color: #6b7280; font-size: 14px; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>Application Approved!</h1>
+        </div>
+        <div class=""content"">
+            <p>Hi {studentName},</p>
+            <p>Congratulations! Your application to the <strong>PlanMorph Learn While You Earn</strong> mentorship program has been approved.</p>
+            <p>You can now log in to your student portal and start working on mentored projects.</p>
+            <p><strong>Next steps:</strong></p>
+            <ul>
+                <li>Log in to your student dashboard</li>
+                <li>Complete your profile</li>
+                <li>Wait for a mentor to assign you to a project</li>
+                <li>Start earning while you learn!</li>
+            </ul>
+            <a href=""https://planmorph.com/student/login"" class=""button"">Go to Student Portal</a>
+        </div>
+        <div class=""footer"">
+            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+        await SendEmailAsync(toEmail, subject, htmlBody);
+    }
+
+    public async Task SendStudentApplicationRejectedEmailAsync(string toEmail, string studentName, string? reason = null)
+    {
+        var reasonText = string.IsNullOrEmpty(reason)
+            ? "your application did not meet our current requirements"
+            : reason;
+
+        var subject = "PlanMorph Mentorship Application Update";
+        var htmlBody = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #6b7280; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
+        .content {{ background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+        .footer {{ text-align: center; margin-top: 20px; color: #6b7280; font-size: 14px; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>Application Update</h1>
+        </div>
+        <div class=""content"">
+            <p>Hi {studentName},</p>
+            <p>Thank you for your interest in the PlanMorph mentorship program.</p>
+            <p>After careful review, we regret to inform you that {reasonText}.</p>
+            <p>You are welcome to reapply in the future once you have additional experience or qualifications.</p>
+            <p>If you have questions about this decision, please contact our support team.</p>
+        </div>
+        <div class=""footer"">
+            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+        await SendEmailAsync(toEmail, subject, htmlBody);
+    }
+
+    public async Task SendMentorStudentInvitationEmailAsync(string toEmail, string studentName, string mentorName)
+    {
+        var subject = $"You've Been Invited to PlanMorph by {mentorName}!";
+        var htmlBody = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #6366f1; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
+        .content {{ background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+        .button {{ display: inline-block; padding: 12px 24px; background-color: #6366f1; color: white; text-decoration: none; border-radius: 6px; margin-top: 20px; }}
+        .footer {{ text-align: center; margin-top: 20px; color: #6b7280; font-size: 14px; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>You're Invited!</h1>
+        </div>
+        <div class=""content"">
+            <p>Hi {studentName},</p>
+            <p><strong>{mentorName}</strong>, a licensed professional on PlanMorph, has invited you to join the <strong>Learn While You Earn</strong> mentorship program.</p>
+            <p>As a mentored design assistant, you'll work on real client projects under professional supervision while earning per-project compensation.</p>
+            <p><strong>Benefits:</strong></p>
+            <ul>
+                <li>Work on real architectural and engineering projects</li>
+                <li>Learn from licensed professionals</li>
+                <li>Earn money while building your portfolio</li>
+                <li>Get mentored feedback on your work</li>
+            </ul>
+            <a href=""https://planmorph.com/student/register"" class=""button"">Accept Invitation & Register</a>
+        </div>
+        <div class=""footer"">
+            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+        await SendEmailAsync(toEmail, subject, htmlBody);
+    }
+
+    // === MENTORSHIP PAYMENT EMAILS ===
+
+    public async Task SendMentorshipPaymentConfirmationEmailAsync(string toEmail, string clientName, string projectTitle, decimal amount, string projectNumber)
+    {
+        var subject = $"Payment Confirmed - {projectNumber}";
+        var htmlBody = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #10b981; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
+        .content {{ background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+        .payment-box {{ background-color: #fff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 15px; margin: 15px 0; }}
+        .footer {{ text-align: center; margin-top: 20px; color: #6b7280; font-size: 14px; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>Payment Confirmed</h1>
+        </div>
+        <div class=""content"">
+            <p>Hi {clientName},</p>
+            <p>Your payment for the mentorship project has been confirmed and funds are now held securely in escrow.</p>
+            <div class=""payment-box"">
+                <p><strong>Project:</strong> {projectTitle}</p>
+                <p><strong>Project Number:</strong> {projectNumber}</p>
+                <p><strong>Amount:</strong> KES {amount:N2}</p>
+                <p><strong>Status:</strong> Escrowed (held securely)</p>
+            </div>
+            <p>Your funds will be held in escrow until you accept the final deliverable. You are fully protected throughout the process.</p>
+        </div>
+        <div class=""footer"">
+            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+        await SendEmailAsync(toEmail, subject, htmlBody);
+    }
+
+    public async Task SendMentorshipPaymentReleasedEmailAsync(string toEmail, string recipientName, string projectTitle, decimal amount, string role)
+    {
+        var subject = $"Payment Released - {projectTitle}";
+        var htmlBody = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #10b981; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
+        .content {{ background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+        .payment-box {{ background-color: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 6px; padding: 15px; margin: 15px 0; }}
+        .footer {{ text-align: center; margin-top: 20px; color: #6b7280; font-size: 14px; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>Payment Released!</h1>
+        </div>
+        <div class=""content"">
+            <p>Hi {recipientName},</p>
+            <p>Great news! Your {role.ToLower()} payment for the project <strong>{projectTitle}</strong> has been released.</p>
+            <div class=""payment-box"">
+                <p><strong>Amount:</strong> KES {amount:N2}</p>
+                <p><strong>Role:</strong> {role}</p>
+                <p><strong>Status:</strong> Released</p>
+            </div>
+            <p>Thank you for your contribution to this project. The payment will be processed to your account.</p>
+        </div>
+        <div class=""footer"">
+            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+        await SendEmailAsync(toEmail, subject, htmlBody);
+    }
+
+    public async Task SendMentorshipRefundEmailAsync(string toEmail, string clientName, string projectTitle, decimal amount, string refundType, string? reason)
+    {
+        var reasonText = string.IsNullOrEmpty(reason) ? "" : $"<p><strong>Reason:</strong> {reason}</p>";
+        var subject = $"Refund Processed - {projectTitle}";
+        var htmlBody = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #3b82f6; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }}
+        .content {{ background-color: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px; }}
+        .refund-box {{ background-color: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 15px; margin: 15px 0; }}
+        .footer {{ text-align: center; margin-top: 20px; color: #6b7280; font-size: 14px; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>Refund Processed</h1>
+        </div>
+        <div class=""content"">
+            <p>Hi {clientName},</p>
+            <p>A refund has been processed for your mentorship project.</p>
+            <div class=""refund-box"">
+                <p><strong>Project:</strong> {projectTitle}</p>
+                <p><strong>Original Amount:</strong> KES {amount:N2}</p>
+                <p><strong>Refund Type:</strong> {refundType}</p>
+                {reasonText}
+            </div>
+            <p>The refund will be returned to your original payment method. Processing may take 3-5 business days.</p>
+            <p>If you have questions about this refund, please contact our support team.</p>
+        </div>
+        <div class=""footer"">
+            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+        await SendEmailAsync(toEmail, subject, htmlBody);
+    }
 }

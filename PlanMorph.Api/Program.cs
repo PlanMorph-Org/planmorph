@@ -152,6 +152,17 @@ builder.Services.AddScoped<IModificationRequestService, ModificationRequestServi
 // Register Ticket Support Services
 builder.Services.AddScoped<PlanMorph.Core.Interfaces.Services.ITicketService, PlanMorph.Application.Services.TicketService>();
 builder.Services.AddScoped<PlanMorph.Core.Interfaces.Services.ITicketNotificationService, PlanMorph.Application.Services.TicketNotificationService>();
+
+// Register Student Onboarding Services
+builder.Services.AddScoped<PlanMorph.Core.Interfaces.Services.IStudentOnboardingService, PlanMorph.Application.Services.StudentOnboardingService>();
+
+// Register Mentor Services
+builder.Services.AddScoped<PlanMorph.Core.Interfaces.Services.IMentorService, PlanMorph.Application.Services.MentorService>();
+
+// Register Mentorship Project Services
+builder.Services.AddScoped<PlanMorph.Core.Interfaces.Services.IProjectWorkflowService, PlanMorph.Application.Services.ProjectWorkflowService>();
+builder.Services.AddScoped<PlanMorph.Core.Interfaces.Services.IMentorshipService, PlanMorph.Application.Services.MentorshipService>();
+builder.Services.AddScoped<PlanMorph.Core.Interfaces.Services.IMentorshipPaymentService, PlanMorph.Application.Services.MentorshipPaymentService>();
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();

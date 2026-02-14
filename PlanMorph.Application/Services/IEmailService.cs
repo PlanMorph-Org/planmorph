@@ -25,4 +25,16 @@ public interface IEmailService
     Task SendTicketUpdatedEmailAsync(string ticketId, string subject, string clientId, string messageContent);
     Task SendTicketClosedEmailAsync(string toEmail, string ticketId, string subject);
     Task SendTicketReopenedEmailAsync(string toEmail, string ticketId, string subject);
+
+    // Student Mentorship Emails
+    Task SendStudentApplicationReceivedEmailAsync(string toEmail, string studentName);
+    Task SendAdminNewStudentApplicationEmailAsync(string studentName, string studentType, string universityName);
+    Task SendStudentApplicationApprovedEmailAsync(string toEmail, string studentName);
+    Task SendStudentApplicationRejectedEmailAsync(string toEmail, string studentName, string? reason = null);
+    Task SendMentorStudentInvitationEmailAsync(string toEmail, string studentName, string mentorName);
+
+    // Mentorship Payment Emails
+    Task SendMentorshipPaymentConfirmationEmailAsync(string toEmail, string clientName, string projectTitle, decimal amount, string projectNumber);
+    Task SendMentorshipPaymentReleasedEmailAsync(string toEmail, string recipientName, string projectTitle, decimal amount, string role);
+    Task SendMentorshipRefundEmailAsync(string toEmail, string clientName, string projectTitle, decimal amount, string refundType, string? reason);
 }

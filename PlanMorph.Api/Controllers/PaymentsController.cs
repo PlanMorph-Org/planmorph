@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PlanMorph.Application.DTOs.Payments;
 using PlanMorph.Application.Services;
+using PlanMorph.Core.Interfaces.Services;
 
 namespace PlanMorph.Api.Controllers;
 
@@ -12,12 +13,18 @@ namespace PlanMorph.Api.Controllers;
 public class PaymentsController : ControllerBase
 {
     private readonly IPaymentService _paymentService;
+    private readonly IMentorshipPaymentService _mentorshipPaymentService;
     private readonly IPaystackGateway _paystackGateway;
     private readonly ILogger<PaymentsController> _logger;
 
-    public PaymentsController(IPaymentService paymentService, IPaystackGateway paystackGateway, ILogger<PaymentsController> logger)
+    public PaymentsController(
+        IPaymentService paymentService,
+        IMentorshipPaymentService mentorshipPaymentService,
+        IPaystackGateway paystackGateway,
+        ILogger<PaymentsController> logger)
     {
         _paymentService = paymentService;
+        _mentorshipPaymentService = mentorshipPaymentService;
         _paystackGateway = paystackGateway;
         _logger = logger;
     }
@@ -78,10 +85,22 @@ public class PaymentsController : ControllerBase
 
         if (!string.IsNullOrWhiteSpace(reference))
         {
-            var verified = await _paymentService.VerifyPaystackAsync(reference);
-            if (!verified)
+            // Try mentorship payment first (references start with "MP-")
+            if (reference.StartsWith("MP-", StringComparison.OrdinalIgnoreCase))
             {
-                _logger.LogWarning("Paystack webhook verification failed for reference {Reference}", reference);
+                var mentorshipVerified = await _mentorshipPaymentService.VerifyEscrowPaymentAsync(reference);
+                if (!mentorshipVerified)
+                {
+                    _logger.LogWarning("Mentorship payment webhook verification failed for reference {Reference}", reference);
+                }
+            }
+            else
+            {
+                var verified = await _paymentService.VerifyPaystackAsync(reference);
+                if (!verified)
+                {
+                    _logger.LogWarning("Paystack webhook verification failed for reference {Reference}", reference);
+                }
             }
         }
 
