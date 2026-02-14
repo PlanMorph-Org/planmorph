@@ -84,6 +84,11 @@ export default function Layout({ children }: LayoutProps) {
                     Engineer Portal
                   </Link>
                 </li>
+                <li>
+                  <Link href="/student/register" className="text-white/50 hover:text-white text-sm transition-colors duration-300 hover-underline">
+                    Student Program
+                  </Link>
+                </li>
               </ul>
             </div>
             <div>
