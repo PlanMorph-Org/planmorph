@@ -146,9 +146,12 @@ builder.Services.AddCors(options =>
 // Register Application Services (add to existing services)
 builder.Services.AddScoped<IDesignService, DesignService>();
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
-
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IModificationRequestService, ModificationRequestService>();
+
+// Register Ticket Support Services
+builder.Services.AddScoped<PlanMorph.Core.Interfaces.Services.ITicketService, PlanMorph.Application.Services.TicketService>();
+builder.Services.AddScoped<PlanMorph.Core.Interfaces.Services.ITicketNotificationService, PlanMorph.Application.Services.TicketNotificationService>();
 builder.Services.AddHealthChecks();
 
 var app = builder.Build();

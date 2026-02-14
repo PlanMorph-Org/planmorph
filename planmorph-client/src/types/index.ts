@@ -80,3 +80,47 @@ export interface DesignFilter {
   minSquareFootage?: number;
   maxSquareFootage?: number;
 }
+
+// Support Ticket Types
+export type TicketStatus = 'Open' | 'Assigned' | 'InProgress' | 'Resolved' | 'Closed';
+export type TicketPriority = 'Low' | 'Medium' | 'High' | 'Urgent';
+export type TicketCategory = 'Technical' | 'Billing' | 'Design' | 'Order' | 'Construction' | 'General';
+
+export interface Ticket {
+  id: string;
+  ticketNumber: string;
+  clientId: string;
+  subject: string;
+  description: string;
+  status: TicketStatus;
+  priority: TicketPriority;
+  category: TicketCategory;
+  assignedToAdminId?: string;
+  orderId?: string;
+  designId?: string;
+  createdAt: string;
+  updatedAt: string;
+  closedAt?: string;
+  messages: TicketMessage[];
+  unreadMessageCount: number;
+}
+
+export interface TicketMessage {
+  id: string;
+  ticketId: string;
+  authorId: string;
+  authorName: string;
+  content: string;
+  isFromAdmin: boolean;
+  isReadByClient: boolean;
+  createdAt: string;
+}
+
+export interface CreateTicketDto {
+  subject: string;
+  description: string;
+  category: TicketCategory;
+  priority: TicketPriority;
+  orderId?: string;
+  designId?: string;
+}

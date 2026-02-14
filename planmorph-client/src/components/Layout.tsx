@@ -33,7 +33,7 @@ export default function Layout({ children }: LayoutProps) {
         <div className="absolute inset-0 blueprint-grid opacity-30" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
             <div>
               <div className="flex items-center gap-2.5 mb-4">
                 <img src="/planmorph.svg" alt="PlanMorph" className="h-7 w-auto brightness-0 invert rounded-full" />
@@ -82,6 +82,21 @@ export default function Layout({ children }: LayoutProps) {
                 <li>
                   <Link href="/engineer/login" className="text-white/50 hover:text-white text-sm transition-colors duration-300 hover-underline">
                     Engineer Portal
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-golden/70 mb-4">Support</h3>
+              <ul className="space-y-2.5">
+                <li>
+                  <Link href="/support" className="text-white/50 hover:text-white text-sm transition-colors duration-300 hover-underline">
+                    Help Center
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/support/create" className="text-white/50 hover:text-white text-sm transition-colors duration-300 hover-underline">
+                    Contact Support
                   </Link>
                 </li>
               </ul>

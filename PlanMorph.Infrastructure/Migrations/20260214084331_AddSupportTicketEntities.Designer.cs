@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PlanMorph.Infrastructure.Data;
@@ -11,9 +12,11 @@ using PlanMorph.Infrastructure.Data;
 namespace PlanMorph.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260214084331_AddSupportTicketEntities")]
+    partial class AddSupportTicketEntities
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -513,7 +516,7 @@ namespace PlanMorph.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("AssignedToAdminId")
+                    b.Property<Guid?>("AssignedToId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Category")
@@ -521,9 +524,6 @@ namespace PlanMorph.Infrastructure.Migrations
 
                     b.Property<Guid>("ClientId")
                         .HasColumnType("uuid");
-
-                    b.Property<DateTime?>("ClosedAt")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
@@ -548,22 +548,22 @@ namespace PlanMorph.Infrastructure.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("character varying(200)");
-
                     b.Property<string>("TicketNumber")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AssignedToAdminId");
+                    b.HasIndex("AssignedToId");
 
                     b.HasIndex("ClientId");
 
@@ -583,30 +583,22 @@ namespace PlanMorph.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("AuthorId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("AuthorName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasMaxLength(5000)
-                        .HasColumnType("character varying(5000)");
-
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("IsFromAdmin")
+                    b.Property<bool>("IsStaffMessage")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("IsReadByClient")
-                        .HasColumnType("boolean");
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(5000)
+                        .HasColumnType("character varying(5000)");
+
+                    b.Property<Guid>("SenderId")
+                        .HasColumnType("uuid");
 
                     b.Property<Guid>("TicketId")
                         .HasColumnType("uuid");
@@ -616,7 +608,7 @@ namespace PlanMorph.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AuthorId");
+                    b.HasIndex("SenderId");
 
                     b.HasIndex("TicketId");
 
@@ -977,7 +969,7 @@ namespace PlanMorph.Infrastructure.Migrations
                 {
                     b.HasOne("PlanMorph.Core.Entities.User", "AssignedTo")
                         .WithMany()
-                        .HasForeignKey("AssignedToAdminId")
+                        .HasForeignKey("AssignedToId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("PlanMorph.Core.Entities.User", "Client")
@@ -1009,7 +1001,7 @@ namespace PlanMorph.Infrastructure.Migrations
                 {
                     b.HasOne("PlanMorph.Core.Entities.User", "Sender")
                         .WithMany()
-                        .HasForeignKey("AuthorId")
+                        .HasForeignKey("SenderId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 

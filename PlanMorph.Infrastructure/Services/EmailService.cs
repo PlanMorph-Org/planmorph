@@ -747,4 +747,421 @@ public class EmailService : IEmailService
 
         await SendEmailAsync(toEmail, subject, htmlBody);
     }
+
+    // Support Ticket Email Methods
+    public async Task SendTicketCreatedEmailAsync(string toEmail, string subject, string ticketId, string priority, string category)
+    {
+        var emailSubject = $"Support Ticket Created - {subject}";
+        var htmlBody = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""utf-8"">
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f4f4f4; }}
+        .container {{ max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }}
+        .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }}
+        .content {{ padding: 20px; }}
+        .ticket-info {{ background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; }}
+        .button {{ display: inline-block; padding: 12px 24px; background-color: #667eea; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }}
+        .footer {{ text-align: center; padding: 20px; font-size: 12px; color: #666; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>🎫 Support Ticket Created</h1>
+        </div>
+        <div class=""content"">
+            <p>Hello,</p>
+            
+            <p>Your support ticket has been successfully created. Our support team will review your request and respond as soon as possible.</p>
+            
+            <div class=""ticket-info"">
+                <h3>Ticket Details:</h3>
+                <p><strong>Ticket ID:</strong> #{ticketId}</p>
+                <p><strong>Subject:</strong> {subject}</p>
+                <p><strong>Priority:</strong> {priority}</p>
+                <p><strong>Category:</strong> {category}</p>
+                <p><strong>Status:</strong> Open</p>
+            </div>
+            
+            <p><strong>What happens next?</strong></p>
+            <ul>
+                <li>Our support team will review your ticket within 24 hours</li>
+                <li>You'll receive email updates when we respond or when the status changes</li>
+                <li>You can reply to ticket emails or visit your support dashboard to add more information</li>
+            </ul>
+            
+            <a href=""https://planmorph.com/support/tickets/{ticketId}"" class=""button"">View Ticket</a>
+        </div>
+        <div class=""footer"">
+            <p>PlanMorph Support Team | support@planmorph.com</p>
+            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+        await SendEmailAsync(toEmail, emailSubject, htmlBody);
+    }
+
+    public async Task SendNewTicketAlertEmailAsync(string ticketId, string subject, string clientId, string priority, string category)
+    {
+        var adminEmail = "admin@planmorph.com"; // This should come from configuration
+        var emailSubject = $"🚨 New Support Ticket: {subject}";
+        var htmlBody = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""utf-8"">
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f4f4f4; }}
+        .container {{ max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }}
+        .header {{ background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }}
+        .content {{ padding: 20px; }}
+        .ticket-info {{ background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107; }}
+        .button {{ display: inline-block; padding: 12px 24px; background-color: #ff6b6b; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }}
+        .footer {{ text-align: center; padding: 20px; font-size: 12px; color: #666; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>🚨 New Support Ticket Alert</h1>
+        </div>
+        <div class=""content"">
+            <p>A new support ticket has been created and requires attention.</p>
+            
+            <div class=""ticket-info"">
+                <h3>Ticket Details:</h3>
+                <p><strong>Ticket ID:</strong> #{ticketId}</p>
+                <p><strong>Subject:</strong> {subject}</p>
+                <p><strong>Client ID:</strong> {clientId}</p>
+                <p><strong>Priority:</strong> {priority}</p>
+                <p><strong>Category:</strong> {category}</p>
+            </div>
+            
+            <p>Please review and assign this ticket promptly based on the priority level.</p>
+            
+            <a href=""https://planmorph.com/admin/tickets/{ticketId}"" class=""button"">View & Assign Ticket</a>
+        </div>
+        <div class=""footer"">
+            <p>PlanMorph Admin Dashboard</p>
+            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+        await SendEmailAsync(adminEmail, emailSubject, htmlBody);
+    }
+
+    public async Task SendTicketStatusChangedEmailAsync(string toEmail, string ticketId, string subject, string previousStatus, string newStatus)
+    {
+        var emailSubject = $"Ticket Status Updated - {subject}";
+        var htmlBody = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""utf-8"">
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f4f4f4; }}
+        .container {{ max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }}
+        .header {{ background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }}
+        .content {{ padding: 20px; }}
+        .status-change {{ background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #28a745; }}
+        .button {{ display: inline-block; padding: 12px 24px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }}
+        .footer {{ text-align: center; padding: 20px; font-size: 12px; color: #666; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>📋 Ticket Status Updated</h1>
+        </div>
+        <div class=""content"">
+            <p>Hello,</p>
+            
+            <p>The status of your support ticket has been updated.</p>
+            
+            <div class=""status-change"">
+                <h3>Status Change:</h3>
+                <p><strong>Ticket ID:</strong> #{ticketId}</p>
+                <p><strong>Subject:</strong> {subject}</p>
+                <p><strong>Previous Status:</strong> {previousStatus}</p>
+                <p><strong>New Status:</strong> {newStatus}</p>
+            </div>
+            
+            <p>You can view the full ticket details and any new messages by clicking the button below.</p>
+            
+            <a href=""https://planmorph.com/support/tickets/{ticketId}"" class=""button"">View Ticket</a>
+        </div>
+        <div class=""footer"">
+            <p>PlanMorph Support Team | support@planmorph.com</p>
+            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+        await SendEmailAsync(toEmail, emailSubject, htmlBody);
+    }
+
+    public async Task SendTicketAssignedEmailAsync(string toEmail, string ticketId, string subject, string adminName)
+    {
+        var emailSubject = $"Ticket Assigned - {subject}";
+        var htmlBody = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""utf-8"">
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f4f4f4; }}
+        .container {{ max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }}
+        .header {{ background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }}
+        .content {{ padding: 20px; }}
+        .assignment-info {{ background-color: #d1ecf1; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #17a2b8; }}
+        .button {{ display: inline-block; padding: 12px 24px; background-color: #17a2b8; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }}
+        .footer {{ text-align: center; padding: 20px; font-size: 12px; color: #666; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>👤 Ticket Assigned</h1>
+        </div>
+        <div class=""content"">
+            <p>Hello,</p>
+            
+            <p>Great news! Your support ticket has been assigned to a team member who will help resolve your issue.</p>
+            
+            <div class=""assignment-info"">
+                <h3>Assignment Details:</h3>
+                <p><strong>Ticket ID:</strong> #{ticketId}</p>
+                <p><strong>Subject:</strong> {subject}</p>
+                <p><strong>Assigned to:</strong> {adminName}</p>
+            </div>
+            
+            <p>You can expect to hear from them soon. They'll work with you to resolve your request as quickly as possible.</p>
+            
+            <a href=""https://planmorph.com/support/tickets/{ticketId}"" class=""button"">View Ticket</a>
+        </div>
+        <div class=""footer"">
+            <p>PlanMorph Support Team | support@planmorph.com</p>
+            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+        await SendEmailAsync(toEmail, emailSubject, htmlBody);
+    }
+
+    public async Task SendTicketReplyEmailAsync(string toEmail, string ticketId, string subject, string messageContent, string replyFromName)
+    {
+        var emailSubject = $"New Reply - {subject}";
+        var htmlBody = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""utf-8"">
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f4f4f4; }}
+        .container {{ max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }}
+        .header {{ background: linear-gradient(135deg, #6f42c1 0%, #6610f2 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }}
+        .content {{ padding: 20px; }}
+        .message {{ background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #6f42c1; }}
+        .button {{ display: inline-block; padding: 12px 24px; background-color: #6f42c1; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }}
+        .footer {{ text-align: center; padding: 20px; font-size: 12px; color: #666; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>💬 New Reply to Your Ticket</h1>
+        </div>
+        <div class=""content"">
+            <p>Hello,</p>
+            
+            <p>You have received a new reply to your support ticket from {replyFromName}.</p>
+            
+            <p><strong>Ticket ID:</strong> #{ticketId}</p>
+            <p><strong>Subject:</strong> {subject}</p>
+            
+            <div class=""message"">
+                <h4>Message from {replyFromName}:</h4>
+                <p>{messageContent}</p>
+            </div>
+            
+            <p>You can reply directly to this email or visit your support dashboard to continue the conversation.</p>
+            
+            <a href=""https://planmorph.com/support/tickets/{ticketId}"" class=""button"">Reply to Ticket</a>
+        </div>
+        <div class=""footer"">
+            <p>PlanMorph Support Team | support@planmorph.com</p>
+            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+        await SendEmailAsync(toEmail, emailSubject, htmlBody);
+    }
+
+    public async Task SendTicketUpdatedEmailAsync(string ticketId, string subject, string clientId, string messageContent)
+    {
+        var adminEmail = "admin@planmorph.com"; // This should come from configuration
+        var emailSubject = $"Ticket Updated by Client - {subject}";
+        var htmlBody = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""utf-8"">
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f4f4f4; }}
+        .container {{ max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }}
+        .header {{ background: linear-gradient(135deg, #fd7e14 0%, #e55e14 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }}
+        .content {{ padding: 20px; }}
+        .message {{ background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #fd7e14; }}
+        .button {{ display: inline-block; padding: 12px 24px; background-color: #fd7e14; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }}
+        .footer {{ text-align: center; padding: 20px; font-size: 12px; color: #666; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>📝 Ticket Updated by Client</h1>
+        </div>
+        <div class=""content"">
+            <p>A client has updated their support ticket and requires attention.</p>
+            
+            <p><strong>Ticket ID:</strong> #{ticketId}</p>
+            <p><strong>Subject:</strong> {subject}</p>
+            <p><strong>Client ID:</strong> {clientId}</p>
+            
+            <div class=""message"">
+                <h4>Client Message:</h4>
+                <p>{messageContent}</p>
+            </div>
+            
+            <p>Please review and respond to the client's message promptly.</p>
+            
+            <a href=""https://planmorph.com/admin/tickets/{ticketId}"" class=""button"">View & Respond</a>
+        </div>
+        <div class=""footer"">
+            <p>PlanMorph Admin Dashboard</p>
+            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+        await SendEmailAsync(adminEmail, emailSubject, htmlBody);
+    }
+
+    public async Task SendTicketClosedEmailAsync(string toEmail, string ticketId, string subject)
+    {
+        var emailSubject = $"Ticket Closed - {subject}";
+        var htmlBody = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""utf-8"">
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f4f4f4; }}
+        .container {{ max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }}
+        .header {{ background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }}
+        .content {{ padding: 20px; }}
+        .closure-info {{ background-color: #d4edda; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #28a745; }}
+        .feedback {{ background-color: #e7f3ff; padding: 15px; border-radius: 5px; margin: 15px 0; }}
+        .button {{ display: inline-block; padding: 12px 24px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }}
+        .footer {{ text-align: center; padding: 20px; font-size: 12px; color: #666; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>✅ Ticket Closed</h1>
+        </div>
+        <div class=""content"">
+            <p>Hello,</p>
+            
+            <p>Your support ticket has been marked as resolved and closed.</p>
+            
+            <div class=""closure-info"">
+                <h3>Closure Details:</h3>
+                <p><strong>Ticket ID:</strong> #{ticketId}</p>
+                <p><strong>Subject:</strong> {subject}</p>
+                <p><strong>Status:</strong> Closed</p>
+            </div>
+            
+            <div class=""feedback"">
+                <h4>We'd love your feedback!</h4>
+                <p>How was your support experience? Your feedback helps us improve our service.</p>
+                <p>If you need further assistance with this issue, simply reply to this email and the ticket will be reopened.</p>
+            </div>
+            
+            <a href=""https://planmorph.com/support/feedback/{ticketId}"" class=""button"">Leave Feedback</a>
+        </div>
+        <div class=""footer"">
+            <p>PlanMorph Support Team | support@planmorph.com</p>
+            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+        await SendEmailAsync(toEmail, emailSubject, htmlBody);
+    }
+
+    public async Task SendTicketReopenedEmailAsync(string toEmail, string ticketId, string subject)
+    {
+        var emailSubject = $"Ticket Reopened - {subject}";
+        var htmlBody = $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""utf-8"">
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f4f4f4; }}
+        .container {{ max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }}
+        .header {{ background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%); color: white; padding: 20px; text-align: center; border-radius: 10px 10px 0 0; }}
+        .content {{ padding: 20px; }}
+        .reopen-info {{ background-color: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107; }}
+        .button {{ display: inline-block; padding: 12px 24px; background-color: #ffc107; color: white; text-decoration: none; border-radius: 5px; margin: 10px 0; }}
+        .footer {{ text-align: center; padding: 20px; font-size: 12px; color: #666; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h1>🔄 Ticket Reopened</h1>
+        </div>
+        <div class=""content"">
+            <p>Hello,</p>
+            
+            <p>Your support ticket has been reopened after you added a new message.</p>
+            
+            <div class=""reopen-info"">
+                <h3>Reopened Ticket:</h3>
+                <p><strong>Ticket ID:</strong> #{ticketId}</p>
+                <p><strong>Subject:</strong> {subject}</p>
+                <p><strong>Status:</strong> Open</p>
+            </div>
+            
+            <p>Our support team will review your new message and respond as soon as possible.</p>
+            
+            <a href=""https://planmorph.com/support/tickets/{ticketId}"" class=""button"">View Ticket</a>
+        </div>
+        <div class=""footer"">
+            <p>PlanMorph Support Team | support@planmorph.com</p>
+            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+        </div>
+    </div>
+</body>
+</html>";
+
+        await SendEmailAsync(toEmail, emailSubject, htmlBody);
+    }
 }

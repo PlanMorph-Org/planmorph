@@ -15,4 +15,14 @@ public interface IEmailService
     Task SendAdminConstructionRequestNotificationAsync(string adminEmail, string clientName, string designTitle, string location, string orderNumber);
     Task SendContractorAssignedToClientEmailAsync(string toEmail, string clientName, string designTitle, string contractorName, string location);
     Task SendContractorAssignmentEmailAsync(string toEmail, string contractorName, string designTitle, string clientName, string location, decimal estimatedCost);
+
+    // Support Ticket Emails
+    Task SendTicketCreatedEmailAsync(string toEmail, string subject, string ticketId, string priority, string category);
+    Task SendNewTicketAlertEmailAsync(string ticketId, string subject, string clientId, string priority, string category);
+    Task SendTicketStatusChangedEmailAsync(string toEmail, string ticketId, string subject, string previousStatus, string newStatus);
+    Task SendTicketAssignedEmailAsync(string toEmail, string ticketId, string subject, string adminName);
+    Task SendTicketReplyEmailAsync(string toEmail, string ticketId, string subject, string messageContent, string replyFromName);
+    Task SendTicketUpdatedEmailAsync(string ticketId, string subject, string clientId, string messageContent);
+    Task SendTicketClosedEmailAsync(string toEmail, string ticketId, string subject);
+    Task SendTicketReopenedEmailAsync(string toEmail, string ticketId, string subject);
 }

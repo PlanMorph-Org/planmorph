@@ -19,6 +19,8 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     public DbSet<ModificationRequest> ModificationRequests { get; set; }
     public DbSet<DesignVerification> DesignVerifications { get; set; }
     public DbSet<ProfessionalReviewLog> ProfessionalReviewLogs { get; set; }
+    public DbSet<Ticket> Tickets { get; set; }
+    public DbSet<TicketMessage> TicketMessages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -177,6 +179,61 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
                 .WithMany()
                 .HasForeignKey(e => e.AdminUserId)
                 .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Ticket Configuration
+        builder.Entity<Ticket>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.TicketNumber).IsRequired().HasMaxLength(50);
+            entity.HasIndex(e => e.TicketNumber).IsUnique();
+            entity.Property(e => e.Subject).IsRequired().HasMaxLength(200); // Changed from Title
+            entity.Property(e => e.Description).IsRequired().HasMaxLength(5000);
+
+            entity.HasOne(e => e.Client)
+                .WithMany()
+                .HasForeignKey(e => e.ClientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.AssignedTo)
+                .WithMany()
+                .HasForeignKey(e => e.AssignedToAdminId) // Changed from AssignedToId
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Order)
+                .WithMany()
+                .HasForeignKey(e => e.OrderId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.Design)
+                .WithMany()
+                .HasForeignKey(e => e.DesignId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasQueryFilter(e => !e.IsDeleted);
+        });
+
+        // TicketMessage Configuration
+        builder.Entity<TicketMessage>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Content).IsRequired().HasMaxLength(5000); // Changed from Message
+            entity.Property(e => e.AuthorName).IsRequired().HasMaxLength(100); // Added
+
+            entity.HasOne(e => e.Ticket)
+                .WithMany(t => t.Messages)
+                .HasForeignKey(e => e.TicketId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Sender)
+                .WithMany()
+                .HasForeignKey(e => e.AuthorId) // Changed from SenderId
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasQueryFilter(e => !e.IsDeleted);
         });
     }
 }
