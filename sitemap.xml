@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+    
+    <!-- Main Public Pages -->
+    <url>
+        <loc>https://planmorph.com/</loc>
+        <lastmod>2026-02-14</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+    </url>
+    
+    <url>
+        <loc>https://planmorph.software/about</loc>
+        <lastmod>2026-02-11</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
+        <loc>https://planmorph.software/designs</loc>
+        <lastmod>2026-02-14</lastmod>
+        <changefreq>daily</changefreq>
+        <priority>0.9</priority>
+    </url>
+    
+    <!-- Legal Pages -->
+    <url>
+        <loc>https://planmorph.software/privacy-policy</loc>
+        <lastmod>2026-02-11</lastmod>
+        <changefreq>quarterly</changefreq>
+        <priority>0.3</priority>
+    </url>
+    
+    <url>
+        <loc>https://planmorph.software/terms-of-service</loc>
+        <lastmod>2026-02-11</lastmod>
+        <changefreq>quarterly</changefreq>
+        <priority>0.3</priority>
+    </url>
+    
+    <!-- Authentication Pages (Client) -->
+    <url>
+        <loc>https://planmorph.software/login</loc>
+        <lastmod>2026-02-14</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    
+    <url>
+        <loc>https://planmorph.software/register</loc>
+        <lastmod>2026-02-14</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    
+    <!-- Architect Portal -->
+    <url>
+        <loc>https://planmorph.software/architect/register</loc>
+        <lastmod>2026-02-14</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
+        <loc>https://planmorph.software/architect/login</loc>
+        <lastmod>2026-02-14</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    
+    <!-- Engineer Portal -->
+    <url>
+        <loc>https://planmorph.software/engineer/register</loc>
+        <lastmod>2026-02-14</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
+        <loc>https://planmorph.software/engineer/login</loc>
+        <lastmod>2026-02-14</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    
+    <!-- 
+    IMPORTANT: Dynamic Design Pages
+    
+    Replace the example design IDs below with actual design IDs from your database.
+    You should generate this section dynamically or update it regularly with real design IDs.
+    
+    To get actual design IDs, you can run a query like:
+    SELECT id, title, updatedAt FROM designs WHERE status = 'Approved' ORDER BY createdAt DESC;
+    
+    Example format for design pages: 
+    -->
+    
+    <!-- Example Design Detail Pages - Replace with actual design IDs -->
+    <url>
+        <loc>https://planmorph.software/designs/1</loc>
+        <lastmod>2026-02-14</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
+        <loc>https://planmorph.software/designs/2</loc>
+        <lastmod>2026-02-14</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <url>
+        <loc>https://planmorph.software/designs/3</loc>
+        <lastmod>2026-02-14</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <!-- Add more design URLs here as you add designs to your platform -->
+    
+    <!-- 
+    DESIGN CATEGORY PAGES (if you implement category filtering with SEO-friendly URLs)
+    Currently your app filters by category but doesn't have separate category URLs.
+    If you create category pages in the future, add them like:
+    
+    <url>
+        <loc>https://planmorph.software/designs/category/residential</loc>
+        <lastmod>2026-02-14</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    
+    <url>
+        <loc>https://planmorph.software/designs/category/commercial</loc>
+        <lastmod>2026-02-14</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    
+    <url>
+        <loc>https://planmorph.software/designs/category/multi-unit</loc>
+        <lastmod>2026-02-14</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    
+    <url>
+        <loc>https://planmorph.software/designs/category/mixed-use</loc>
+        <lastmod>2026-02-14</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    -->
+    
+    <!-- 
+    BLOG OR CONTENT PAGES (if you add them in the future)
+    Consider adding a blog for SEO with architectural tips, building guides, etc.
+    
+    <url>
+        <loc>https://planmorph.software/blog</loc>
+        <lastmod>2026-02-14</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    -->
+    
+</urlset>
