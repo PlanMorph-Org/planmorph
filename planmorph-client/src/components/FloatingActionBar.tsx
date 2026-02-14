@@ -195,13 +195,26 @@ export default function FloatingActionBar({
                             <span className="text-xs text-white/60 hidden lg:inline">{displayName}</span>
                         </div>
                         {authMode === 'client' && (
-                            <Link
-                                href="/my-orders"
-                                className={`text-xs font-medium rounded-lg px-2.5 py-1.5 transition-all duration-300 ${isActive('/my-orders') ? 'text-white bg-white/10' : 'text-white/50 hover:text-white hover:bg-white/5'
-                                    }`}
-                            >
-                                Orders
-                            </Link>
+                            <>
+                                <Link
+                                    href="/my-orders"
+                                    className={`text-xs font-medium rounded-lg px-2.5 py-1.5 transition-all duration-300 ${isActive('/my-orders') ? 'text-white bg-white/10' : 'text-white/50 hover:text-white hover:bg-white/5'
+                                        }`}
+                                >
+                                    Orders
+                                </Link>
+                                {/* Admin Management Button */}
+                                {user?.role === 'Admin' && (
+                                    <Link
+                                        href="/admin"
+                                        className={`text-xs font-medium rounded-lg px-2.5 py-1.5 transition-all duration-300 ${isActive('/admin') ? 'text-white bg-red-500/20 border border-red-500/30' : 'text-red-400 hover:text-red-300 hover:bg-red-500/10'
+                                            }`}
+                                        title="Administrative Dashboard - Management Access Only"
+                                    >
+                                        Management
+                                    </Link>
+                                )}
+                            </>
                         )}
                         <button
                             onClick={handleLogout}
@@ -268,13 +281,26 @@ export default function FloatingActionBar({
                                                 <span className="text-xs text-white/50">{displayName}</span>
                                             </div>
                                             {authMode === 'client' && (
-                                                <Link
-                                                    href="/my-orders"
-                                                    onClick={() => setExpanded(false)}
-                                                    className="block px-3 py-2 text-sm text-white/55 hover:text-white rounded-lg hover:bg-white/5 transition-all"
-                                                >
-                                                    My Orders
-                                                </Link>
+                                                <>
+                                                    <Link
+                                                        href="/my-orders"
+                                                        onClick={() => setExpanded(false)}
+                                                        className="block px-3 py-2 text-sm text-white/55 hover:text-white rounded-lg hover:bg-white/5 transition-all"
+                                                    >
+                                                        My Orders
+                                                    </Link>
+                                                    {/* Admin Management Button for Mobile */}
+                                                    {user?.role === 'Admin' && (
+                                                        <Link
+                                                            href="/admin"
+                                                            onClick={() => setExpanded(false)}
+                                                            className="block px-3 py-2 text-sm text-red-400 hover:text-red-300 rounded-lg hover:bg-red-500/10 transition-all"
+                                                            title="Administrative Dashboard - Management Access Only"
+                                                        >
+                                                            🔒 Management
+                                                        </Link>
+                                                    )}
+                                                </>
                                             )}
                                             <button
                                                 onClick={handleLogout}

@@ -10,6 +10,7 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   register: (data: RegisterData) => Promise<AuthResponse>;
   logout: () => void;
+  isAdmin: () => boolean;
 }
 
 interface RegisterData {
@@ -40,7 +41,8 @@ export const useAuthStore = create<AuthState>()(
 
         const { token, ...userData } = response.data;
 
-        if (userData.role !== 'Client') {
+        // Allow both Client and Admin roles to access the portal
+        if (userData.role !== 'Client' && userData.role !== 'Admin') {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           set({
@@ -48,7 +50,7 @@ export const useAuthStore = create<AuthState>()(
             token: null,
             isAuthenticated: false,
           });
-          throw new Error('Please use the appropriate professional login portal.');
+          throw new Error('Access denied. Please contact your administrator if you believe this is an error.');
         }
 
         localStorage.setItem('token', token);
@@ -117,6 +119,11 @@ export const useAuthStore = create<AuthState>()(
           token: null,
           isAuthenticated: false,
         });
+      },
+
+      isAdmin: () => {
+        const state = get();
+        return state.user?.role === 'Admin';
       },
     }),
     {
