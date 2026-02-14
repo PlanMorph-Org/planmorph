@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '@/src/store/authStore';
 
-export type AuthRole = 'Client' | 'Architect' | 'Engineer';
+export type AuthRole = 'Client' | 'Architect' | 'Engineer' | 'Student';
 
 interface StoredUser {
   email?: string;

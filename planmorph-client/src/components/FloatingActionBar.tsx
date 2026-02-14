@@ -16,11 +16,11 @@ interface NavItem {
 
 interface FloatingActionBarProps {
     navItems: NavItem[];
-    accentColor?: 'blue' | 'golden' | 'teal';
+    accentColor?: 'blue' | 'golden' | 'teal' | 'indigo';
     portalLabel?: string;
     logoHref?: string;
     showCurrency?: boolean;
-    authMode?: 'client' | 'architect' | 'engineer';
+    authMode?: 'client' | 'architect' | 'engineer' | 'student';
     /** For architect/engineer portals — pre-loaded user info from role guard */
     portalUser?: { firstName?: string; lastName?: string } | null;
 }
@@ -56,6 +56,16 @@ const accents = {
         avatarGradient: 'from-slate-teal to-emerald-400',
         avatarText: 'text-white',
         btnBg: 'bg-slate-teal hover:bg-teal-500',
+    },
+    indigo: {
+        activeBg: 'bg-indigo/15',
+        activeText: 'text-indigo',
+        indicator: 'bg-indigo',
+        glow: 'shadow-[0_0_24px_rgba(99,102,241,0.12)]',
+        pill: 'text-indigo bg-indigo/10 border-indigo/20',
+        avatarGradient: 'from-indigo to-indigo-light',
+        avatarText: 'text-white',
+        btnBg: 'bg-indigo hover:bg-indigo-light',
     },
 };
 
@@ -125,7 +135,12 @@ export default function FloatingActionBar({
         } else {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
-            router.push(authMode === 'architect' ? '/architect/login' : '/engineer/login');
+            const loginRoutes: Record<string, string> = {
+                architect: '/architect/login',
+                engineer: '/engineer/login',
+                student: '/student/login',
+            };
+            router.push(loginRoutes[authMode] ?? '/');
         }
         setExpanded(false);
     };
@@ -147,7 +162,7 @@ export default function FloatingActionBar({
                 {/* Logo */}
                 <Link href={logoHref} className="flex items-center gap-2 px-2 group shrink-0">
                     <div className="relative">
-                        <div className={`absolute inset-0 ${accentColor === 'golden' ? 'bg-golden/20' : accentColor === 'teal' ? 'bg-slate-teal/20' : 'bg-brand-accent/20'} rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                        <div className={`absolute inset-0 ${accentColor === 'golden' ? 'bg-golden/20' : accentColor === 'teal' ? 'bg-slate-teal/20' : accentColor === 'indigo' ? 'bg-indigo/20' : 'bg-brand-accent/20'} rounded-full blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
                         <img src="/planmorph.svg" alt="PlanMorph" className="h-7 w-auto brightness-0 invert rounded-full relative z-10" />
                     </div>
                     <span className="text-base font-display font-bold text-white tracking-tight">PlanMorph</span>

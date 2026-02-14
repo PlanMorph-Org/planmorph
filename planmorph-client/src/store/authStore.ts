@@ -41,8 +41,8 @@ export const useAuthStore = create<AuthState>()(
 
         const { token, ...userData } = response.data;
 
-        // Allow both Client and Admin roles to access the portal
-        if (userData.role !== 'Client' && userData.role !== 'Admin') {
+        // Allow Client, Admin, and Student roles to access the portal
+        if (userData.role !== 'Client' && userData.role !== 'Admin' && userData.role !== 'Student') {
           localStorage.removeItem('token');
           localStorage.removeItem('user');
           set({
