@@ -103,28 +103,28 @@ export default function Home() {
     {
       icon: ShieldCheckIcon,
       title: 'Engineer-Reviewed',
-      description: 'Structural integrity is reviewed before a design is published',
+      description: 'Engineer review gates publication before a package ships',
       color: 'from-brand-accent/20 to-blue-500/10',
       iconColor: 'text-brand-accent',
     },
     {
       icon: DocumentCheckIcon,
       title: 'Complete Packages',
-      description: 'Architectural drawings, structural plans, and BOQ in one purchase',
+      description: 'Drawings, structural docs, and BOQ packaged under one license',
       color: 'from-golden/20 to-amber-500/10',
       iconColor: 'text-golden',
     },
     {
       icon: ArrowDownTrayIcon,
       title: 'Instant Download',
-      description: 'Access all documents immediately after purchase',
+      description: 'License once. Download instantly. Keep everything in one place',
       color: 'from-verified/20 to-emerald-500/10',
       iconColor: 'text-verified',
     },
     {
       icon: UserGroupIcon,
-      title: 'Vetted Professionals',
-      description: 'Professionals are reviewed before they can sell on PlanMorph',
+      title: 'Verified Publishers',
+      description: 'Credentialed professionals publish under clear platform standards',
       color: 'from-purple-500/20 to-violet-500/10',
       iconColor: 'text-purple-400',
     },
@@ -154,7 +154,7 @@ export default function Home() {
               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/8 text-xs font-medium text-white/60 mb-8"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-verified animate-pulse" />
-              Verified plan sets from licensed professionals
+              Build-ready design packages from verified professionals
             </motion.div>
 
             <motion.h1
@@ -163,10 +163,10 @@ export default function Home() {
               transition={{ delay: 0.15, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
               className="text-4xl md:text-5xl lg:text-7xl font-display font-bold tracking-tight leading-[1.08] mb-7"
             >
-              Every building
+              Build-ready design packages.
               <br />
-              deserves a{' '}
-              <span className="text-gradient-golden">verified</span> plan.
+              Distributed like{' '}
+              <span className="text-gradient-golden">infrastructure</span>.
             </motion.h1>
 
             <motion.p
@@ -175,7 +175,7 @@ export default function Home() {
               transition={{ delay: 0.3, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               className="text-lg md:text-xl text-white/40 mb-12 leading-relaxed max-w-2xl"
             >
-              Buy build-ready plan sets you can actually act on: architectural drawings, structural plans, and BOQ—delivered instantly after purchase.
+              PlanMorph is the publishing and distribution layer for architectural and civil plan sets—engineer-reviewed, packaged with complete documentation, and delivered instantly.
             </motion.p>
 
             <motion.div
@@ -188,7 +188,7 @@ export default function Home() {
                 href="/designs"
                 className="group px-8 py-3.5 bg-brand-accent text-white font-semibold rounded-xl hover:bg-blue-500 transition-all duration-300 shadow-blue btn-glow inline-flex items-center gap-2"
               >
-                Browse Verified Designs
+                Browse Packages
                 <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 16 16" fill="none">
                   <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>
@@ -197,7 +197,7 @@ export default function Home() {
                 href="/architect/register"
                 className="px-8 py-3.5 text-white/50 hover:text-white font-medium transition-all duration-300 inline-flex items-center gap-2 hover:bg-white/5 rounded-xl"
               >
-                Sell as a Professional
+                Publish as a Professional
                 <span aria-hidden="true">&rarr;</span>
               </Link>
             </motion.div>
@@ -266,8 +266,8 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div variants={fadeUp} className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-display font-bold text-white tracking-tight">
-              Three steps to your{' '}
-              <span className="text-gradient-blue">build-ready</span> plan.
+              Three steps to a{' '}
+              <span className="text-gradient-blue">build-ready</span> package.
             </h2>
           </motion.div>
 
@@ -286,20 +286,20 @@ export default function Home() {
             {[
               {
                 step: '01',
-                title: 'Browse verified designs',
-                description: 'Explore build-ready designs from licensed architects, each verified by structural engineers.',
+                title: 'Browse packages',
+                description: 'Explore build-ready plan sets from verified professionals, gated by engineer review.',
                 gradient: 'from-brand-accent to-blue-400',
               },
               {
                 step: '02',
-                title: 'Purchase complete packages',
-                description: 'Get instant access to architectural drawings, structural plans, and a bill of quantities.',
+                title: 'License & download',
+                description: 'Purchase once and download the full package: drawings, structural documentation, and BOQ (as listed).',
                 gradient: 'from-golden to-amber-400',
               },
               {
                 step: '03',
-                title: 'Build with confidence',
-                description: 'Use your complete, verified plan set to begin construction with certainty.',
+                title: 'Execute with clarity',
+                description: 'Move from selection to construction with complete documentation and less back-and-forth.',
                 gradient: 'from-verified to-emerald-400',
               },
             ].map((item, i) => (
@@ -320,15 +320,15 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-end mb-12">
             <motion.div variants={fadeUp}>
-              <h2 className="text-3xl md:text-4xl font-display font-bold text-white tracking-tight">Featured Designs</h2>
-              <p className="text-sm text-white/35 mt-2">Verified packages, ready to download.</p>
+              <h2 className="text-3xl md:text-4xl font-display font-bold text-white tracking-tight">Featured Packages</h2>
+              <p className="text-sm text-white/35 mt-2">Engineer-reviewed packages, ready to download.</p>
             </motion.div>
             <motion.div variants={fadeUp} custom={1}>
               <Link
                 href="/designs"
                 className="hidden sm:inline-flex items-center text-sm font-medium text-brand-accent hover:text-blue-400 transition-colors duration-300 gap-1.5 hover-underline"
               >
-                Browse all designs
+                Browse all packages
                 <span aria-hidden="true">&rarr;</span>
               </Link>
             </motion.div>
@@ -336,7 +336,7 @@ export default function Home() {
 
           {featuredDesigns.length === 0 ? (
             <div className="text-center py-16 text-white/30">
-              <p>No designs available yet. Check back soon.</p>
+              <p>No packages available yet. Check back soon.</p>
             </div>
           ) : (
             <motion.div variants={stagger} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -385,7 +385,7 @@ export default function Home() {
               href="/designs"
               className="inline-flex items-center text-sm font-medium text-brand-accent hover:text-blue-400 transition-colors duration-300 gap-1.5"
             >
-              Browse all designs
+              Browse all packages
               <span aria-hidden="true">&rarr;</span>
             </Link>
           </motion.div>
@@ -397,14 +397,14 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl mx-auto text-center">
             <motion.h2 variants={fadeUp} className="text-3xl md:text-4xl font-display font-bold text-white tracking-tight mb-8">
-              What &ldquo;verified&rdquo; means on PlanMorph.
+              Verification is the publishing standard.
             </motion.h2>
             <div className="space-y-5 text-left">
               {[
                 {
                   num: 1,
-                  title: 'Architect uploads a design',
-                  desc: 'Licensed architects submit complete plan sets including architectural drawings and documentation.',
+                  title: 'Publisher submits a complete package',
+                  desc: 'Licensed professionals submit plan sets with documentation and the required files for delivery.',
                   color: 'from-brand-accent to-blue-400',
                 },
                 {
@@ -415,8 +415,8 @@ export default function Home() {
                 },
                 {
                   num: 3,
-                  title: 'Design published with verification badge',
-                  desc: 'Only designs that pass review are published. Every plan you see has completed this process.',
+                  title: 'Package published with verification record',
+                  desc: 'Only packages that pass review are published. Buyers see what was verified and what was delivered.',
                   color: 'from-verified to-emerald-400',
                 },
               ].map((item, i) => (
@@ -443,10 +443,10 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             <motion.div variants={fadeUp}>
               <h2 className="text-3xl md:text-4xl font-display font-bold text-white tracking-tight mb-4">
-                Clients get a <span className="text-gradient-golden">home</span> for every project.
+                One place for files, scope, and <span className="text-gradient-golden">delivery</span>.
               </h2>
               <p className="text-white/35 max-w-xl leading-relaxed">
-                Your purchases, files, and next steps live in one place—so you can move from browsing to building without chaos.
+                Orders keep licensing, files, and verification context attached—so you can move from selection to construction without losing time.
               </p>
 
               <div className="mt-7 space-y-3">
@@ -469,7 +469,7 @@ export default function Home() {
                   href="/register"
                   className="px-6 py-3 text-sm font-semibold bg-brand-accent text-white rounded-xl hover:bg-blue-500 transition-all duration-300 btn-glow"
                 >
-                  Create a Client Account
+                  Create Account
                 </Link>
                 <Link
                   href="/my-orders"
@@ -507,7 +507,7 @@ export default function Home() {
                 </div>
 
                 <p className="text-[11px] text-white/25 mt-6 leading-relaxed">
-                  Sales accuracy matters: your order shows what you purchased, what was delivered, and your verification context—clearly and in one place.
+                  Orders stay auditable: what you purchased, what was delivered, and the verification context—clearly and in one place.
                 </p>
               </div>
             </motion.div>
@@ -523,11 +523,11 @@ export default function Home() {
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div variants={fadeUp} className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-display font-bold text-white tracking-tight mb-4">
-              Your expertise deserves a{' '}
-              <span className="text-gradient-golden">professional</span> home.
+              Publish build-ready work.{' '}
+              <span className="text-gradient-golden">Monetize</span> distribution.
             </h2>
             <p className="text-white/35 max-w-xl mx-auto">
-              Join licensed professionals who list, verify, and sell build-ready designs.
+              PlanMorph is the rail for professional design packages—visibility, licensing, delivery, and payouts.
             </p>
           </motion.div>
 
@@ -540,7 +540,7 @@ export default function Home() {
 
               <h3 className="text-lg font-display font-semibold text-white mb-2 relative">Architect Portal</h3>
               <p className="text-white/40 text-sm mb-6 leading-relaxed relative">
-                Upload your designs and earn 70% on every sale. Build your professional portfolio with verified, commercially proven work.
+                Publish design packages with complete documentation and earn 70% on every license. Build a catalog buyers can trust.
               </p>
               <div className="flex gap-3 relative">
                 <Link
@@ -565,7 +565,7 @@ export default function Home() {
 
               <h3 className="text-lg font-display font-semibold text-white mb-2 relative">Engineer Portal</h3>
               <p className="text-white/40 text-sm mb-6 leading-relaxed relative">
-                Review structural integrity and BOQs. Your verification ensures every published design is build-ready.
+                Run the quality gate. Review structural integrity and documentation completeness before publication.
               </p>
               <div className="flex gap-3 relative">
                 <Link

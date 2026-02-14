@@ -6,7 +6,7 @@
 
 Welcome to PlanMorph ("we," "our," or "us"). PlanMorph operates an online marketplace connecting architects and engineers with clients seeking architectural designs and construction services. We are committed to protecting your personal information and your right to privacy.
 
-This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform at planmorph.com (the "Platform"). Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the Platform.
+This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform at planmorph.software (the "Platform"). Please read this privacy policy carefully. If you do not agree with the terms of this privacy policy, please do not access the Platform.
 
 ## 2. Information We Collect
 
@@ -215,7 +215,7 @@ Depending on your location, you may have the following rights regarding your per
 ### 6.2 How to Exercise Your Rights
 
 To exercise any of these rights, please contact us at:
-- **Email:** privacy@planmorph.com
+- **Email:** privacy@planmorph.software
 - **Subject Line:** "Privacy Rights Request"
 - **Include:** Your full name, email address, and description of your request
 
@@ -239,7 +239,7 @@ When we transfer your information internationally, we ensure appropriate safegua
 
 ## 8. Children's Privacy
 
-PlanMorph is not intended for individuals under the age of 18. We do not knowingly collect personal information from children under 18. If you are a parent or guardian and believe your child has provided us with personal information, please contact us at privacy@planmorph.com, and we will delete such information.
+PlanMorph is not intended for individuals under the age of 18. We do not knowingly collect personal information from children under 18. If you are a parent or guardian and believe your child has provided us with personal information, please contact us at privacy@planmorph.software, and we will delete such information.
 
 ## 9. Third-Party Links
 
@@ -268,7 +268,7 @@ If you are located in the EEA, you have additional rights under the General Data
 - Right to data portability in a structured, machine-readable format
 
 **Data Protection Officer:**
-- Email: dpo@planmorph.com
+- Email: dpo@planmorph.software
 
 ### 10.2 California - CCPA/CPRA
 
@@ -284,7 +284,7 @@ If you are a California resident, you have rights under the California Consumer 
 **We Do NOT Sell Personal Information:** PlanMorph does not sell your personal information to third parties.
 
 **California Privacy Requests:**
-- Email: privacy@planmorph.com
+- Email: privacy@planmorph.software
 - Toll-Free: [To be configured]
 - Response Time: 45 days
 
@@ -299,7 +299,7 @@ If you are located in Kenya, you have rights under the Kenya Data Protection Act
 - Right to lodge a complaint with the Office of the Data Protection Commissioner
 
 **Kenya Contact:**
-- Email: kenya@planmorph.com
+- Email: kenya@planmorph.software
 
 ### 10.4 Other African Countries
 
@@ -348,12 +348,12 @@ Your continued use of the Platform after changes take effect constitutes accepta
 If you have questions, concerns, or requests regarding this Privacy Policy or our privacy practices, please contact us:
 
 **General Privacy Inquiries:**
-- **Email:** privacy@planmorph.com
-- **Support Email:** support@planmorph.com
-- **Website:** https://planmorph.com/contact
+- **Email:** privacy@planmorph.software
+- **Support Email:** support@planmorph.software
+- **Website:** https://planmorph.software/contact
 
 **Data Protection Officer:**
-- **Email:** dpo@planmorph.com
+- **Email:** dpo@planmorph.software
 
 **Mailing Address:**
 PlanMorph Privacy Team
@@ -394,4 +394,4 @@ We aim to respond to all privacy inquiries within 5 business days and fulfill ri
 
 **End of Privacy Policy**
 
-For the most current version of this policy, please visit: https://planmorph.com/privacy-policy
+For the most current version of this policy, please visit: https://planmorph.software/privacy-policy

@@ -87,7 +87,7 @@ dotnet run
 ```
 
 Default admin credentials:
-- Email: admin@planmorph.com
+- Email: admin@planmorph.software
 - Password: Admin@123
 
 ### Frontend Setup
@@ -187,4 +187,4 @@ Proprietary - All rights reserved
 
 ## Contact
 
-For support or inquiries, contact: support@planmorph.com
+For support or inquiries, contact: support@planmorph.software

@@ -18,7 +18,7 @@ export default function LoginPage() {
     setIsLoading(true);
     try {
       await login(formData.email, formData.password);
-      toast.success('Welcome back!');
+      toast.success('Signed in.');
       router.push('/designs');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Login failed. Please check your credentials.');
@@ -52,10 +52,10 @@ export default function LoginPage() {
               <span className="text-2xl font-display font-bold text-white">PlanMorph</span>
             </Link>
             <h2 className="text-3xl font-display font-bold text-white leading-snug mb-4">
-              Every building deserves a <span className="text-gradient-golden">verified</span> plan.
+              Build-ready packages. <span className="text-gradient-golden">Delivered</span> instantly.
             </h2>
             <p className="text-white/35 leading-relaxed">
-              Access structurally verified architectural designs from licensed professionals. Browse, purchase, and build with confidence.
+              License and download engineer-reviewed architectural and civil design packages—packaged for execution.
             </p>
           </motion.div>
 

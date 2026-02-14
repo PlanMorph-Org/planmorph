@@ -41,7 +41,7 @@ export default function ArchitectRegisterPage() {
       if (formData.specialization.trim()) payload.append('specialization', formData.specialization.trim());
       if (!hasPortfolio) { if (cvFile) payload.append('cvFile', cvFile); if (coverLetterFile) payload.append('coverLetterFile', coverLetterFile); if (workExperienceFile) payload.append('workExperienceFile', workExperienceFile); }
       await api.post('/auth/register-professional', payload);
-      toast.success('Application submitted! Review within 24-48 hours.', { duration: 6000 });
+      toast.success('Application submitted. Review in 24–48 hours.', { duration: 6000 });
       setTimeout(() => router.push('/architect/login'), 2000);
     } catch (error: any) { toast.error(error.response?.data?.message || 'Registration failed.'); }
     finally { setIsLoading(false); }
@@ -123,7 +123,7 @@ export default function ArchitectRegisterPage() {
           </div>
 
           <div className="glass-card-light rounded-lg p-4 border border-golden/10">
-            <p className="text-xs text-golden/60"><strong className="text-golden">Application Review:</strong> Your architect account will be reviewed within 24-48 hours. You'll receive an email once approved.</p>
+            <p className="text-xs text-golden/60"><strong className="text-golden">Review window:</strong> 24–48 hours. You&apos;ll receive an email once your account is approved.</p>
           </div>
 
           <button type="submit" disabled={isLoading}

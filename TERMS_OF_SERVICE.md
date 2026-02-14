@@ -78,7 +78,7 @@ You are responsible for:
 - Notifying us immediately of any unauthorized access
 - Using a strong, unique password
 
-**We will never ask for your password via email or phone.** If you receive such a request, report it to security@planmorph.com immediately.
+**We will never ask for your password via email or phone.** If you receive such a request, report it to security@planmorph.software immediately.
 
 ### 2.6 Account Accuracy
 
@@ -382,12 +382,12 @@ Users may report:
 - Offensive or prohibited content
 - Platform bugs or security issues
 
-Reports should be emailed to: abuse@planmorph.com
+Reports should be emailed to: abuse@planmorph.software
 
 ### 8.3 Copyright Infringement (DMCA)
 
 If you believe your copyrighted work has been infringed, submit a DMCA notice to:
-- **Email:** dmca@planmorph.com
+- **Email:** dmca@planmorph.software
 - **Include:**
   - Identification of copyrighted work
   - Location of infringing material (URL or design ID)
@@ -481,7 +481,7 @@ This indemnification obligation survives termination of your account and these T
 ### 11.1 Termination by You
 
 You may terminate your account at any time by:
-- Emailing support@planmorph.com with termination request
+- Emailing support@planmorph.software with termination request
 - Providing 30 days notice
 - Completing any outstanding orders or obligations
 
@@ -526,13 +526,13 @@ Your privacy is important to us. Our Privacy Policy explains how we collect, use
 - We do not sell your personal information
 - You have rights to access, correct, and delete your data (subject to legal requirements)
 
-See our full Privacy Policy at: https://planmorph.com/privacy-policy
+See our full Privacy Policy at: https://planmorph.software/privacy-policy
 
 ## 13. Dispute Resolution
 
 ### 13.1 Informal Resolution
 
-Before filing any formal dispute, you agree to contact us at disputes@planmorph.com to attempt informal resolution. We will work in good faith to resolve disputes within 30 days.
+Before filing any formal dispute, you agree to contact us at disputes@planmorph.software to attempt informal resolution. We will work in good faith to resolve disputes within 30 days.
 
 ### 13.2 Mediation
 
@@ -626,7 +626,7 @@ PlanMorph shall not be liable for any failure or delay in performance due to cir
 ### 16.6 Notices
 
 All notices to PlanMorph must be sent to:
-- **Email:** legal@planmorph.com
+- **Email:** legal@planmorph.software
 - **Mailing Address:** [Physical address to be added]
 
 Notices to you will be sent to the email address associated with your account.
@@ -644,21 +644,21 @@ These Terms are originally drafted in English. If translated into other language
 For questions, concerns, or support regarding these Terms or the Platform, contact us:
 
 **General Support:**
-- **Email:** support@planmorph.com
-- **Website:** https://planmorph.com/contact
+- **Email:** support@planmorph.software
+- **Website:** https://planmorph.software/contact
 - **Response Time:** Within 48 hours
 
 **Legal Inquiries:**
-- **Email:** legal@planmorph.com
+- **Email:** legal@planmorph.software
 
 **Abuse Reports:**
-- **Email:** abuse@planmorph.com
+- **Email:** abuse@planmorph.software
 
 **Copyright Claims (DMCA):**
-- **Email:** dmca@planmorph.com
+- **Email:** dmca@planmorph.software
 
 **Dispute Resolution:**
-- **Email:** disputes@planmorph.com
+- **Email:** disputes@planmorph.software
 
 **Business Address:**
 [Physical Address to be Added]
@@ -706,4 +706,4 @@ Nairobi, Kenya
 
 **Version:** 1.0
 
-For the most current version of these Terms, please visit: https://planmorph.com/terms-of-service
+For the most current version of these Terms, please visit: https://planmorph.software/terms-of-service

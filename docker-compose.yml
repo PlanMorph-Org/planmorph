@@ -41,7 +41,7 @@ services:
       - EmailSettings__SmtpPort=${SMTP_PORT:-587}
       - EmailSettings__SmtpUsername=${SMTP_USERNAME}
       - EmailSettings__SmtpPassword=${SMTP_PASSWORD}
-      - EmailSettings__FromEmail=${FROM_EMAIL:-noreply@planmorph.com}
+      - EmailSettings__FromEmail=${FROM_EMAIL:-noreply@planmorph.software}
       - EmailSettings__FromName=${FROM_NAME:-PlanMorph}
       - Paystack__SecretKey=${PAYSTACK_SECRET_KEY}
       - Paystack__PublicKey=${PAYSTACK_PUBLIC_KEY}

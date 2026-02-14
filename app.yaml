@@ -61,7 +61,7 @@ services:
         value: iyst dhcl wepo uitp
       - key: EmailSettings__FromEmail
         scope: RUN_TIME
-        value: noreply@planmorph.com
+        value: noreply@planmorph.software
       - key: EmailSettings__FromName
         value: PlanMorph
       - key: Currency__Base

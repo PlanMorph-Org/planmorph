@@ -14,7 +14,7 @@ const roleCards = [
   {
     role: 'Client' as const,
     title: 'Client',
-    desc: 'Browse and purchase verified, build-ready designs',
+    desc: 'License and download build-ready design packages',
     gradient: 'from-brand-accent/20 to-blue-500/10',
     border: 'border-brand-accent/40',
     iconBg: 'bg-brand-accent/20',
@@ -25,7 +25,7 @@ const roleCards = [
   {
     role: 'Architect' as const,
     title: 'Architect',
-    desc: 'List your designs on a verified professional platform',
+    desc: 'Publish and monetize professional design packages',
     gradient: 'from-golden/20 to-amber-500/10',
     border: 'border-golden/40',
     iconBg: 'bg-golden/20',
@@ -36,7 +36,7 @@ const roleCards = [
   {
     role: 'Engineer' as const,
     title: 'Engineer',
-    desc: 'Review and verify structural integrity and BOQs',
+    desc: 'Gate publication through verification and review',
     gradient: 'from-slate-teal/20 to-emerald-500/10',
     border: 'border-slate-teal/40',
     iconBg: 'bg-slate-teal/20',

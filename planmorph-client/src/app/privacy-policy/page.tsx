@@ -14,13 +14,12 @@ export default function PrivacyPolicyPage() {
             <section>
               <h2 className="text-lg font-semibold text-white mt-6 mb-3">1. Introduction</h2>
               <p className="text-white/50 leading-relaxed">
-                Welcome to PlanMorph (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). PlanMorph operates an online marketplace connecting
-                architects and engineers with clients seeking architectural designs and construction services. We are
-                committed to protecting your personal information and your right to privacy.
+                Welcome to PlanMorph (&quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). PlanMorph operates a platform for publishing and licensing
+                architectural and civil design packages, connecting verified professionals with clients seeking build-ready documentation and construction services. We are committed to protecting your personal information and your right to privacy.
               </p>
               <p className="text-white/50 leading-relaxed mt-3">
                 This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use
-                our platform at planmorph.com (the &quot;Platform&quot;). Please read this privacy policy carefully.
+                our platform at planmorph.software (the &quot;Platform&quot;). Please read this privacy policy carefully.
               </p>
             </section>
 
@@ -86,7 +85,7 @@ export default function PrivacyPolicyPage() {
               </ul>
               <div className="glass-card-light rounded-lg p-4 mt-3 border border-golden/10">
                 <h4 className="font-semibold text-golden/60 text-xs uppercase tracking-widest mb-1">How to Exercise Your Rights</h4>
-                <p className="text-white/40 text-xs">Email: privacy@planmorph.com — Subject: &quot;Privacy Rights Request&quot; — Response within 30 days.</p>
+                <p className="text-white/40 text-xs">Email: privacy@planmorph.software — Subject: &quot;Privacy Rights Request&quot; — Response within 30 days.</p>
               </div>
             </section>
 
@@ -94,9 +93,9 @@ export default function PrivacyPolicyPage() {
               <h2 className="text-lg font-semibold text-white mt-6 mb-3">7. Regional Privacy Rights</h2>
               <div className="space-y-3">
                 {[
-                  { region: 'European Economic Area (EEA) — GDPR', text: 'Additional rights under GDPR. DPO: dpo@planmorph.com' },
+                  { region: 'European Economic Area (EEA) — GDPR', text: 'Additional rights under GDPR. DPO: dpo@planmorph.software' },
                   { region: 'California — CCPA/CPRA', text: 'Right to know and delete. We Do NOT Sell Personal Information.' },
-                  { region: 'Kenya — Data Protection Act', text: 'Rights under Kenya DPA (2019). Contact: kenya@planmorph.com' },
+                  { region: 'Kenya — Data Protection Act', text: 'Rights under Kenya DPA (2019). Contact: kenya@planmorph.software' },
                 ].map(item => (
                   <div key={item.region} className="glass-card-light rounded-lg p-4 border border-white/6">
                     <h4 className="font-semibold text-white/60 mb-1 text-xs">{item.region}</h4>
@@ -109,7 +108,7 @@ export default function PrivacyPolicyPage() {
             <section>
               <h2 className="text-lg font-semibold text-white mt-6 mb-3">8. Children&apos;s Privacy</h2>
               <div className="glass-card-light rounded-lg p-4 border border-rose-500/10">
-                <p className="text-white/40 text-xs">PlanMorph is not intended for individuals under 18. Contact privacy@planmorph.com if a child has provided personal information.</p>
+                <p className="text-white/40 text-xs">PlanMorph is not intended for individuals under 18. Contact privacy@planmorph.software if a child has provided personal information.</p>
               </div>
             </section>
 
@@ -121,16 +120,16 @@ export default function PrivacyPolicyPage() {
             <section>
               <h2 className="text-lg font-semibold text-white mt-6 mb-3">10. Contact Us</h2>
               <div className="glass-card-light rounded-lg p-5 space-y-2 text-xs">
-                <div><strong className="text-white/60">General Privacy:</strong> <span className="text-white/40">privacy@planmorph.com</span></div>
-                <div><strong className="text-white/60">Support:</strong> <span className="text-white/40">support@planmorph.com</span></div>
-                <div><strong className="text-white/60">Data Protection Officer:</strong> <span className="text-white/40">dpo@planmorph.com</span></div>
+                <div><strong className="text-white/60">General Privacy:</strong> <span className="text-white/40">privacy@planmorph.software</span></div>
+                <div><strong className="text-white/60">Support:</strong> <span className="text-white/40">support@planmorph.software</span></div>
+                <div><strong className="text-white/60">Data Protection Officer:</strong> <span className="text-white/40">dpo@planmorph.software</span></div>
                 <div><strong className="text-white/60">Response Time:</strong> <span className="text-white/40">5 business days (inquiries), 30 days (rights requests)</span></div>
               </div>
             </section>
 
             <div className="mt-10 pt-6 border-t border-white/6">
               <p className="text-xs text-white/20 text-center">
-                Current version: <a href="/privacy-policy" className="text-golden/40 hover:text-golden transition-colors">planmorph.com/privacy-policy</a>
+                Current version: <a href="/privacy-policy" className="text-golden/40 hover:text-golden transition-colors">planmorph.software/privacy-policy</a>
               </p>
             </div>
           </div>

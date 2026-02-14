@@ -93,7 +93,7 @@ export default function DesignsPage() {
             animate={{ opacity: 1, y: 0 }}
             className="text-3xl md:text-4xl font-display font-bold text-white tracking-tight mb-3"
           >
-            Browse Designs
+            Browse Packages
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 16 }}
@@ -101,7 +101,7 @@ export default function DesignsPage() {
             transition={{ delay: 0.1 }}
             className="text-white/40 text-sm"
           >
-            Every design has been structurally verified by a licensed engineer.
+            Engineer-reviewed, build-ready packages published by verified professionals.
           </motion.p>
         </div>
       </section>
@@ -122,7 +122,7 @@ export default function DesignsPage() {
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search designs..."
+                placeholder="Search packages..."
                 className="w-full pl-10 pr-4 py-2.5 glass-input rounded-lg text-sm text-white placeholder:text-white/25"
               />
             </div>
@@ -209,7 +209,7 @@ export default function DesignsPage() {
         {/* Results count */}
         {!isLoading && (
           <p className="text-xs text-white/25 mb-6">
-            {filteredDesigns.length} design{filteredDesigns.length !== 1 ? 's' : ''} found
+            {filteredDesigns.length} package{filteredDesigns.length !== 1 ? 's' : ''} found
           </p>
         )}
 
@@ -223,7 +223,7 @@ export default function DesignsPage() {
             <div className="w-16 h-16 mx-auto mb-4 glass-card rounded-full flex items-center justify-center">
               <MagnifyingGlassIcon className="w-7 h-7 text-white/20" />
             </div>
-            <p className="text-white/40 mb-2">No designs found</p>
+            <p className="text-white/40 mb-2">No packages found</p>
             <p className="text-white/25 text-sm">Try adjusting your filters or search term.</p>
           </div>
         ) : (

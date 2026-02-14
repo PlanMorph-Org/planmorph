@@ -18,8 +18,17 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: 'PlanMorph — Verified Architectural Designs',
-  description: 'Browse structurally verified, build-ready architectural designs from licensed professionals. Every building deserves a verified plan.',
+  title: 'PlanMorph — Build-Ready Design Infrastructure',
+  description: 'Publish, license, and download engineer-reviewed architectural and civil design packages. PlanMorph is the distribution layer for construction-ready documentation.',
+  keywords: [
+    'architectural plans',
+    'structural plans',
+    'civil designs',
+    'design packages',
+    'build-ready',
+    'BOQ',
+    'bill of quantities',
+  ],
   icons: {
     icon: '/icon.svg',
   },

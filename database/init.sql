@@ -29,10 +29,10 @@ INSERT INTO "AspNetUsers" (
     "LockoutEnabled", "AccessFailedCount", "FirstName", "LastName", "Role", "IsActive"
 ) VALUES (
     'e0000000-0000-0000-0000-000000000001'::uuid,
-    'admin@planmorph.com',
-    'ADMIN@PLANMORPH.COM',
-    'admin@planmorph.com',
-    'ADMIN@PLANMORPH.COM',
+    'admin@planmorph.software',
+    'ADMIN@PLANMORPH.SOFTWARE',
+    'admin@planmorph.software',
+    'ADMIN@PLANMORPH.SOFTWARE',
     true,
     'AQAAAAIAAYagAAAAEK+...', -- This needs to be generated using ASP.NET Identity
     'PLACEHOLDER_SECURITY_STAMP',

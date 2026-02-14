@@ -9,7 +9,7 @@ interface LayoutProps {
 }
 
 const navLinks = [
-  { href: '/designs', label: 'Browse Designs' },
+  { href: '/designs', label: 'Browse Packages' },
   { href: '/about', label: 'About' },
 ];
 
@@ -40,10 +40,10 @@ export default function Layout({ children }: LayoutProps) {
                 <span className="text-lg font-display font-bold text-white">PlanMorph</span>
               </div>
               <p className="text-white/40 text-sm leading-relaxed">
-                Build with certainty.
+                Construction design, distributed.
               </p>
               <p className="text-white/25 text-xs mt-3">
-                Verified architectural designs from licensed professionals.
+                Engineer-reviewed architectural and civil design packages—licensed and delivered instantly.
               </p>
               {/* Decorative element */}
               <div className="mt-5 flex gap-1">
@@ -61,7 +61,7 @@ export default function Layout({ children }: LayoutProps) {
               <ul className="space-y-2.5">
                 <li>
                   <Link href="/designs" className="text-white/50 hover:text-white text-sm transition-colors duration-300 hover-underline">
-                    Browse Designs
+                    Browse Packages
                   </Link>
                 </li>
                 <li>
@@ -127,7 +127,7 @@ export default function Layout({ children }: LayoutProps) {
             </div>
           </div>
           <div className="mt-12 pt-8 border-t border-white/6 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <p className="text-white/25 text-xs">&copy; 2025 PlanMorph. All rights reserved.</p>
+            <p className="text-white/25 text-xs">&copy; 2026 PlanMorph. All rights reserved.</p>
             <p className="text-white/25 text-xs">
               By using this site, you agree to our{' '}
               <Link href="/terms-of-service" className="text-brand-accent/70 hover:text-brand-accent transition-colors">

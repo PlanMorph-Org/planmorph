@@ -22,7 +22,7 @@ public static class DbInitializer
         UserManager<User> userManager,
         RoleManager<IdentityRole<Guid>> roleManager)
     {
-        var adminEmail = "admin@planmorph.com";
+        var adminEmail = "admin@planmorph.software";
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
 
         if (adminUser == null)

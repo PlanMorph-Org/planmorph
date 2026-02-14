@@ -35,7 +35,7 @@ public class EmailService : IEmailService
 
         _smtpUsername = NormalizeValue(_configuration["EmailSettings:SmtpUsername"], "");
         _smtpPassword = NormalizeValue(_configuration["EmailSettings:SmtpPassword"], "");
-        _fromEmail = NormalizeValue(_configuration["EmailSettings:FromEmail"], "noreply@planmorph.com");
+        _fromEmail = NormalizeValue(_configuration["EmailSettings:FromEmail"], "noreply@planmorph.software");
         _fromName = NormalizeValue(_configuration["EmailSettings:FromName"], "PlanMorph");
     }
 
@@ -93,7 +93,7 @@ public class EmailService : IEmailService
 
     public async Task SendDesignApprovedEmailAsync(string toEmail, string architectName, string designTitle)
     {
-        var subject = "Your Design Has Been Approved! 🎉";
+        var subject = "Design approved — PlanMorph";
         var htmlBody = $@"
 <!DOCTYPE html>
 <html>
@@ -110,26 +110,26 @@ public class EmailService : IEmailService
 <body>
     <div class=""container"">
         <div class=""header"">
-            <h1>Congratulations!</h1>
+            <h1>Design approved</h1>
         </div>
         <div class=""content"">
             <p>Hi {architectName},</p>
 
-            <p>Great news! Your design <strong>{designTitle}</strong> has been approved and is now live on the PlanMorph marketplace.</p>
+            <p>Your design <strong>{designTitle}</strong> is approved and now live on PlanMorph.</p>
 
-            <p>Your design is now visible to all potential buyers. You'll receive notifications when someone purchases your design.</p>
+            <p>Your package is now visible to buyers. You&apos;ll receive a notification when it is licensed.</p>
 
             <p><strong>What happens next?</strong></p>
             <ul>
-                <li>Your design is now searchable and can be purchased by clients</li>
-                <li>You'll earn 70% commission on each sale</li>
-                <li>Track your sales and earnings in your architect dashboard</li>
+                <li>Your package is searchable and can be licensed by clients</li>
+                <li>You earn 70% on each license</li>
+                <li>Track performance in your architect dashboard</li>
             </ul>
 
-            <a href=""https://planmorph.com/architect/dashboard"" class=""button"">View Your Dashboard</a>
+            <a href=""https://planmorph.software/architect/dashboard"" class=""button"">View Your Dashboard</a>
         </div>
         <div class=""footer"">
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -140,7 +140,7 @@ public class EmailService : IEmailService
 
     public async Task SendDesignRejectedEmailAsync(string toEmail, string architectName, string designTitle, string? reason = null)
     {
-        var subject = "Update on Your Design Submission";
+        var subject = "Design submission update — PlanMorph";
         var reasonText = !string.IsNullOrEmpty(reason)
             ? $"<p><strong>Reason:</strong> {reason}</p>"
             : "";
@@ -181,10 +181,10 @@ public class EmailService : IEmailService
 
             <p>If you have questions about this decision, please contact our support team.</p>
 
-            <a href=""https://planmorph.com/architect/dashboard"" class=""button"">Go to Dashboard</a>
+            <a href=""https://planmorph.software/architect/dashboard"" class=""button"">Go to Dashboard</a>
         </div>
         <div class=""footer"">
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -195,7 +195,7 @@ public class EmailService : IEmailService
 
     public async Task SendArchitectApprovedEmailAsync(string toEmail, string architectName)
     {
-        var subject = "Welcome to PlanMorph - Your Architect Account is Approved! 🎉";
+        var subject = "Architect account approved — PlanMorph";
         var htmlBody = $@"
 <!DOCTYPE html>
 <html>
@@ -212,33 +212,33 @@ public class EmailService : IEmailService
 <body>
     <div class=""container"">
         <div class=""header"">
-            <h1>Welcome to PlanMorph!</h1>
+            <h1>Architect account approved</h1>
         </div>
         <div class=""content"">
             <p>Hi {architectName},</p>
 
-            <p>Congratulations! Your architect account has been approved. You can now start uploading and selling your architectural designs on PlanMorph.</p>
+            <p>Your architect account is approved. You can now publish and monetize design packages on PlanMorph.</p>
 
             <p><strong>Getting Started:</strong></p>
             <ul>
                 <li>Log in to your architect dashboard</li>
-                <li>Upload your first design</li>
+                <li>Upload your first package</li>
                 <li>Add high-quality preview images and files</li>
-                <li>Set your pricing (you earn 70% commission on each sale)</li>
+                <li>Set your pricing (you earn 70% on each license)</li>
             </ul>
 
-            <p><strong>What Makes a Great Design Listing:</strong></p>
+            <p><strong>What ships well on PlanMorph:</strong></p>
             <ul>
                 <li>Clear, professional preview images</li>
                 <li>Accurate specifications (bedrooms, bathrooms, size)</li>
-                <li>Complete file sets (architectural drawings, structural drawings, BOQ)</li>
-                <li>Competitive pricing</li>
+                <li>Complete deliverables (drawings, structural documentation, BOQ)</li>
+                <li>Clear scope (what&apos;s included in the package)</li>
             </ul>
 
-            <a href=""https://planmorph.com/architect/login"" class=""button"">Go to Dashboard</a>
+            <a href=""https://planmorph.software/architect/login"" class=""button"">Go to Dashboard</a>
         </div>
         <div class=""footer"">
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -249,7 +249,7 @@ public class EmailService : IEmailService
 
     public async Task SendArchitectRejectedEmailAsync(string toEmail, string architectName, string? reason = null)
     {
-        var subject = "Update on Your Architect Application";
+        var subject = "Architect application update — PlanMorph";
         var reasonText = !string.IsNullOrEmpty(reason)
             ? $"<p><strong>Reason:</strong> {reason}</p>"
             : "";
@@ -283,10 +283,10 @@ public class EmailService : IEmailService
 
             <p>If you believe this is an error or would like to discuss your application, please contact our support team.</p>
 
-            <a href=""https://planmorph.com/contact"" class=""button"">Contact Support</a>
+            <a href=""https://planmorph.software/contact"" class=""button"">Contact Support</a>
         </div>
         <div class=""footer"">
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -297,7 +297,7 @@ public class EmailService : IEmailService
 
     public async Task SendOrderConfirmationEmailAsync(string toEmail, string customerName, string designTitle, decimal amount)
     {
-        var subject = "Order Confirmation - Your Architectural Plans Are Ready!";
+        var subject = "Order confirmed — files ready to download";
         var htmlBody = $@"
 <!DOCTYPE html>
 <html>
@@ -315,12 +315,12 @@ public class EmailService : IEmailService
 <body>
     <div class=""container"">
         <div class=""header"">
-            <h1>Order Confirmed!</h1>
+            <h1>Order confirmed</h1>
         </div>
         <div class=""content"">
             <p>Hi {customerName},</p>
 
-            <p>Thank you for your purchase! Your architectural plans are now ready to download.</p>
+            <p>Your files are ready to download.</p>
 
             <div class=""order-details"">
                 <h3>Order Details</h3>
@@ -328,21 +328,21 @@ public class EmailService : IEmailService
                 <p><strong>Amount Paid:</strong> KES {amount:N2}</p>
             </div>
 
-            <p><strong>Your Purchase Includes:</strong></p>
+            <p><strong>Files included (as listed):</strong></p>
             <ul>
                 <li>Complete architectural drawings</li>
                 <li>Structural drawings</li>
                 <li>Bill of Quantities (BOQ)</li>
-                <li>High-resolution renders</li>
-                <li>CAD files (DWG format)</li>
+                <li>Renders (if included)</li>
+                <li>CAD files (if included)</li>
             </ul>
 
             <p>You can download your files anytime from your account.</p>
 
-            <a href=""https://planmorph.com/my-orders"" class=""button"">Download Your Files</a>
+            <a href=""https://planmorph.software/my-orders"" class=""button"">Download Your Files</a>
         </div>
         <div class=""footer"">
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -353,7 +353,7 @@ public class EmailService : IEmailService
 
     public async Task SendWelcomeEmailAsync(string toEmail, string firstName)
     {
-        var subject = "Welcome to PlanMorph!";
+        var subject = "Welcome to PlanMorph";
         var htmlBody = $@"
 <!DOCTYPE html>
 <html>
@@ -370,30 +370,29 @@ public class EmailService : IEmailService
 <body>
     <div class=""container"">
         <div class=""header"">
-            <h1>Welcome to PlanMorph!</h1>
+            <h1>Welcome to PlanMorph</h1>
         </div>
         <div class=""content"">
             <p>Hi {firstName},</p>
 
-            <p>Welcome to PlanMorph - a global marketplace for architectural designs!</p>
+            <p>PlanMorph is the distribution layer for build-ready design packages.</p>
 
             <p><strong>What You Can Do:</strong></p>
             <ul>
-                <li>Browse hundreds of professionally designed house plans</li>
-                <li>Filter by bedrooms, bathrooms, size, and budget</li>
-                <li>Purchase and instantly download complete architectural plans</li>
-                <li>Request construction services from verified contractors</li>
-                <li>Request modifications to existing designs</li>
+                <li>Browse and filter build-ready packages</li>
+                <li>License and instantly download complete plan sets</li>
+                <li>Keep files and delivery context organized in My Orders</li>
+                <li>Request construction services (Kenya only) when available</li>
             </ul>
 
             <p><strong>Construction services:</strong> Currently available in Kenya only.</p>
 
-            <p>Start exploring our collection of designs and find the perfect plan for your dream home!</p>
+            <p>Browse packages when you&apos;re ready.</p>
 
-            <a href=""https://planmorph.com/designs"" class=""button"">Browse Designs</a>
+            <a href=""https://planmorph.software/designs"" class=""button"">Browse Packages</a>
         </div>
         <div class=""footer"">
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -404,8 +403,8 @@ public class EmailService : IEmailService
 
     public async Task SendPasswordResetEmailAsync(string toEmail, string firstName, string resetToken)
     {
-        var resetUrl = $"https://planmorph.com/reset-password?token={resetToken}";
-        var subject = "Reset Your Password - PlanMorph";
+        var resetUrl = $"https://planmorph.software/reset-password?token={resetToken}";
+        var subject = "Reset your password — PlanMorph";
         var htmlBody = $@"
 <!DOCTYPE html>
 <html>
@@ -442,7 +441,7 @@ public class EmailService : IEmailService
             <p style=""word-break: break-all; color: #3b82f6;"">{resetUrl}</p>
         </div>
         <div class=""footer"">
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -453,7 +452,7 @@ public class EmailService : IEmailService
 
     public async Task SendConstructionRequestReceivedEmailAsync(string toEmail, string clientName, string designTitle, string location)
     {
-        var subject = "Construction Service Request Received - PlanMorph";
+        var subject = "Construction request received — PlanMorph";
         var htmlBody = $@"
 <!DOCTYPE html>
 <html>
@@ -471,12 +470,12 @@ public class EmailService : IEmailService
 <body>
     <div class=""container"">
         <div class=""header"">
-            <h1>🏗️ Construction Request Received</h1>
+            <h1>Construction request received</h1>
         </div>
         <div class=""content"">
             <p>Hi {clientName},</p>
 
-            <p>Thank you for requesting construction services through PlanMorph! We've received your request and are processing it.</p>
+            <p>We received your construction request. We&apos;re processing it now.</p>
 
             <div class=""info-box"">
                 <h3>Request Details</h3>
@@ -499,11 +498,11 @@ public class EmailService : IEmailService
 
             <p>If you have any questions or need to update your request, please contact our support team.</p>
 
-            <a href=""https://planmorph.com/my-orders"" class=""button"">View My Orders</a>
+            <a href=""https://planmorph.software/my-orders"" class=""button"">View My Orders</a>
         </div>
         <div class=""footer"">
-            <p>Questions? Email us at construction@planmorph.com</p>
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>Questions? Email us at construction@planmorph.software</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -514,7 +513,7 @@ public class EmailService : IEmailService
 
     public async Task SendAdminConstructionRequestNotificationAsync(string adminEmail, string clientName, string designTitle, string location, string orderNumber)
     {
-        var subject = $"New Construction Request - {orderNumber}";
+        var subject = $"New construction request — {orderNumber}";
         var htmlBody = $@"
 <!DOCTYPE html>
 <html>
@@ -533,11 +532,11 @@ public class EmailService : IEmailService
 <body>
     <div class=""container"">
         <div class=""header"">
-            <h1>⚡ Action Required: New Construction Request</h1>
+            <h1>Action required: new construction request</h1>
         </div>
         <div class=""content"">
             <div class=""alert"">
-                <strong>🔔 Admin Action Needed:</strong> A client has requested construction services and requires contractor assignment.
+                <strong>Admin action needed:</strong> A client requested construction services and requires contractor assignment.
             </div>
 
             <div class=""info-box"">
@@ -566,11 +565,11 @@ public class EmailService : IEmailService
                 <li>Past performance and client ratings</li>
             </ul>
 
-            <a href=""https://planmorph.com/admin/orders"" class=""button"">Assign Contractor Now</a>
+            <a href=""https://planmorph.software/admin/orders"" class=""button"">Assign Contractor Now</a>
         </div>
         <div class=""footer"">
             <p>PlanMorph Admin Notification System</p>
-            <p>&copy; 2024 PlanMorph.</p>
+            <p>&copy; 2026 PlanMorph.</p>
         </div>
     </div>
 </body>
@@ -581,7 +580,7 @@ public class EmailService : IEmailService
 
     public async Task SendContractorAssignedToClientEmailAsync(string toEmail, string clientName, string designTitle, string contractorName, string location)
     {
-        var subject = "Contractor Assigned to Your Project - PlanMorph";
+        var subject = "Contractor assigned — PlanMorph";
         var htmlBody = $@"
 <!DOCTYPE html>
 <html>
@@ -600,12 +599,12 @@ public class EmailService : IEmailService
 <body>
     <div class=""container"">
         <div class=""header"">
-            <h1>✅ Contractor Assigned!</h1>
+            <h1>Contractor assigned</h1>
         </div>
         <div class=""content"">
             <p>Hi {clientName},</p>
 
-            <p>Great news! We've assigned a qualified contractor to your construction project.</p>
+            <p>A contractor has been assigned to your construction request.</p>
 
             <div class=""contractor-card"">
                 <h3>Your Assigned Contractor</h3>
@@ -615,7 +614,7 @@ public class EmailService : IEmailService
             </div>
 
             <div class=""info-box"">
-                <strong>📞 Next Steps:</strong>
+                <strong>Next steps:</strong>
                 <p>Your contractor will contact you within 24-48 hours to:</p>
                 <ul>
                     <li>Introduce themselves and discuss their experience</li>
@@ -645,11 +644,11 @@ public class EmailService : IEmailService
 
             <p>If you have any concerns or need additional support, please don't hesitate to contact us.</p>
 
-            <a href=""https://planmorph.com/my-orders"" class=""button"">View Project Details</a>
+            <a href=""https://planmorph.software/my-orders"" class=""button"">View Project Details</a>
         </div>
         <div class=""footer"">
-            <p>Need help? Contact us at construction@planmorph.com</p>
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>Need help? Contact us at construction@planmorph.software</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -660,7 +659,7 @@ public class EmailService : IEmailService
 
     public async Task SendContractorAssignmentEmailAsync(string toEmail, string contractorName, string designTitle, string clientName, string location, decimal estimatedCost)
     {
-        var subject = "New Construction Project Assignment - PlanMorph";
+        var subject = "New project assignment — PlanMorph";
         var htmlBody = $@"
 <!DOCTYPE html>
 <html>
@@ -679,12 +678,12 @@ public class EmailService : IEmailService
 <body>
     <div class=""container"">
         <div class=""header"">
-            <h1>🎉 New Project Assignment</h1>
+            <h1>New project assignment</h1>
         </div>
         <div class=""content"">
             <p>Hi {contractorName},</p>
 
-            <p>Congratulations! You've been assigned a new construction project through PlanMorph.</p>
+            <p>You have been assigned a new construction project through PlanMorph.</p>
 
             <div class=""project-card"">
                 <h3>Project Details</h3>
@@ -696,7 +695,7 @@ public class EmailService : IEmailService
             </div>
 
             <div class=""highlight"">
-                <strong>⏰ Action Required:</strong>
+                <strong>Action required:</strong>
                 <p>Please contact the client within <strong>24-48 hours</strong> to discuss the project and schedule a site visit.</p>
             </div>
 
@@ -729,17 +728,17 @@ public class EmailService : IEmailService
             </ul>
 
             <div class=""highlight"">
-                <strong>💼 Platform Commission:</strong>
+                <strong>Platform commission:</strong>
                 <p>A 2% platform fee (KES {(estimatedCost * 0.02m):N2}) is included in this project. This fee supports platform maintenance, quality assurance, and dispute resolution services.</p>
             </div>
 
-            <p>We're excited to have you work on this project! If you have any questions or need support, please contact our contractor support team.</p>
+            <p>If you have questions or need support, please contact our contractor support team.</p>
 
-            <a href=""https://planmorph.com/contractor/projects"" class=""button"">View Project Dashboard</a>
+            <a href=""https://planmorph.software/contractor/projects"" class=""button"">View Project Dashboard</a>
         </div>
         <div class=""footer"">
-            <p>Contractor Support: contractors@planmorph.com | Phone: [To be added]</p>
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>Contractor Support: contractors@planmorph.software | Phone: [To be added]</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -770,7 +769,7 @@ public class EmailService : IEmailService
 <body>
     <div class=""container"">
         <div class=""header"">
-            <h1>🎫 Support Ticket Created</h1>
+            <h1>Support ticket created</h1>
         </div>
         <div class=""content"">
             <p>Hello,</p>
@@ -793,11 +792,11 @@ public class EmailService : IEmailService
                 <li>You can reply to ticket emails or visit your support dashboard to add more information</li>
             </ul>
             
-            <a href=""https://planmorph.com/support/tickets/{ticketId}"" class=""button"">View Ticket</a>
+            <a href=""https://planmorph.software/support/tickets/{ticketId}"" class=""button"">View Ticket</a>
         </div>
         <div class=""footer"">
-            <p>PlanMorph Support Team | support@planmorph.com</p>
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>PlanMorph Support Team | support@planmorph.software</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -808,8 +807,8 @@ public class EmailService : IEmailService
 
     public async Task SendNewTicketAlertEmailAsync(string ticketId, string subject, string clientId, string priority, string category)
     {
-        var adminEmail = "admin@planmorph.com"; // This should come from configuration
-        var emailSubject = $"🚨 New Support Ticket: {subject}";
+        var adminEmail = "admin@planmorph.software"; // This should come from configuration
+        var emailSubject = $"New support ticket: {subject}";
         var htmlBody = $@"
 <!DOCTYPE html>
 <html>
@@ -828,7 +827,7 @@ public class EmailService : IEmailService
 <body>
     <div class=""container"">
         <div class=""header"">
-            <h1>🚨 New Support Ticket Alert</h1>
+            <h1>New support ticket alert</h1>
         </div>
         <div class=""content"">
             <p>A new support ticket has been created and requires attention.</p>
@@ -844,11 +843,11 @@ public class EmailService : IEmailService
             
             <p>Please review and assign this ticket promptly based on the priority level.</p>
             
-            <a href=""https://planmorph.com/admin/tickets/{ticketId}"" class=""button"">View & Assign Ticket</a>
+            <a href=""https://planmorph.software/admin/tickets/{ticketId}"" class=""button"">View & Assign Ticket</a>
         </div>
         <div class=""footer"">
             <p>PlanMorph Admin Dashboard</p>
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -878,7 +877,7 @@ public class EmailService : IEmailService
 <body>
     <div class=""container"">
         <div class=""header"">
-            <h1>📋 Ticket Status Updated</h1>
+            <h1>Ticket status updated</h1>
         </div>
         <div class=""content"">
             <p>Hello,</p>
@@ -895,11 +894,11 @@ public class EmailService : IEmailService
             
             <p>You can view the full ticket details and any new messages by clicking the button below.</p>
             
-            <a href=""https://planmorph.com/support/tickets/{ticketId}"" class=""button"">View Ticket</a>
+            <a href=""https://planmorph.software/support/tickets/{ticketId}"" class=""button"">View Ticket</a>
         </div>
         <div class=""footer"">
-            <p>PlanMorph Support Team | support@planmorph.com</p>
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>PlanMorph Support Team | support@planmorph.software</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -929,12 +928,12 @@ public class EmailService : IEmailService
 <body>
     <div class=""container"">
         <div class=""header"">
-            <h1>👤 Ticket Assigned</h1>
+            <h1>Ticket assigned</h1>
         </div>
         <div class=""content"">
             <p>Hello,</p>
             
-            <p>Great news! Your support ticket has been assigned to a team member who will help resolve your issue.</p>
+            <p>Your support ticket has been assigned to a team member who will help resolve your issue.</p>
             
             <div class=""assignment-info"">
                 <h3>Assignment Details:</h3>
@@ -945,11 +944,11 @@ public class EmailService : IEmailService
             
             <p>You can expect to hear from them soon. They'll work with you to resolve your request as quickly as possible.</p>
             
-            <a href=""https://planmorph.com/support/tickets/{ticketId}"" class=""button"">View Ticket</a>
+            <a href=""https://planmorph.software/support/tickets/{ticketId}"" class=""button"">View Ticket</a>
         </div>
         <div class=""footer"">
-            <p>PlanMorph Support Team | support@planmorph.com</p>
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>PlanMorph Support Team | support@planmorph.software</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -979,7 +978,7 @@ public class EmailService : IEmailService
 <body>
     <div class=""container"">
         <div class=""header"">
-            <h1>💬 New Reply to Your Ticket</h1>
+            <h1>New reply to your ticket</h1>
         </div>
         <div class=""content"">
             <p>Hello,</p>
@@ -996,11 +995,11 @@ public class EmailService : IEmailService
             
             <p>You can reply directly to this email or visit your support dashboard to continue the conversation.</p>
             
-            <a href=""https://planmorph.com/support/tickets/{ticketId}"" class=""button"">Reply to Ticket</a>
+            <a href=""https://planmorph.software/support/tickets/{ticketId}"" class=""button"">Reply to Ticket</a>
         </div>
         <div class=""footer"">
-            <p>PlanMorph Support Team | support@planmorph.com</p>
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>PlanMorph Support Team | support@planmorph.software</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -1011,7 +1010,7 @@ public class EmailService : IEmailService
 
     public async Task SendTicketUpdatedEmailAsync(string ticketId, string subject, string clientId, string messageContent)
     {
-        var adminEmail = "admin@planmorph.com"; // This should come from configuration
+        var adminEmail = "admin@planmorph.software"; // This should come from configuration
         var emailSubject = $"Ticket Updated by Client - {subject}";
         var htmlBody = $@"
 <!DOCTYPE html>
@@ -1031,7 +1030,7 @@ public class EmailService : IEmailService
 <body>
     <div class=""container"">
         <div class=""header"">
-            <h1>📝 Ticket Updated by Client</h1>
+            <h1>Ticket updated by client</h1>
         </div>
         <div class=""content"">
             <p>A client has updated their support ticket and requires attention.</p>
@@ -1047,11 +1046,11 @@ public class EmailService : IEmailService
             
             <p>Please review and respond to the client's message promptly.</p>
             
-            <a href=""https://planmorph.com/admin/tickets/{ticketId}"" class=""button"">View & Respond</a>
+            <a href=""https://planmorph.software/admin/tickets/{ticketId}"" class=""button"">View & Respond</a>
         </div>
         <div class=""footer"">
             <p>PlanMorph Admin Dashboard</p>
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -1082,7 +1081,7 @@ public class EmailService : IEmailService
 <body>
     <div class=""container"">
         <div class=""header"">
-            <h1>✅ Ticket Closed</h1>
+            <h1>Ticket closed</h1>
         </div>
         <div class=""content"">
             <p>Hello,</p>
@@ -1102,11 +1101,11 @@ public class EmailService : IEmailService
                 <p>If you need further assistance with this issue, simply reply to this email and the ticket will be reopened.</p>
             </div>
             
-            <a href=""https://planmorph.com/support/feedback/{ticketId}"" class=""button"">Leave Feedback</a>
+            <a href=""https://planmorph.software/support/feedback/{ticketId}"" class=""button"">Leave Feedback</a>
         </div>
         <div class=""footer"">
-            <p>PlanMorph Support Team | support@planmorph.com</p>
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>PlanMorph Support Team | support@planmorph.software</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -1136,7 +1135,7 @@ public class EmailService : IEmailService
 <body>
     <div class=""container"">
         <div class=""header"">
-            <h1>🔄 Ticket Reopened</h1>
+            <h1>Ticket reopened</h1>
         </div>
         <div class=""content"">
             <p>Hello,</p>
@@ -1152,11 +1151,11 @@ public class EmailService : IEmailService
             
             <p>Our support team will review your new message and respond as soon as possible.</p>
             
-            <a href=""https://planmorph.com/support/tickets/{ticketId}"" class=""button"">View Ticket</a>
+            <a href=""https://planmorph.software/support/tickets/{ticketId}"" class=""button"">View Ticket</a>
         </div>
         <div class=""footer"">
-            <p>PlanMorph Support Team | support@planmorph.com</p>
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>PlanMorph Support Team | support@planmorph.software</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -1169,7 +1168,7 @@ public class EmailService : IEmailService
 
     public async Task SendStudentApplicationReceivedEmailAsync(string toEmail, string studentName)
     {
-        var subject = "Application Received - PlanMorph Mentorship Program";
+        var subject = "Application received — PlanMorph Mentorship Program";
         var htmlBody = $@"
 <!DOCTYPE html>
 <html>
@@ -1199,7 +1198,7 @@ public class EmailService : IEmailService
             </ul>
         </div>
         <div class=""footer"">
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -1210,7 +1209,7 @@ public class EmailService : IEmailService
 
     public async Task SendAdminNewStudentApplicationEmailAsync(string studentName, string studentType, string universityName)
     {
-        var subject = $"New Student Application - {studentName}";
+        var subject = $"New student application — {studentName}";
         var htmlBody = $@"
 <!DOCTYPE html>
 <html>
@@ -1237,21 +1236,21 @@ public class EmailService : IEmailService
                 <p><strong>Type:</strong> {studentType}</p>
                 <p><strong>University:</strong> {universityName}</p>
             </div>
-            <a href=""https://planmorph.com/admin"" class=""button"">Review Application</a>
+            <a href=""https://planmorph.software/admin"" class=""button"">Review Application</a>
         </div>
         <div class=""footer"">
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
 </html>";
 
-        await SendEmailAsync("admin@planmorph.com", subject, htmlBody);
+        await SendEmailAsync("admin@planmorph.software", subject, htmlBody);
     }
 
     public async Task SendStudentApplicationApprovedEmailAsync(string toEmail, string studentName)
     {
-        var subject = "Welcome to PlanMorph Mentorship Program!";
+        var subject = "Welcome to PlanMorph Mentorship Program";
         var htmlBody = $@"
 <!DOCTYPE html>
 <html>
@@ -1268,7 +1267,7 @@ public class EmailService : IEmailService
 <body>
     <div class=""container"">
         <div class=""header"">
-            <h1>Application Approved!</h1>
+            <h1>Application approved</h1>
         </div>
         <div class=""content"">
             <p>Hi {studentName},</p>
@@ -1279,12 +1278,12 @@ public class EmailService : IEmailService
                 <li>Log in to your student dashboard</li>
                 <li>Complete your profile</li>
                 <li>Wait for a mentor to assign you to a project</li>
-                <li>Start earning while you learn!</li>
+                <li>Start on assigned projects</li>
             </ul>
-            <a href=""https://planmorph.com/student/login"" class=""button"">Go to Student Portal</a>
+            <a href=""https://planmorph.software/student/login"" class=""button"">Go to Student Portal</a>
         </div>
         <div class=""footer"">
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -1325,7 +1324,7 @@ public class EmailService : IEmailService
             <p>If you have questions about this decision, please contact our support team.</p>
         </div>
         <div class=""footer"">
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -1381,13 +1380,13 @@ public class EmailService : IEmailService
                 <li>Log in to your student dashboard using the credentials above</li>
                 <li>Complete your profile</li>
                 <li>Wait for a mentor to assign you to a project</li>
-                <li>Start earning while you learn!</li>
+                <li>Start on assigned projects</li>
             </ul>
 
-            <a href=""https://planmorph.com/student/login"" class=""button"">Log In to Student Portal</a>
+            <a href=""https://planmorph.software/student/login"" class=""button"">Log In to Student Portal</a>
         </div>
         <div class=""footer"">
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -1398,7 +1397,7 @@ public class EmailService : IEmailService
 
     public async Task SendMentorStudentInvitationEmailAsync(string toEmail, string studentName, string mentorName)
     {
-        var subject = $"You've Been Invited to PlanMorph by {mentorName}!";
+        var subject = $"Invitation to PlanMorph from {mentorName}";
         var htmlBody = $@"
 <!DOCTYPE html>
 <html>
@@ -1428,10 +1427,10 @@ public class EmailService : IEmailService
                 <li>Earn money while building your portfolio</li>
                 <li>Get mentored feedback on your work</li>
             </ul>
-            <a href=""https://planmorph.com/student/register"" class=""button"">Accept Invitation & Register</a>
+            <a href=""https://planmorph.software/student/register"" class=""button"">Accept Invitation & Register</a>
         </div>
         <div class=""footer"">
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -1444,7 +1443,7 @@ public class EmailService : IEmailService
 
     public async Task SendMentorshipPaymentConfirmationEmailAsync(string toEmail, string clientName, string projectTitle, decimal amount, string projectNumber)
     {
-        var subject = $"Payment Confirmed - {projectNumber}";
+        var subject = $"Payment confirmed — {projectNumber}";
         var htmlBody = $@"
 <!DOCTYPE html>
 <html>
@@ -1475,7 +1474,7 @@ public class EmailService : IEmailService
             <p>Your funds will be held in escrow until you accept the final deliverable. You are fully protected throughout the process.</p>
         </div>
         <div class=""footer"">
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -1486,7 +1485,7 @@ public class EmailService : IEmailService
 
     public async Task SendMentorshipPaymentReleasedEmailAsync(string toEmail, string recipientName, string projectTitle, decimal amount, string role)
     {
-        var subject = $"Payment Released - {projectTitle}";
+        var subject = $"Payment released — {projectTitle}";
         var htmlBody = $@"
 <!DOCTYPE html>
 <html>
@@ -1503,11 +1502,11 @@ public class EmailService : IEmailService
 <body>
     <div class=""container"">
         <div class=""header"">
-            <h1>Payment Released!</h1>
+            <h1>Payment released</h1>
         </div>
         <div class=""content"">
             <p>Hi {recipientName},</p>
-            <p>Great news! Your {role.ToLower()} payment for the project <strong>{projectTitle}</strong> has been released.</p>
+            <p>Your {role.ToLower()} payment for the project <strong>{projectTitle}</strong> has been released.</p>
             <div class=""payment-box"">
                 <p><strong>Amount:</strong> KES {amount:N2}</p>
                 <p><strong>Role:</strong> {role}</p>
@@ -1516,7 +1515,7 @@ public class EmailService : IEmailService
             <p>Thank you for your contribution to this project. The payment will be processed to your account.</p>
         </div>
         <div class=""footer"">
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>
@@ -1528,7 +1527,7 @@ public class EmailService : IEmailService
     public async Task SendMentorshipRefundEmailAsync(string toEmail, string clientName, string projectTitle, decimal amount, string refundType, string? reason)
     {
         var reasonText = string.IsNullOrEmpty(reason) ? "" : $"<p><strong>Reason:</strong> {reason}</p>";
-        var subject = $"Refund Processed - {projectTitle}";
+        var subject = $"Refund processed — {projectTitle}";
         var htmlBody = $@"
 <!DOCTYPE html>
 <html>
@@ -1560,7 +1559,7 @@ public class EmailService : IEmailService
             <p>If you have questions about this refund, please contact our support team.</p>
         </div>
         <div class=""footer"">
-            <p>&copy; 2024 PlanMorph. Building Dreams Worldwide.</p>
+            <p>&copy; 2026 PlanMorph. Construction design, distributed.</p>
         </div>
     </div>
 </body>

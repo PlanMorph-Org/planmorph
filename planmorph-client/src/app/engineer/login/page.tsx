@@ -25,7 +25,7 @@ export default function EngineerLoginPage() {
       }
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify({ email, firstName, lastName, role }));
-      toast.success('Login successful!');
+      toast.success('Signed in.');
       router.push('/engineer/dashboard');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Login failed. Please check your credentials.');
@@ -60,10 +60,10 @@ export default function EngineerLoginPage() {
             </span>
           </Link>
           <h2 className="text-3xl font-display font-bold text-white leading-snug mb-4">
-            Verify designs. <br /><span className="text-gradient-blue">Protect builders.</span>
+            Gate publication. <br /><span className="text-gradient-blue">Define</span> the standard.
           </h2>
           <p className="text-white/35 leading-relaxed">
-            Review architectural designs for structural integrity and completeness. Your verification ensures every published plan is build-ready.
+            Review packages for structural integrity and documentation completeness. Your verification is the quality gate for what ships.
           </p>
         </motion.div>
       </div>

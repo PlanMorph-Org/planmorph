@@ -316,7 +316,7 @@ This document outlines the implementation of comprehensive legal documentation (
     "SmtpPort": "587",
     "SmtpUsername": "your-email@gmail.com",
     "SmtpPassword": "your-app-password",
-    "FromEmail": "noreply@planmorph.com",
+    "FromEmail": "noreply@planmorph.software",
     "FromName": "PlanMorph"
   }
 }
@@ -522,7 +522,7 @@ toast.success(
      "SmtpPort": "587",
      "SmtpUsername": "YOUR_EMAIL@gmail.com",
      "SmtpPassword": "YOUR_APP_PASSWORD",
-     "FromEmail": "noreply@planmorph.com",
+     "FromEmail": "noreply@planmorph.software",
      "FromName": "PlanMorph"
    }
    ```
@@ -668,7 +668,7 @@ toast.success(
 
 ### 6.3 Environment Configuration
 
-- [ ] `FromEmail` should use actual domain (e.g., `noreply@planmorph.com`)
+- [ ] `FromEmail` should use actual domain (e.g., `noreply@planmorph.software`)
 - [ ] Configure custom SMTP settings for production
 - [ ] Set up admin notification email address
 - [ ] Test admin email notifications are received

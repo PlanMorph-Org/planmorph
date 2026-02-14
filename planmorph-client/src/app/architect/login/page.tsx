@@ -25,7 +25,7 @@ export default function ArchitectLoginPage() {
       }
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify({ email, firstName, lastName, role }));
-      toast.success('Login successful!');
+      toast.success('Signed in.');
       router.push('/architect/dashboard');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Login failed. Please check your credentials.');
@@ -60,10 +60,10 @@ export default function ArchitectLoginPage() {
             </span>
           </Link>
           <h2 className="text-3xl font-display font-bold text-white leading-snug mb-4">
-            Your designs. <br /><span className="text-gradient-golden">Verified</span> and sold.
+            Publish packages. <br /><span className="text-gradient-golden">Distributed</span> at professional standard.
           </h2>
           <p className="text-white/35 leading-relaxed">
-            Upload your architectural designs, have them structurally verified, and earn 70% on every sale. Build your professional portfolio with commercially proven work.
+            Package your work, route it through engineer review, and earn 70% on every license. Build a catalog buyers can trust.
           </p>
         </motion.div>
       </div>

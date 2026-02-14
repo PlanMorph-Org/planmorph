@@ -48,7 +48,7 @@ export default function TermsOfServicePage() {
             {/* 3. Platform Description */}
             <section>
               <h2 className="text-lg font-semibold text-white mt-6 mb-3">3. Platform Description</h2>
-              <p className="text-white/50 leading-relaxed mb-3">PlanMorph is a global online marketplace connecting clients with architects and engineers.</p>
+              <p className="text-white/50 leading-relaxed mb-3">PlanMorph is a platform where architects and engineers publish and license build-ready design packages to clients.</p>
               <div className="glass-card-light rounded-lg p-4 border border-verified/10">
                 <h4 className="font-semibold text-verified/60 text-xs uppercase tracking-widest mb-1">Construction Services</h4>
                 <p className="text-white/40 text-xs">Currently available <strong className="text-white/60">ONLY in Kenya</strong>. Other countries: designs only.</p>
@@ -146,7 +146,7 @@ export default function TermsOfServicePage() {
               <h2 className="text-lg font-semibold text-white mt-6 mb-3">9. Dispute Resolution</h2>
               <div className="space-y-2">
                 {[
-                  { step: '1', title: 'Informal Resolution', desc: 'Contact disputes@planmorph.com. Resolution within 30 days.' },
+                  { step: '1', title: 'Informal Resolution', desc: 'Contact disputes@planmorph.software. Resolution within 30 days.' },
                   { step: '2', title: 'Mediation', desc: 'Neutral mediator. Costs shared equally.' },
                   { step: '3', title: 'Arbitration', desc: 'Kenya: NCIA. International: ICC. Decision is final.' },
                 ].map(item => (
@@ -180,10 +180,10 @@ export default function TermsOfServicePage() {
             <section>
               <h2 className="text-lg font-semibold text-white mt-6 mb-3">12. Contact Information</h2>
               <div className="glass-card-light rounded-lg p-5 space-y-2 text-xs">
-                <div><strong className="text-white/60">General Support:</strong> <span className="text-white/40">support@planmorph.com</span></div>
-                <div><strong className="text-white/60">Legal Inquiries:</strong> <span className="text-white/40">legal@planmorph.com</span></div>
-                <div><strong className="text-white/60">Dispute Resolution:</strong> <span className="text-white/40">disputes@planmorph.com</span></div>
-                <div><strong className="text-white/60">Copyright Claims:</strong> <span className="text-white/40">dmca@planmorph.com</span></div>
+                <div><strong className="text-white/60">General Support:</strong> <span className="text-white/40">support@planmorph.software</span></div>
+                <div><strong className="text-white/60">Legal Inquiries:</strong> <span className="text-white/40">legal@planmorph.software</span></div>
+                <div><strong className="text-white/60">Dispute Resolution:</strong> <span className="text-white/40">disputes@planmorph.software</span></div>
+                <div><strong className="text-white/60">Copyright Claims:</strong> <span className="text-white/40">dmca@planmorph.software</span></div>
               </div>
             </section>
 
@@ -197,7 +197,7 @@ export default function TermsOfServicePage() {
 
             <div className="mt-4">
               <p className="text-xs text-white/20 text-center">
-                Current version: <a href="/terms-of-service" className="text-golden/40 hover:text-golden transition-colors">planmorph.com/terms-of-service</a>
+                Current version: <a href="/terms-of-service" className="text-golden/40 hover:text-golden transition-colors">planmorph.software/terms-of-service</a>
               </p>
             </div>
           </div>

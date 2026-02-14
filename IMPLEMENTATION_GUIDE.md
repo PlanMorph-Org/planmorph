@@ -38,7 +38,7 @@ Add the following to `appsettings.json`:
   "SmtpPort": "587",
   "SmtpUsername": "your-email@gmail.com",
   "SmtpPassword": "your-app-password",
-  "FromEmail": "noreply@planmorph.com",
+  "FromEmail": "noreply@planmorph.software",
   "FromName": "PlanMorph"
 }
 ```
@@ -191,7 +191,7 @@ Already configured with:
   "SmtpPort": "587",
   "SmtpUsername": "YOUR_EMAIL",
   "SmtpPassword": "YOUR_APP_PASSWORD",
-  "FromEmail": "noreply@planmorph.com",
+  "FromEmail": "noreply@planmorph.software",
   "FromName": "PlanMorph"
 }
 ```
@@ -232,7 +232,7 @@ Response: `"role": "PendingApproval"` (no token)
 ```bash
 POST /api/auth/login
 {
-  "email": "admin@planmorph.com",
+  "email": "admin@planmorph.software",
   "password": "Admin@123"
 }
 ```
