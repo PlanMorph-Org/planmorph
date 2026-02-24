@@ -43,7 +43,7 @@ To access certain features of the Platform, you must create an account by provid
 **Architect & Engineer Accounts:**
 - Apply for professional verification
 - Upload and sell architectural designs
-- Track sales and earnings (70% commission)
+- Track sales and earnings under founding-member and tiered commission rules
 - Manage design portfolio
 - Respond to modification requests
 - Applicable to both individual architects and architectural firms
@@ -227,13 +227,22 @@ Violations may result in design removal and account termination.
 ### 5.3 Commission Structure
 
 **Design Sales (Architects & Engineers):**
-- Architects receive **70% of design sale price**
-- PlanMorph retains **30% platform commission**
-- Example: KES 50,000 design = KES 35,000 to architect, KES 15,000 to PlanMorph
+- Founding members (first 25 approved architects + first 25 approved engineers) have **no platform commission cuts** on design sales (taxes still apply)
+- Non-founding professionals are subject to **tiered design commission rates** based on sale amount:
+  - KES 0 - 20,000: **3%**
+  - KES 20,001 - 50,000: **4%**
+  - KES 50,001 - 100,000: **5%**
+  - KES 100,001 - 200,000: **6%**
+  - KES 200,001+: **7%**
+- Example (non-founding): KES 50,000 design at 4% = KES 2,000 platform commission and KES 48,000 professional net
 
 **Construction Contracts (Contractors):**
-- PlanMorph charges **2% commission on estimated construction costs**
-- Example: KES 5,000,000 construction project = KES 100,000 commission
+- PlanMorph charges **tiered contract referral commission** on estimated construction value:
+  - KES 0 - 500,000: **1.5%**
+  - KES 500,001 - 2,000,000: **2%**
+  - KES 2,000,001 - 10,000,000: **2.5%**
+  - KES 10,000,001+: **3%**
+- Example: KES 5,000,000 construction project falls in the 2.5% tier = KES 125,000 referral commission
 - Contractor receives remaining amount from client (less any direct costs)
 - Commission is calculated on the estimated construction cost provided by the architect
 
@@ -287,7 +296,7 @@ Violations may result in design removal and account termination.
 3. **Contract Creation:** Construction contract is created with estimated cost from design listing
 4. **Contractor Assignment:** PlanMorph admin assigns a verified contractor
 5. **Contract Execution:** Client and contractor agree on terms, timeline, and payment schedule
-6. **Platform Commission:** PlanMorph charges 2% commission on estimated construction cost
+6. **Platform Commission:** PlanMorph applies tiered contract referral commission on estimated construction value (1.5%-3%)
 7. **Project Completion:** Contractor completes project, client confirms completion
 
 ### 6.3 Construction Contract Terms
@@ -701,14 +710,16 @@ Nairobi, Kenya
 ## Appendix B: Commission Examples
 
 **Example 1: Design Sale**
-- Design Price: KES 75,000
-- Platform Commission (30%): KES 22,500
-- Architect Earnings (70%): KES 52,500
+- Design Price: KES 75,000 (non-founding professional)
+- Applicable Tier: 5%
+- Platform Commission: KES 3,750
+- Professional Earnings: KES 71,250
 
 **Example 2: Construction Contract**
 - Estimated Construction Cost: KES 8,000,000
-- Platform Commission (2%): KES 160,000
-- Contractor Receives (from client): KES 7,840,000 (plus any construction contract terms)
+- Applicable Referral Tier: 2.5%
+- Platform Commission: KES 200,000
+- Contractor Receives (from client): KES 7,800,000 (plus any construction contract terms)
 
 ---
 

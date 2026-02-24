@@ -8,7 +8,7 @@ export default function TermsOfServicePage() {
       <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="glass-card rounded-2xl p-8 border border-white/10">
           <h1 className="text-3xl font-display font-bold text-white mb-2">Terms of Service</h1>
-          <p className="text-xs text-white/30 mb-8">Last Updated: February 11, 2026</p>
+          <p className="text-xs text-white/30 mb-8">Last Updated: February 24, 2026</p>
 
           <div className="max-w-none space-y-8 text-sm">
             {/* 1. Agreement to Terms */}
@@ -34,7 +34,7 @@ export default function TermsOfServicePage() {
               <div className="grid md:grid-cols-3 gap-3">
                 {[
                   { title: 'Client', color: 'text-brand-accent', items: ['Browse & purchase designs', 'Download files', 'Request construction', 'Track orders'] },
-                  { title: 'Architect / Engineer', color: 'text-golden', items: ['Upload & sell designs', 'Earn 70% commission', 'Manage portfolio', 'Track earnings'] },
+                  { title: 'Architect / Engineer', color: 'text-golden', items: ['Upload & sell designs', 'Founding slot: no platform commission cuts (taxes apply)', 'Tiered commission model for non-founding members', 'Track earnings'] },
                   { title: 'Contractor', color: 'text-purple-400', items: ['Receive assignments', 'View project details', 'Construction (Kenya)'] },
                 ].map(card => (
                   <div key={card.title} className="glass-card-light rounded-lg p-4 border border-white/6">
@@ -61,9 +61,9 @@ export default function TermsOfServicePage() {
               <h3 className="text-base font-semibold text-white/70 mt-4 mb-3">Commission Structure</h3>
               <div className="glass-card-light rounded-lg p-5 space-y-4 border border-white/6">
                 {[
-                  { pct: '70%', title: 'Architects & Engineers', desc: 'Receive 70% of design sale price', bg: 'bg-brand-accent/20 text-brand-accent' },
-                  { pct: '30%', title: 'Platform Commission', desc: 'PlanMorph retains 30% for maintenance and support', bg: 'bg-verified/20 text-verified' },
-                  { pct: '2%', title: 'Construction Commission', desc: '2% on construction costs for contractor matching', bg: 'bg-purple-500/20 text-purple-400' },
+                  { pct: '50', title: 'Founding Professionals', desc: 'First 50 approved architects/engineers (25+25) have no platform commission cuts on design earnings (taxes still apply).', bg: 'bg-golden/20 text-golden' },
+                  { pct: '3–7%', title: 'Design Sale Commission', desc: 'For non-founding professionals, design commission is tiered by sale value: 3%, 4%, 5%, 6%, or 7%.', bg: 'bg-brand-accent/20 text-brand-accent' },
+                  { pct: '1.5–3%', title: 'Contract Referral Commission', desc: 'Referral commission on estimated contract value is tiered: 1.5%, 2%, 2.5%, or 3%.', bg: 'bg-purple-500/20 text-purple-400' },
                 ].map(item => (
                   <div key={item.pct} className="flex items-start gap-3">
                     <div className={`flex items-center justify-center h-10 w-10 rounded-lg ${item.bg} text-sm font-bold shrink-0`}>{item.pct}</div>
@@ -71,6 +71,10 @@ export default function TermsOfServicePage() {
                   </div>
                 ))}
               </div>
+
+              <p className="text-white/30 text-xs mt-3">
+                Current design tier bands: KES 0–20,000 (3%), 20,001–50,000 (4%), 50,001–100,000 (5%), 100,001–200,000 (6%), and 200,001+ (7%).
+              </p>
 
               <h3 className="text-base font-semibold text-white/70 mt-4 mb-2">Payment Processing</h3>
               <p className="text-white/40 text-xs">All payments processed in KES via Paystack. Multi-currency display for convenience.</p>
