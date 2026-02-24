@@ -301,7 +301,7 @@ export default function FloatingActionBar({
                                 {/* Admin Management Button */}
                                 {user?.role === 'Admin' && (
                                     <Link
-                                        href="/admin"
+                                        href="/admin/login"
                                         className={`text-xs font-medium rounded-lg px-2.5 py-1.5 transition-all duration-300 ${isActive('/admin') ? 'text-white bg-red-500/20 border border-red-500/30' : 'text-red-400 hover:text-red-300 hover:bg-red-500/10'
                                             }`}
                                         title="Administrative Dashboard - Management Access Only"

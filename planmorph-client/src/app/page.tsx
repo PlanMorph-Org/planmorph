@@ -154,7 +154,7 @@ export default function Home() {
               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/8 text-xs font-medium text-white/60 mb-8"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-verified animate-pulse" />
-              Build-ready design packages from verified professionals
+              Founding Program: First 50 professionals get 0% commission
             </motion.div>
 
             <motion.h1
@@ -200,6 +200,33 @@ export default function Home() {
                 Publish as a Professional
                 <span aria-hidden="true">&rarr;</span>
               </Link>
+              <Link
+                href="/register"
+                className="px-8 py-3.5 text-white/50 hover:text-white font-medium transition-all duration-300 inline-flex items-center gap-2 hover:bg-white/5 rounded-xl"
+              >
+                Register as a Client
+                <span aria-hidden="true">&rarr;</span>
+              </Link>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.58, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="mt-7 grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl"
+            >
+              <div className="glass-card-light rounded-xl border border-golden/30 p-4">
+                <p className="text-xs uppercase tracking-widest text-golden/80 mb-1">For Architects & Engineers</p>
+                <p className="text-sm text-white/70 leading-relaxed">
+                  The first 50 approved professionals (architects + engineers) get <span className="text-golden font-semibold">0% commission cuts</span> on earnings, plus early feature testing access and priority review cycles.
+                </p>
+              </div>
+              <div className="glass-card-light rounded-xl border border-brand-accent/30 p-4">
+                <p className="text-xs uppercase tracking-widest text-brand-accent/80 mb-1">For Clients</p>
+                <p className="text-sm text-white/70 leading-relaxed">
+                  Your dream home is coming to life on PlanMorph. Register now to be first in line for verified designs and upcoming build-ready home discoveries.
+                </p>
+              </div>
             </motion.div>
           </div>
 
