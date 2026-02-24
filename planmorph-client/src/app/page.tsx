@@ -154,7 +154,7 @@ export default function Home() {
               className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/8 text-xs font-medium text-white/60 mb-8"
             >
               <span className="w-1.5 h-1.5 rounded-full bg-verified animate-pulse" />
-              Founding Program: First 50 professionals get 0% commission
+              Founding Program: First 50 professionals get no platform commission cuts (taxes apply)
             </motion.div>
 
             <motion.h1
@@ -163,10 +163,7 @@ export default function Home() {
               transition={{ delay: 0.15, duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
               className="text-4xl md:text-5xl lg:text-7xl font-display font-bold tracking-tight leading-[1.08] mb-7"
             >
-              Build-ready architectural and structural design packages.
-              <br />
-              Delivered with professional oversight. Distributed like{' '}
-              <span className="text-gradient-golden">infrastructure</span>.
+              Build-ready architectural and structural design packages — reviewed, documented, and deployment-ready.
             </motion.h1>
 
             <motion.p
@@ -175,7 +172,7 @@ export default function Home() {
               transition={{ delay: 0.3, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
               className="text-lg md:text-xl text-white/40 mb-12 leading-relaxed max-w-2xl"
             >
-              PlanMorph is a construction technology company operating a verified marketplace for architectural and civil design packages engineer-reviewed, fully documented, and delivered instantly.
+              PlanMorph operates a verified construction marketplace where licensed professionals publish their work, clients access trusted designs, and projects move from concept to execution with clarity.
             </motion.p>
 
             <motion.div
@@ -201,10 +198,10 @@ export default function Home() {
                 <span aria-hidden="true">&rarr;</span>
               </Link>
               <Link
-                href="/register"
+                href="/student/register"
                 className="px-8 py-3.5 text-white/50 hover:text-white font-medium transition-all duration-300 inline-flex items-center gap-2 hover:bg-white/5 rounded-xl"
               >
-                Register as a Client
+                Join as a Student
                 <span aria-hidden="true">&rarr;</span>
               </Link>
             </motion.div>
@@ -218,13 +215,13 @@ export default function Home() {
               <div className="glass-card-light rounded-xl border border-golden/30 p-4">
                 <p className="text-xs uppercase tracking-widest text-golden/80 mb-1">For Architects & Engineers</p>
                 <p className="text-sm text-white/70 leading-relaxed">
-                  The first 50 approved professionals (architects + engineers) get <span className="text-golden font-semibold">0% commission cuts</span> on earnings, plus early feature testing access and priority review cycles.
+                  The first 50 approved professionals (architects + engineers) get <span className="text-golden font-semibold">no platform commission cuts</span> on earnings (taxes apply), plus early feature testing access and priority review cycles.
                 </p>
               </div>
               <div className="glass-card-light rounded-xl border border-brand-accent/30 p-4">
-                <p className="text-xs uppercase tracking-widest text-brand-accent/80 mb-1">For Clients</p>
+                <p className="text-xs uppercase tracking-widest text-brand-accent/80 mb-1">For Students</p>
                 <p className="text-sm text-white/70 leading-relaxed">
-                  Your dream home is coming to life on PlanMorph. Register now to be first in line for verified designs and upcoming build-ready home discoveries.
+                  Build your portfolio with real-world exposure by collaborating on practical projects and receiving guided reviews from professionals. Register now.
                 </p>
               </div>
             </motion.div>

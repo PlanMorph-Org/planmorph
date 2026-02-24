@@ -145,7 +145,7 @@ export default function ArchitectEarningsPage() {
       setFoundingStatus(response.data);
     } catch {
       if (!silent) {
-        toast.error('Failed to load 0% commission slot status.');
+        toast.error('Failed to load founding slot status.');
       }
     }
   };
@@ -201,13 +201,13 @@ export default function ArchitectEarningsPage() {
           <>
             {foundingStatus ? (
               <div className="glass-card rounded-xl p-4 mb-6 border border-white/10">
-                <p className="text-xs text-white/30 mb-1">0% Commission Founding Slots (Live)</p>
+                <p className="text-xs text-white/30 mb-1">No Platform Commission Cut Founding Slots (Live)</p>
                 <p className="text-sm text-white/75">
                   Architects: <span className="text-golden font-semibold">{foundingStatus.architect.filled}/{foundingStatus.architect.slotLimit}</span> filled ({foundingStatus.architect.remaining} left) • Engineers: <span className="text-slate-teal font-semibold">{foundingStatus.engineer.filled}/{foundingStatus.engineer.slotLimit}</span> filled ({foundingStatus.engineer.remaining} left)
                 </p>
                 <p className="text-xs text-white/50 mt-1">
                   {foundingStatus.currentUserIsFoundingMember
-                    ? `You are on 0% commission${foundingStatus.currentUserFoundingSlot ? ` (slot #${foundingStatus.currentUserFoundingSlot})` : ''}.`
+                    ? `You have no platform commission cuts on earnings (taxes apply)${foundingStatus.currentUserFoundingSlot ? ` (slot #${foundingStatus.currentUserFoundingSlot})` : ''}.`
                     : `Your role currently has ${foundingStatus.currentUserRole === 'Architect' ? foundingStatus.architect.remaining : foundingStatus.engineer.remaining} slot(s) remaining.`}
                 </p>
               </div>

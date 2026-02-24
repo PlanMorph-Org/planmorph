@@ -19,13 +19,13 @@ export default function Layout({ children }: LayoutProps) {
       <div className="border-b border-white/8 bg-brand-light/70">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
           <p className="text-xs text-white/70">
-            <span className="text-golden font-semibold">Founding Offer:</span> First 50 approved professionals (architects + engineers) get <span className="text-golden font-semibold">0% commission</span>, early feature testing, and priority review cycles.
+            <span className="text-golden font-semibold">Founding Offer:</span> First 50 approved professionals (architects + engineers) get <span className="text-golden font-semibold">no platform commission cuts on earnings</span> (taxes apply), plus early feature testing and priority review cycles.
           </p>
           <div className="flex flex-wrap items-center gap-3 text-xs">
             <Link href="/architect/register" className="text-golden/80 hover:text-golden transition-colors">Architect Register</Link>
             <Link href="/engineer/register" className="text-slate-teal/90 hover:text-slate-teal transition-colors">Engineer Register</Link>
             <span className="text-white/20">|</span>
-            <Link href="/register" className="text-brand-accent/90 hover:text-brand-accent transition-colors">Clients: Find your dream home soon — Register now</Link>
+            <Link href="/student/register" className="text-brand-accent/90 hover:text-brand-accent transition-colors">Students: Get real-world exposure — Join now</Link>
           </div>
         </div>
       </div>
