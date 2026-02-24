@@ -1,11 +1,14 @@
 @using PlanMorph.Core.Entities
 @inject PlanMorph.Admin.Services.AuthStateService AuthState
 
-<div class="top-row ps-3 navbar navbar-dark">
+<div class="top-row ps-3 navbar navbar-dark admin-brand-strip">
     <div class="container-fluid">
         <a class="navbar-brand d-flex align-items-center gap-2" href="">
             <img src="planmorph.svg" alt="PlanMorph" style="height: 28px; width: auto;" />
-            <span>PlanMorph Admin</span>
+            <div class="d-flex flex-column lh-1">
+                <span>PlanMorph Admin</span>
+                <small class="text-white-50">Management Console</small>
+            </div>
         </a>
         <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
@@ -14,37 +17,37 @@
 </div>
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
-    <nav class="nav flex-column">
+    <nav class="nav flex-column admin-nav">
         @if (AuthState.UserRole == UserRole.Admin)
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                    <span class="oi oi-home" aria-hidden="true"></span> Dashboard
+                    <span class="oi oi-home" aria-hidden="true"></span> <span>Dashboard</span>
                 </NavLink>
             </div>
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="designs">
-                    <span class="oi oi-brush" aria-hidden="true"></span> Designs
+                    <span class="oi oi-brush" aria-hidden="true"></span> <span>Designs</span>
                 </NavLink>
             </div>
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="verifications">
-                    <span class="oi oi-task" aria-hidden="true"></span> Verifications
+                    <span class="oi oi-task" aria-hidden="true"></span> <span>Verifications</span>
                 </NavLink>
             </div>
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="orders">
-                    <span class="oi oi-cart" aria-hidden="true"></span> Orders
+                    <span class="oi oi-cart" aria-hidden="true"></span> <span>Orders</span>
                 </NavLink>
             </div>
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="users">
-                    <span class="oi oi-people" aria-hidden="true"></span> Users
+                    <span class="oi oi-people" aria-hidden="true"></span> <span>Users & Applications</span>
                 </NavLink>
             </div>
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="contracts">
-                    <span class="oi oi-document" aria-hidden="true"></span> Construction Contracts
+                    <span class="oi oi-document" aria-hidden="true"></span> <span>Construction Contracts</span>
                 </NavLink>
             </div>
         }
@@ -52,7 +55,7 @@
         {
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="verifications" Match="NavLinkMatch.All">
-                    <span class="oi oi-task" aria-hidden="true"></span> Verifications
+                    <span class="oi oi-task" aria-hidden="true"></span> <span>Verifications</span>
                 </NavLink>
             </div>
         }

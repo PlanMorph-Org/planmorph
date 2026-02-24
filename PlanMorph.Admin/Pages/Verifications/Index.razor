@@ -11,11 +11,21 @@
 
 <PageTitle>Design Verifications - PlanMorph Admin</PageTitle>
 
-<h1>Design Verifications</h1>
+<section class="admin-hero mb-4">
+    <h1 class="mb-2">Design Verifications</h1>
+    @if (userRole == UserRole.Admin)
+    {
+        <p class="mb-0 text-white-50">Restricted management review area for architectural, structural, and BOQ verification audits.</p>
+    }
+    else
+    {
+        <p class="mb-0 text-white-50">Authorized verification workspace. Review and validate assigned technical submissions.</p>
+    }
+</section>
 
 @if (isLoading)
 {
-    <div class="text-center mt-5">
+    <div class="admin-surface text-center mt-4">
         <div class="spinner-border" role="status">
             <span class="visually-hidden">Loading...</span>
         </div>
@@ -23,8 +33,45 @@
 }
 else
 {
+    <div class="row g-3 mb-3">
+        <div class="col-md-6 col-xl-3">
+            <div class="admin-stat-card">
+                <div class="admin-stat-label">Visible Verifications</div>
+                <div class="admin-stat-value">@allCount</div>
+                <div class="admin-stat-sub">Based on your role access</div>
+            </div>
+        </div>
+        @if (userRole == UserRole.Architect || userRole == UserRole.Admin)
+        {
+            <div class="col-md-6 col-xl-3">
+                <div class="admin-stat-card info">
+                    <div class="admin-stat-label">Architectural</div>
+                    <div class="admin-stat-value">@architecturalCount</div>
+                    <div class="admin-stat-sub">Architecture-track checks</div>
+                </div>
+            </div>
+        }
+        @if (userRole == UserRole.Engineer || userRole == UserRole.Admin)
+        {
+            <div class="col-md-6 col-xl-3">
+                <div class="admin-stat-card success">
+                    <div class="admin-stat-label">Structural</div>
+                    <div class="admin-stat-value">@structuralCount</div>
+                    <div class="admin-stat-sub">Engineering-track checks</div>
+                </div>
+            </div>
+        }
+        <div class="col-md-6 col-xl-3">
+            <div class="admin-stat-card warning">
+                <div class="admin-stat-label">BOQ</div>
+                <div class="admin-stat-value">@boqCount</div>
+                <div class="admin-stat-sub">Quantity validation queue</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Filter Tabs -->
-    <ul class="nav nav-tabs mt-4 mb-3">
+    <ul class="nav nav-tabs admin-tabs mt-4 mb-3">
         <li class="nav-item">
             <button class="nav-link @(currentFilter == "All" ? "active" : "")" @onclick='() => FilterVerifications("All")'>
                 All (@allCount)
@@ -53,15 +100,15 @@ else
         </li>
     </ul>
 
-    <div class="row mt-4">
-        <div class="col-md-12">
+    <div class="admin-surface mt-4">
             @if (filteredVerifications == null || !filteredVerifications.Any())
             {
                 <div class="alert alert-info">No verifications found.</div>
             }
             else
             {
-                <table class="table table-striped">
+                <div class="table-responsive">
+                <table class="table table-striped admin-table align-middle">
                     <thead>
                         <tr>
                             <th>Design</th>
@@ -124,8 +171,8 @@ else
                         }
                     </tbody>
                 </table>
+                </div>
             }
-        </div>
     </div>
 }
 
@@ -134,8 +181,8 @@ else
 {
     <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
         <div class="modal-dialog modal-xl modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
+            <div class="modal-content admin-modal-content">
+                <div class="modal-header admin-modal-header">
                     <h5 class="modal-title">Review @GetVerificationTypeLabel(selectedVerification.VerificationType) Verification</h5>
                     <div class="ms-auto me-3">
                         <span class="badge bg-@GetVerificationTypeBadge(selectedVerification.VerificationType)">
@@ -144,12 +191,12 @@ else
                     </div>
                     <button type="button" class="btn-close" @onclick="CloseReviewModal"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body admin-modal-body">
                     <div class="row">
                         <!-- Design Info -->
                         <div class="col-md-4">
                             <h6>Design Information</h6>
-                            <div class="card mb-3">
+                            <div class="card mb-3 admin-modal-card">
                                 <div class="card-body">
                                     <p><strong>Title:</strong> @selectedVerification.DesignTitle</p>
                                     <p><strong>Uploaded By:</strong> @selectedVerification.ArchitectName</p>
@@ -190,7 +237,7 @@ else
                                     @foreach (var file in relevantFiles)
                                     {
                                         <div class="col-md-6">
-                                            <div class="card">
+                                            <div class="card admin-modal-card">
                                                 <div class="card-body">
                                                     <h6 class="card-title">
                                                         <span class="badge bg-@GetFileCategoryBadge(file.Category)">
@@ -221,7 +268,7 @@ else
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer admin-modal-footer">
                     @if (selectedVerification.Status == VerificationStatus.Pending.ToString() && CanVerify(selectedVerification.VerificationType))
                     {
                         <button class="btn btn-success" @onclick="() => VerifyDesign(selectedVerification.Id)">

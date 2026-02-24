@@ -1,47 +1,47 @@
 @page "/login"
 @using PlanMorph.Core.Entities
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <div class="d-flex align-items-center gap-2">
-                        <img src="planmorph.svg" alt="PlanMorph" style="height: 28px; width: auto;" />
-                        <h3 class="mb-0">PlanMorph Admin Login</h3>
-                    </div>
-                </div>
-                <div class="card-body">
-                    @if (!string.IsNullOrEmpty(errorMessage))
-                    {
-                        <div class="alert alert-danger">@errorMessage</div>
-                    }
-
-                    <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
-                        <DataAnnotationsValidator />
-                        <ValidationSummary />
-
-                        <div class="mb-3">
-                            <label class="form-label">Email</label>
-                            <InputText @bind-Value="loginModel.Email" class="form-control" />
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Password</label>
-                            <InputText @bind-Value="loginModel.Password" type="password" class="form-control" />
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100" disabled="@isLoading">
-                            @if (isLoading)
-                            {
-                                <span class="spinner-border spinner-border-sm me-2"></span>
-                            }
-                            Login
-                        </button>
-                    </EditForm>
-                </div>
+<div class="admin-login-page">
+    <div class="admin-login-card">
+        <div class="admin-login-header">
+            <div class="d-flex align-items-center gap-2">
+                <img src="planmorph.svg" alt="PlanMorph" style="height: 32px; width: auto;" />
+                <h3 class="mb-0">PlanMorph Admin Portal</h3>
             </div>
+            <p class="mb-0 text-white-50">Secure access for management personnel.</p>
         </div>
+
+        <div class="alert alert-danger admin-restricted-alert" role="alert">
+            <strong>Restricted Access:</strong> This portal is for management personnel only. All access attempts are logged and monitored.
+        </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+
+        <EditForm Model="loginModel" OnValidSubmit="HandleLogin" class="admin-login-form">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label class="form-label">Management Email</label>
+                <InputText @bind-Value="loginModel.Email" class="form-control" autocomplete="username" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Password</label>
+                <InputText @bind-Value="loginModel.Password" type="password" class="form-control" autocomplete="current-password" />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100" disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                }
+                Sign In to Management Portal
+            </button>
+        </EditForm>
     </div>
 </div>
 

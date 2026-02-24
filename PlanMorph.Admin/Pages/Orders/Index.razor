@@ -8,10 +8,43 @@
 
 <PageTitle>Orders - PlanMorph Admin</PageTitle>
 
-<h1>Order Management</h1>
+<section class="admin-hero mb-4">
+    <h1 class="mb-2">Order Management</h1>
+    <p class="mb-0 text-white-50">Track payment lifecycle, construction inclusion, and fulfillment status from a single operations view.</p>
+</section>
 
-<div class="row mt-4">
-    <div class="col-md-12">
+<div class="row g-3 mb-3">
+    <div class="col-md-6 col-xl-3">
+        <div class="admin-stat-card">
+            <div class="admin-stat-label">Total Orders</div>
+            <div class="admin-stat-value">@GetOrderCount()</div>
+            <div class="admin-stat-sub">All captured order records</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="admin-stat-card warning">
+            <div class="admin-stat-label">Pending</div>
+            <div class="admin-stat-value">@GetOrderCount("Pending")</div>
+            <div class="admin-stat-sub">Awaiting payment/processing</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="admin-stat-card success">
+            <div class="admin-stat-label">Paid</div>
+            <div class="admin-stat-value">@GetOrderCount("Paid")</div>
+            <div class="admin-stat-sub">Ready for completion</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="admin-stat-card info">
+            <div class="admin-stat-label">Completed</div>
+            <div class="admin-stat-value">@GetOrderCount("Completed")</div>
+            <div class="admin-stat-sub">Fulfilled orders</div>
+        </div>
+    </div>
+</div>
+
+<div class="admin-surface">
         @if (isLoading)
         {
             <div class="text-center">
@@ -30,7 +63,8 @@
             {
                 <div class="alert alert-danger">@actionErrorMessage</div>
             }
-            <table class="table table-striped">
+            <div class="table-responsive">
+            <table class="table table-striped admin-table align-middle">
                 <thead>
                     <tr>
                         <th>Order Number</th>
@@ -87,8 +121,8 @@
                     }
                 </tbody>
             </table>
+            </div>
         }
-    </div>
 </div>
 
 @if (selectedOrder != null)
@@ -208,6 +242,17 @@
             "Cancelled" => "danger",
             _ => "secondary"
         };
+    }
+
+    private int GetOrderCount(string? status = null)
+    {
+        if (orders == null)
+            return 0;
+
+        if (string.IsNullOrWhiteSpace(status))
+            return orders.Count;
+
+        return orders.Count(o => string.Equals(o.Status, status, StringComparison.OrdinalIgnoreCase));
     }
 
     public class OrderDto

@@ -12,11 +12,47 @@
 
 <PageTitle>Designs - PlanMorph Admin</PageTitle>
 
-<h1>Design Management</h1>
+<section class="admin-hero mb-4">
+    <h1 class="mb-2">Design Management</h1>
+    <p class="mb-0 text-white-50">
+        Manage uploaded designs, verification audit trails, approvals, and platform visibility.
+    </p>
+</section>
 
-<div class="d-flex justify-content-between align-items-center mt-3">
-    <div class="text-muted">
-        Manage all uploaded designs, approvals, and visibility.
+<div class="row g-3">
+    <div class="col-md-6 col-xl-3">
+        <div class="admin-stat-card">
+            <div class="admin-stat-label">All Designs</div>
+            <div class="admin-stat-value">@allCount</div>
+            <div class="admin-stat-sub">Total designs in catalog</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="admin-stat-card warning">
+            <div class="admin-stat-label">Pending Verification</div>
+            <div class="admin-stat-value">@pendingVerificationCount</div>
+            <div class="admin-stat-sub">Waiting for verifier actions</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="admin-stat-card info">
+            <div class="admin-stat-label">Pending Approval</div>
+            <div class="admin-stat-value">@pendingCount</div>
+            <div class="admin-stat-sub">Ready for admin decision</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="admin-stat-card success">
+            <div class="admin-stat-label">Approved</div>
+            <div class="admin-stat-value">@approvedCount</div>
+            <div class="admin-stat-sub">Live and purchasable</div>
+        </div>
+    </div>
+</div>
+
+<div class="admin-surface d-flex justify-content-between align-items-center mt-4">
+    <div class="text-white-50">
+        Restricted management tools: moderation, approval decisions, and bulk cleanup.
     </div>
     <button class="btn btn-sm btn-outline-danger" @onclick="PromptDeleteAllDesigns">
         <i class="bi bi-trash3"></i> Delete All Designs
@@ -24,7 +60,7 @@
 </div>
 
 <!-- Filter Tabs -->
-<ul class="nav nav-tabs mt-4 mb-3">
+<ul class="nav nav-tabs admin-tabs mt-4 mb-3">
     <li class="nav-item">
         <button class="nav-link @(currentFilter == "All" ? "active" : "")" @onclick='() => FilterDesigns("All")'>
             All Designs (@allCount)
@@ -52,8 +88,7 @@
     </li>
 </ul>
 
-<div class="row mt-4">
-    <div class="col-md-12">
+<div class="admin-surface mt-4">
         @if (isLoading)
         {
             <div class="text-center">
@@ -68,7 +103,8 @@
         }
         else
         {
-            <table class="table table-striped">
+            <div class="table-responsive">
+            <table class="table table-striped admin-table align-middle">
                 <thead>
                     <tr>
                         <th>Preview</th>
@@ -159,8 +195,8 @@
                     }
                 </tbody>
             </table>
+            </div>
         }
-    </div>
 </div>
 
 <!-- View Design Modal -->

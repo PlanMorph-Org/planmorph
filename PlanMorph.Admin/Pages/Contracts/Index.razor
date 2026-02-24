@@ -9,10 +9,43 @@
 
 <PageTitle>Construction Contracts - PlanMorph Admin</PageTitle>
 
-<h1>Construction Contracts</h1>
+<section class="admin-hero mb-4">
+    <h1 class="mb-2">Construction Contracts</h1>
+    <p class="mb-0 text-white-50">Coordinate contractor assignment, project execution, and contract lifecycle status.</p>
+</section>
 
-<div class="row mt-4">
-    <div class="col-md-12">
+<div class="row g-3 mb-3">
+    <div class="col-md-6 col-xl-3">
+        <div class="admin-stat-card">
+            <div class="admin-stat-label">Total Contracts</div>
+            <div class="admin-stat-value">@GetContractCount()</div>
+            <div class="admin-stat-sub">All construction engagements</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="admin-stat-card warning">
+            <div class="admin-stat-label">Pending/Assigned</div>
+            <div class="admin-stat-value">@(GetContractCount("Pending") + GetContractCount("Assigned"))</div>
+            <div class="admin-stat-sub">Awaiting or newly assigned</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="admin-stat-card info">
+            <div class="admin-stat-label">In Progress</div>
+            <div class="admin-stat-value">@GetContractCount("InProgress")</div>
+            <div class="admin-stat-sub">Active construction works</div>
+        </div>
+    </div>
+    <div class="col-md-6 col-xl-3">
+        <div class="admin-stat-card success">
+            <div class="admin-stat-label">Completed</div>
+            <div class="admin-stat-value">@GetContractCount("Completed")</div>
+            <div class="admin-stat-sub">Closed contracts</div>
+        </div>
+    </div>
+</div>
+
+<div class="admin-surface">
         @if (isLoading)
         {
             <div class="text-center">
@@ -27,7 +60,8 @@
         }
         else
         {
-            <table class="table table-striped">
+            <div class="table-responsive">
+            <table class="table table-striped admin-table align-middle">
                 <thead>
                     <tr>
                         <th>Order Number</th>
@@ -88,8 +122,8 @@
                     }
                 </tbody>
             </table>
+            </div>
         }
-    </div>
 </div>
 
 @if (showAssignModal)
@@ -251,6 +285,17 @@
             "Cancelled" => "danger",
             _ => "secondary"
         };
+    }
+
+    private int GetContractCount(string? status = null)
+    {
+        if (contracts == null)
+            return 0;
+
+        if (string.IsNullOrWhiteSpace(status))
+            return contracts.Count;
+
+        return contracts.Count(c => string.Equals(c.Status, status, StringComparison.OrdinalIgnoreCase));
     }
 
     public class ContractViewModel

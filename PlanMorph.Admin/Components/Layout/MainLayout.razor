@@ -4,21 +4,28 @@
 <div class="page">
     @if (AuthState.IsAuthenticated)
     {
-        <div class="sidebar">
+        <aside class="sidebar admin-sidebar">
             <NavMenu />
-        </div>
+        </aside>
     }
 
-    <main>
+    <main class="admin-main">
         @if (AuthState.IsAuthenticated)
         {
-            <div class="top-row px-4">
-                <span class="text-white">Welcome, @AuthState.UserName</span>
-                <button class="btn btn-sm btn-outline-light ms-3" @onclick="Logout">Logout</button>
-            </div>
+            <header class="top-row px-4 admin-top-row">
+                <div>
+                    <div class="admin-kicker">Operations Console</div>
+                    <div class="admin-page-title">PlanMorph Management Portal</div>
+                </div>
+                <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+                    <span class="management-chip">Restricted: Management Personnel Only</span>
+                    <span class="welcome-chip">@AuthState.UserName</span>
+                    <button class="btn btn-sm btn-outline-light" @onclick="Logout">Logout</button>
+                </div>
+            </header>
         }
 
-        <article class="content px-4">
+        <article class="content px-4 admin-content">
             @Body
         </article>
     </main>

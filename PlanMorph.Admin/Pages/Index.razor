@@ -1,6 +1,7 @@
 @page "/"
 @using Microsoft.EntityFrameworkCore
 @using PlanMorph.Core.Entities
+@using PlanMorph.Core.Entities.Mentorship
 @using PlanMorph.Core.Interfaces
 @using PlanMorph.Admin.Services
 @using PlanMorph.Infrastructure.Data
@@ -11,7 +12,7 @@
 
 @if (!AuthState.IsAuthenticated)
 {
-    <div class="text-center mt-5">
+    <div class="admin-surface text-center mt-5">
         <p>Redirecting to login...</p>
     </div>
 }
@@ -19,190 +20,179 @@ else
 {
     <PageTitle>Dashboard - PlanMorph Admin</PageTitle>
 
-    <h1>Dashboard</h1>
+    <section class="admin-hero mb-4">
+        <h1 class="mb-2">Management Dashboard</h1>
+        <p class="mb-0 text-white-50">Restricted access for management personnel only. Monitor approvals, applications, revenue, and operations from one console.</p>
+    </section>
 
-    <div class="row mt-4">
-        <div class="col-md-3">
-            <div class="card text-white bg-primary mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Total Designs</h5>
-                    <p class="card-text display-4">@totalDesigns</p>
-                    <small>@approvedDesigns approved</small>
-                </div>
+    <div class="row g-3">
+        <div class="col-md-6 col-xl-3">
+            <div class="admin-stat-card">
+                <div class="admin-stat-label">Total Designs</div>
+                <div class="admin-stat-value">@totalDesigns</div>
+                <div class="admin-stat-sub">@approvedDesigns approved</div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-warning mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Pending Approvals</h5>
-                    <p class="card-text display-4">@pendingApprovals</p>
-                    <a href="designs" class="btn btn-light btn-sm mt-2">Review Now</a>
-                </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="admin-stat-card warning">
+                <div class="admin-stat-label">Pending Design Approvals</div>
+                <div class="admin-stat-value">@pendingApprovals</div>
+                <a href="designs" class="btn btn-sm btn-outline-light mt-2">Review Designs</a>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-success mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Total Orders</h5>
-                    <p class="card-text display-4">@totalOrders</p>
-                    <small>KES @totalRevenue.ToString("N0") revenue</small>
-                </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="admin-stat-card success">
+                <div class="admin-stat-label">Total Orders</div>
+                <div class="admin-stat-value">@totalOrders</div>
+                <div class="admin-stat-sub">KES @totalRevenue.ToString("N0") paid revenue</div>
             </div>
         </div>
-        <div class="col-md-3">
-            <div class="card text-white bg-info mb-3">
-                <div class="card-body">
-                    <h5 class="card-title">Active Contracts</h5>
-                    <p class="card-text display-4">@activeContracts</p>
-                    <small>@pendingContracts pending assignment</small>
-                </div>
+        <div class="col-md-6 col-xl-3">
+            <div class="admin-stat-card info">
+                <div class="admin-stat-label">Active Contracts</div>
+                <div class="admin-stat-value">@activeContracts</div>
+                <div class="admin-stat-sub">@pendingContracts pending assignment</div>
             </div>
         </div>
     </div>
 
-    <!-- Pending Professional Applications Alert -->
-    @if (pendingProfessionals > 0)
+    @if (pendingProfessionals > 0 || pendingStudentApplications > 0 || pendingApprovals > 0)
     {
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <h5 class="alert-heading">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                @pendingProfessionals Pending Professional Application@(pendingProfessionals > 1 ? "s" : "")
-            </h5>
-            <p>There @(pendingProfessionals > 1 ? "are" : "is") @pendingProfessionals professional application@(pendingProfessionals > 1 ? "s" : "") waiting for your review.</p>
-            <hr>
-            <a href="users" class="btn btn-warning">Review Applications</a>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        <div class="admin-surface mt-4">
+            <h5 class="mb-3">Action Required</h5>
+            <div class="d-flex flex-wrap gap-2">
+                @if (pendingProfessionals > 0)
+                {
+                    <a href="users" class="btn btn-warning">@pendingProfessionals pending professional application@(pendingProfessionals > 1 ? "s" : "")</a>
+                }
+                @if (pendingStudentApplications > 0)
+                {
+                    <a href="users" class="btn btn-primary">@pendingStudentApplications pending student application@(pendingStudentApplications > 1 ? "s" : "")</a>
+                }
+                @if (pendingApprovals > 0)
+                {
+                    <a href="designs" class="btn btn-info">@pendingApprovals pending design approval@(pendingApprovals > 1 ? "s" : "")</a>
+                }
+            </div>
         </div>
     }
 
-    <!-- Pending Design Approvals Alert -->
-    @if (pendingApprovals > 0)
-    {
-        <div class="alert alert-info alert-dismissible fade show" role="alert">
-            <h5 class="alert-heading">
-                <i class="bi bi-info-circle-fill me-2"></i>
-                @pendingApprovals Design@(pendingApprovals > 1 ? "s" : "") Awaiting Approval
-            </h5>
-            <p>There @(pendingApprovals > 1 ? "are" : "is") @pendingApprovals design@(pendingApprovals > 1 ? "s" : "") submitted by architects waiting for approval.</p>
-            <hr>
-            <a href="designs" class="btn btn-info">Review Designs</a>
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    }
+    <div class="row g-3 mt-1">
+        <div class="col-lg-7">
+            <div class="admin-surface h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Revenue Overview</h5>
+                    <span class="text-white-50">Last 6 months</span>
+                </div>
+                <div class="revenue-metrics mb-3">
+                    <div><span>Total Revenue</span><strong>KES @totalRevenue.ToString("N0")</strong></div>
+                    <div><span>Platform Commission</span><strong>KES @platformCommission.ToString("N0")</strong></div>
+                    <div><span>Professional Payouts</span><strong>KES @architectPayouts.ToString("N0")</strong></div>
+                    <div><span>Construction Commissions</span><strong>KES @totalConstructionCommission.ToString("N0")</strong></div>
+                </div>
 
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Revenue Overview</h5>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <strong>Total Revenue:</strong> KES @totalRevenue.ToString("N0")
-                    </div>
-                    <div class="mb-3">
-                        <strong>Commission Earned (30%):</strong> KES @platformCommission.ToString("N0")
-                    </div>
-                    <div class="mb-3">
-                        <strong>Architect Payouts (70%):</strong> KES @architectPayouts.ToString("N0")
-                    </div>
-                    <div class="mb-3">
-                        <strong>This Month:</strong> KES @monthlyRevenue.ToString("N0")
-                    </div>
-                    <hr>
-                    <div class="mb-2">
-                        <strong>Construction Commissions (2%):</strong> KES @totalConstructionCommission.ToString("N0")
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h5>User Statistics</h5>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <strong>Total Users:</strong> @totalUsers
-                    </div>
-                    <div class="mb-3">
-                        <strong>Clients:</strong> @totalClients
-                    </div>
-                    <div class="mb-3">
-                        <strong>Architects:</strong> @totalArchitects (@activeArchitects active)
-                    </div>
-                    <div class="mb-3">
-                        <strong>Engineers:</strong> @totalEngineers (@activeEngineers active)
-                    </div>
-                    <div class="mb-3">
-                        <strong>Contractors:</strong> @totalContractors
-                    </div>
-                    <div class="mb-3">
-                        <strong>Pending Professional Applications:</strong> @pendingProfessionals
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Pending Orders</h5>
-                        @if (previousOrders != null && previousOrders.Any())
-                        {
-                            <button class="btn btn-sm btn-outline-primary" @onclick="OpenPreviousOrders">
-                                View Previous Orders
-                            </button>
-                        }
-                    </div>
-                </div>
-                <div class="card-body">
-                    @if (recentOrders == null || !recentOrders.Any())
+                <div class="admin-chart-bars">
+                    @foreach (var point in monthlyRevenuePoints)
                     {
-                        <p class="text-muted">No pending orders</p>
-                    }
-                    else
-                    {
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Order Number</th>
-                                        <th>Client</th>
-                                        <th>Design</th>
-                                        <th>Amount</th>
-                                        <th>Status</th>
-                                        <th>Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach (var order in recentOrders)
-                                    {
-                                        <tr>
-                                            <td>@order.OrderNumber</td>
-                                            <td>@order.ClientName</td>
-                                            <td>@order.DesignTitle</td>
-                                            <td>KES @order.Amount.ToString("N0")</td>
-                                            <td>
-                                                <span class="badge bg-@GetOrderStatusBadge(order.Status)">
-                                                    @order.Status
-                                                </span>
-                                            </td>
-                                            <td>@order.CreatedAt.ToShortDateString()</td>
-                                        </tr>
-                                    }
-                                </tbody>
-                            </table>
+                        <div class="bar-wrap">
+                            <div class="bar" style="height:@GetRevenueBarHeight(point.Amount)%"></div>
+                            <small>@point.Label</small>
                         </div>
-                        <a href="orders" class="btn btn-primary">Manage Orders</a>
                     }
+                </div>
+                <div class="text-white-50 mt-2">This month: KES @monthlyRevenue.ToString("N0")</div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="admin-surface h-100">
+                <h5 class="mb-3">User Mix</h5>
+
+                <div class="mix-row">
+                    <div class="mix-label">Clients</div>
+                    <div class="mix-bar"><span style="width:@GetPercent(totalClients, totalUsers)%"></span></div>
+                    <div class="mix-value">@totalClients</div>
+                </div>
+                <div class="mix-row">
+                    <div class="mix-label">Architects</div>
+                    <div class="mix-bar"><span class="accent-2" style="width:@GetPercent(totalArchitects, totalUsers)%"></span></div>
+                    <div class="mix-value">@totalArchitects</div>
+                </div>
+                <div class="mix-row">
+                    <div class="mix-label">Engineers</div>
+                    <div class="mix-bar"><span class="accent-3" style="width:@GetPercent(totalEngineers, totalUsers)%"></span></div>
+                    <div class="mix-value">@totalEngineers</div>
+                </div>
+                <div class="mix-row">
+                    <div class="mix-label">Contractors</div>
+                    <div class="mix-bar"><span class="accent-4" style="width:@GetPercent(totalContractors, totalUsers)%"></span></div>
+                    <div class="mix-value">@totalContractors</div>
+                </div>
+                <hr class="border-white-25" />
+                <div class="d-flex justify-content-between text-white-50">
+                    <span>Total Users</span>
+                    <strong class="text-white">@totalUsers</strong>
+                </div>
+                <div class="d-flex justify-content-between text-white-50 mt-1">
+                    <span>Pending Professional Applications</span>
+                    <strong class="text-white">@pendingProfessionals</strong>
+                </div>
+                <div class="d-flex justify-content-between text-white-50 mt-1">
+                    <span>Pending Student Applications</span>
+                    <strong class="text-white">@pendingStudentApplications</strong>
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="admin-surface mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Pending Orders</h5>
+            <div class="d-flex gap-2">
+                @if (previousOrders != null && previousOrders.Any())
+                {
+                    <button class="btn btn-sm btn-outline-light" @onclick="OpenPreviousOrders">View Previous Orders</button>
+                }
+                <a href="orders" class="btn btn-sm btn-primary">Manage Orders</a>
+            </div>
+        </div>
+
+        @if (recentOrders == null || !recentOrders.Any())
+        {
+            <p class="text-white-50 mb-0">No pending orders.</p>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table admin-table align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>Order Number</th>
+                            <th>Client</th>
+                            <th>Design</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var order in recentOrders)
+                        {
+                            <tr>
+                                <td>@order.OrderNumber</td>
+                                <td>@order.ClientName</td>
+                                <td>@order.DesignTitle</td>
+                                <td>KES @order.Amount.ToString("N0")</td>
+                                <td>
+                                    <span class="badge bg-@GetOrderStatusBadge(order.Status)">@order.Status</span>
+                                </td>
+                                <td>@order.CreatedAt.ToShortDateString()</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
     </div>
 
     @if (showPreviousOrders)
@@ -263,29 +253,14 @@ else
         </div>
     }
 
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <div class="card">
-                <div class="card-header">
-                    <h5>Quick Actions</h5>
-                </div>
-                <div class="card-body">
-                    <div class="d-grid gap-2 d-md-flex">
-                        <a href="designs" class="btn btn-outline-primary">
-                            <i class="bi bi-brush me-2"></i>Manage Designs
-                        </a>
-                        <a href="orders" class="btn btn-outline-success">
-                            <i class="bi bi-cart me-2"></i>View Orders
-                        </a>
-                        <a href="users" class="btn btn-outline-info">
-                            <i class="bi bi-people me-2"></i>Manage Users
-                        </a>
-                        <a href="contracts" class="btn btn-outline-warning">
-                            <i class="bi bi-document me-2"></i>Construction Contracts
-                        </a>
-                    </div>
-                </div>
-            </div>
+    <div class="admin-surface mt-4">
+        <h5 class="mb-3">Quick Actions</h5>
+        <div class="d-flex flex-wrap gap-2">
+            <a href="designs" class="btn btn-outline-primary">Manage Designs</a>
+            <a href="orders" class="btn btn-outline-success">View Orders</a>
+            <a href="users" class="btn btn-outline-info">Manage Users & Applications</a>
+            <a href="contracts" class="btn btn-outline-warning">Construction Contracts</a>
+            <a href="verifications" class="btn btn-outline-light">Design Verifications</a>
         </div>
     </div>
 }
@@ -311,9 +286,11 @@ else
     private int activeEngineers = 0;
     private int totalContractors = 0;
     private int pendingProfessionals = 0;
+    private int pendingStudentApplications = 0;
 
     private List<RecentOrderViewModel>? recentOrders;
     private List<RecentOrderViewModel>? previousOrders;
+    private List<MonthlyRevenuePoint> monthlyRevenuePoints = new();
     private bool showPreviousOrders;
 
     protected override async Task OnInitializedAsync()
@@ -365,6 +342,8 @@ else
                 && o.PaidAt.Value.Year == currentYear)
             .Sum(o => o.Amount);
 
+        monthlyRevenuePoints = BuildMonthlyRevenuePoints(orders);
+
         // Load contract statistics
         var contracts = await unitOfWork.ConstructionContracts.GetAllAsync();
         activeContracts = contracts.Count(c => c.Status == ContractStatus.InProgress || c.Status == ContractStatus.Assigned);
@@ -381,6 +360,7 @@ else
         activeEngineers = users.Count(u => u.Role == UserRole.Engineer && u.IsActive);
         pendingProfessionals = users.Count(u => (u.Role == UserRole.Architect || u.Role == UserRole.Engineer) && !u.IsActive);
         totalContractors = users.Count(u => u.Role == UserRole.Contractor);
+        pendingStudentApplications = await context.StudentApplications.CountAsync(s => s.Status == ApplicationStatus.Pending);
 
         // Load pending orders (dashboard only)
         recentOrders = new List<RecentOrderViewModel>();
@@ -451,6 +431,51 @@ else
         };
     }
 
+    private static List<MonthlyRevenuePoint> BuildMonthlyRevenuePoints(IEnumerable<Order> orders)
+    {
+        var points = new List<MonthlyRevenuePoint>();
+        var utcNow = DateTime.UtcNow;
+
+        for (var i = 5; i >= 0; i--)
+        {
+            var month = utcNow.AddMonths(-i);
+            var amount = orders
+                .Where(o => o.Status == OrderStatus.Paid
+                            && o.PaidAt.HasValue
+                            && o.PaidAt.Value.Month == month.Month
+                            && o.PaidAt.Value.Year == month.Year)
+                .Sum(o => o.Amount);
+
+            points.Add(new MonthlyRevenuePoint
+            {
+                Label = month.ToString("MMM"),
+                Amount = amount
+            });
+        }
+
+        return points;
+    }
+
+    private decimal GetRevenueBarHeight(decimal amount)
+    {
+        if (monthlyRevenuePoints == null || monthlyRevenuePoints.Count == 0)
+            return 5m;
+
+        var max = monthlyRevenuePoints.Max(p => p.Amount);
+        if (max <= 0)
+            return 5m;
+
+        return Math.Max(5m, Math.Round((amount / max) * 100m, 1));
+    }
+
+    private decimal GetPercent(int part, int total)
+    {
+        if (total <= 0)
+            return 0m;
+
+        return Math.Round((decimal)part / total * 100m, 1);
+    }
+
     public class RecentOrderViewModel
     {
         public string OrderNumber { get; set; } = "";
@@ -459,6 +484,12 @@ else
         public decimal Amount { get; set; }
         public string Status { get; set; } = "";
         public DateTime CreatedAt { get; set; }
+    }
+
+    public class MonthlyRevenuePoint
+    {
+        public string Label { get; set; } = "";
+        public decimal Amount { get; set; }
     }
 }
 
