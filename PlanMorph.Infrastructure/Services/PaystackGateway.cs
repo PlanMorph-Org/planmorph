@@ -42,7 +42,13 @@ public class PaystackGateway : IPaystackGateway
         }
     }
 
-    public async Task<PaymentInitializationResult?> InitializePaymentAsync(string email, decimal amount, string reference)
+    public async Task<PaymentInitializationResult?> InitializePaymentAsync(
+        string email,
+        decimal amount,
+        string reference,
+        string? subaccountCode = null,
+        int? transactionChargeKobo = null,
+        string? splitCode = null)
     {
         if (string.IsNullOrWhiteSpace(_secretKey))
             return null;
@@ -59,6 +65,18 @@ public class PaystackGateway : IPaystackGateway
             ["reference"] = reference,
             ["currency"] = _currency
         };
+
+        if (!string.IsNullOrWhiteSpace(subaccountCode))
+        {
+            payload["subaccount"] = subaccountCode;
+            payload["bearer"] = "subaccount";
+        }
+
+        if (transactionChargeKobo.HasValue && transactionChargeKobo.Value > 0)
+            payload["transaction_charge"] = transactionChargeKobo.Value;
+
+        if (!string.IsNullOrWhiteSpace(splitCode))
+            payload["split_code"] = splitCode;
 
         if (!string.IsNullOrWhiteSpace(_callbackUrl))
             payload["callback_url"] = _callbackUrl;
@@ -117,6 +135,128 @@ public class PaystackGateway : IPaystackGateway
             AmountKobo = result.Data.Amount,
             Currency = result.Data.Currency ?? string.Empty,
             Status = status
+        };
+    }
+
+    public async Task<IReadOnlyList<PaystackBankOptionDto>> GetTransferBanksAsync(string country = "kenya", string? currency = null)
+    {
+        if (string.IsNullOrWhiteSpace(_secretKey))
+            return Array.Empty<PaystackBankOptionDto>();
+
+        var resolvedCurrency = string.IsNullOrWhiteSpace(currency) ? _currency : currency;
+        var url = $"bank?country={Uri.EscapeDataString(country)}&currency={Uri.EscapeDataString(resolvedCurrency)}";
+
+        var response = await _httpClient.GetAsync(url);
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogWarning("Paystack bank lookup failed with status {Status}", response.StatusCode);
+            return Array.Empty<PaystackBankOptionDto>();
+        }
+
+        var body = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<PaystackBankListResponse>(body, _jsonOptions);
+        if (result?.Status != true || result.Data == null)
+            return Array.Empty<PaystackBankOptionDto>();
+
+        return result.Data
+            .Where(x => !string.IsNullOrWhiteSpace(x.Name) && !string.IsNullOrWhiteSpace(x.Code) && x.Active != false)
+            .OrderBy(x => x.Name)
+            .Select(x => new PaystackBankOptionDto
+            {
+                Name = x.Name!,
+                Code = x.Code!,
+                Type = x.Type
+            })
+            .ToList();
+    }
+
+    public async Task<PaystackTransferRecipientResult?> CreateTransferRecipientAsync(PaystackTransferRecipientRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(_secretKey))
+            return null;
+
+        if (string.IsNullOrWhiteSpace(request.Type)
+            || string.IsNullOrWhiteSpace(request.Name)
+            || string.IsNullOrWhiteSpace(request.AccountNumber))
+            return null;
+
+        var payload = new Dictionary<string, object?>
+        {
+            ["type"] = request.Type,
+            ["name"] = request.Name,
+            ["account_number"] = request.AccountNumber,
+            ["currency"] = request.Currency
+        };
+
+        if (!string.IsNullOrWhiteSpace(request.BankCode))
+            payload["bank_code"] = request.BankCode;
+
+        var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+        var response = await _httpClient.PostAsync("transferrecipient", content);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogWarning("Paystack transfer recipient creation failed with status {Status}", response.StatusCode);
+            return null;
+        }
+
+        var body = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<PaystackRecipientResponse>(body, _jsonOptions);
+
+        if (result?.Status != true || result.Data == null || string.IsNullOrWhiteSpace(result.Data.RecipientCode))
+            return null;
+
+        return new PaystackTransferRecipientResult
+        {
+            IsSuccessful = true,
+            RecipientCode = result.Data.RecipientCode,
+            Message = result.Message
+        };
+    }
+
+    public async Task<PaystackTransferResult?> InitiateTransferAsync(PaystackTransferRequest request)
+    {
+        if (string.IsNullOrWhiteSpace(_secretKey))
+            return null;
+
+        if (request.Amount <= 0
+            || string.IsNullOrWhiteSpace(request.RecipientCode)
+            || string.IsNullOrWhiteSpace(request.Reference))
+            return null;
+
+        var amountKobo = Convert.ToInt32(Math.Round(request.Amount * 100m, MidpointRounding.AwayFromZero));
+
+        var payload = new Dictionary<string, object?>
+        {
+            ["source"] = "balance",
+            ["amount"] = amountKobo,
+            ["recipient"] = request.RecipientCode,
+            ["reason"] = request.Reason,
+            ["reference"] = request.Reference
+        };
+
+        var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+        var response = await _httpClient.PostAsync("transfer", content);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogWarning("Paystack transfer initiation failed with status {Status}", response.StatusCode);
+            return null;
+        }
+
+        var body = await response.Content.ReadAsStringAsync();
+        var result = JsonSerializer.Deserialize<PaystackTransferResponse>(body, _jsonOptions);
+        if (result?.Status != true || result.Data == null)
+            return null;
+
+        var status = result.Data.Status?.Trim().ToLowerInvariant() ?? string.Empty;
+
+        return new PaystackTransferResult
+        {
+            IsSuccessful = status == "success",
+            IsPending = status == "pending" || status == "otp",
+            TransferCode = result.Data.TransferCode,
+            Message = result.Message
         };
     }
 
@@ -184,5 +324,68 @@ public class PaystackGateway : IPaystackGateway
 
         [JsonPropertyName("reference")]
         public string? Reference { get; set; }
+    }
+
+    private class PaystackRecipientResponse
+    {
+        [JsonPropertyName("status")]
+        public bool Status { get; set; }
+
+        [JsonPropertyName("message")]
+        public string? Message { get; set; }
+
+        [JsonPropertyName("data")]
+        public PaystackRecipientData? Data { get; set; }
+    }
+
+    private class PaystackRecipientData
+    {
+        [JsonPropertyName("recipient_code")]
+        public string? RecipientCode { get; set; }
+    }
+
+    private class PaystackTransferResponse
+    {
+        [JsonPropertyName("status")]
+        public bool Status { get; set; }
+
+        [JsonPropertyName("message")]
+        public string? Message { get; set; }
+
+        [JsonPropertyName("data")]
+        public PaystackTransferData? Data { get; set; }
+    }
+
+    private class PaystackTransferData
+    {
+        [JsonPropertyName("status")]
+        public string? Status { get; set; }
+
+        [JsonPropertyName("transfer_code")]
+        public string? TransferCode { get; set; }
+    }
+
+    private class PaystackBankListResponse
+    {
+        [JsonPropertyName("status")]
+        public bool Status { get; set; }
+
+        [JsonPropertyName("data")]
+        public List<PaystackBankData>? Data { get; set; }
+    }
+
+    private class PaystackBankData
+    {
+        [JsonPropertyName("name")]
+        public string? Name { get; set; }
+
+        [JsonPropertyName("code")]
+        public string? Code { get; set; }
+
+        [JsonPropertyName("type")]
+        public string? Type { get; set; }
+
+        [JsonPropertyName("active")]
+        public bool? Active { get; set; }
     }
 }

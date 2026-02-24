@@ -73,9 +73,10 @@
                     <tr>
                         <th>Preview</th>
                         <th>Title</th>
-                        <th>Architect</th>
+                        <th>Uploaded By</th>
                         <th>Category</th>
                         <th>Specs</th>
+                        <th>Verification Audit</th>
                         <th>Price</th>
                         <th>Status</th>
                         <th>Created</th>
@@ -100,12 +101,22 @@
                                 <strong>@design.Title</strong><br/>
                                 <small class="text-muted">@design.Description?.Substring(0, Math.Min(50, design.Description.Length))...</small>
                             </td>
-                            <td>@design.ArchitectName</td>
+                            <td>
+                                <div class="fw-semibold">@design.UploaderName</div>
+                                <small class="text-muted">Uploaded @design.CreatedAt.ToString("dd MMM yyyy, HH:mm")</small>
+                            </td>
                             <td>@design.Category</td>
                             <td>
                                 <small>
                                     @design.Bedrooms BR • @design.Bathrooms BA<br/>
                                     @design.SquareFootage sqft • @design.Stories story
+                                </small>
+                            </td>
+                            <td>
+                                <small>
+                                    <div><strong>Arch:</strong> @GetAuditSummary(design.ArchitecturalVerification)</div>
+                                    <div><strong>Struct:</strong> @GetAuditSummary(design.StructuralVerification)</div>
+                                    <div><strong>BOQ:</strong> @GetAuditSummary(design.BoqVerification)</div>
                                 </small>
                             </td>
                             <td>
@@ -221,8 +232,19 @@
                         <div class="col-md-7">
                             <!-- Architect Info -->
                             <div class="mb-3">
-                                <small class="text-muted">Architect</small>
-                                <p class="mb-0 fw-semibold">@selectedDesign.ArchitectName</p>
+                                <small class="text-muted">Uploaded By</small>
+                                <p class="mb-0 fw-semibold">@selectedDesign.UploaderName</p>
+                                <small class="text-muted">Uploaded @selectedDesign.CreatedAt.ToString("dd MMM yyyy, HH:mm")</small>
+                            </div>
+
+                            <!-- Verification Audit -->
+                            <div class="card bg-light mb-3">
+                                <div class="card-body py-2">
+                                    <h6 class="card-title mb-2">Verification Audit Trail</h6>
+                                    <div><small><strong>Architectural:</strong> @GetAuditSummary(selectedDesign.ArchitecturalVerification)</small></div>
+                                    <div><small><strong>Structural:</strong> @GetAuditSummary(selectedDesign.StructuralVerification)</small></div>
+                                    <div><small><strong>BOQ:</strong> @GetAuditSummary(selectedDesign.BoqVerification)</small></div>
+                                </div>
                             </div>
 
                             <!-- Description -->
@@ -280,7 +302,7 @@
                             {
                                 <div class="mb-3">
                                     <h6>Uploaded Files (@selectedDesignFiles.Count)</h6>
-                                    <small class="text-muted d-block mb-2">Uploaded by @selectedDesign.ArchitectName</small>
+                                    <small class="text-muted d-block mb-2">Uploaded by @selectedDesign.UploaderName</small>
                                     @if (!string.IsNullOrWhiteSpace(fileUrlError))
                                     {
                                         <div class="alert alert-warning py-2">@fileUrlError</div>
@@ -462,6 +484,15 @@
         var designs = await unitOfWork.Designs.GetAllAsync();
         var designIds = designs.Select(d => d.Id).ToList();
         var verifications = await unitOfWork.DesignVerifications.FindAsync(v => designIds.Contains(v.DesignId));
+        var verifierUserIds = verifications
+            .Where(v => v.VerifierUserId.HasValue)
+            .Select(v => v.VerifierUserId!.Value)
+            .Distinct()
+            .ToList();
+        var verifierUsers = verifierUserIds.Any()
+            ? await unitOfWork.Users.FindAsync(u => verifierUserIds.Contains(u.Id))
+            : Enumerable.Empty<User>();
+        var verifierLookup = verifierUsers.ToDictionary(u => u.Id, u => $"{u.FirstName} {u.LastName}".Trim());
         var verificationLookup = verifications
             .GroupBy(v => v.DesignId)
             .ToDictionary(g => g.Key, g => g.ToList());
@@ -477,6 +508,7 @@
                 ? list
                 : new List<DesignVerification>();
             var readyForApproval = IsReadyForApproval(designVerifications);
+            var uploaderName = architect != null ? $"{architect.FirstName} {architect.LastName}" : "Unknown";
 
             if (readyForApproval && design.Status == DesignStatus.PendingVerification)
             {
@@ -490,7 +522,8 @@
                 Id = design.Id,
                 Title = design.Title,
                 Description = design.Description,
-                ArchitectName = architect != null ? $"{architect.FirstName} {architect.LastName}" : "Unknown",
+                ArchitectName = uploaderName,
+                UploaderName = uploaderName,
                 Category = design.Category.ToString(),
                 Bedrooms = design.Bedrooms,
                 Bathrooms = design.Bathrooms,
@@ -501,7 +534,10 @@
                 Status = design.Status.ToString(),
                 CreatedAt = design.CreatedAt,
                 PreviewImageUrl = previewImage?.StorageUrl,
-                IsReadyForApproval = readyForApproval
+                IsReadyForApproval = readyForApproval,
+                ArchitecturalVerification = BuildVerificationAudit(designVerifications, verifierLookup, VerificationType.Architectural),
+                StructuralVerification = BuildVerificationAudit(designVerifications, verifierLookup, VerificationType.Structural),
+                BoqVerification = BuildBoqVerificationAudit(designVerifications, verifierLookup)
             });
         }
 
@@ -864,12 +900,84 @@
         return $"{bytes / (1024.0 * 1024.0):F1} MB";
     }
 
+    private static VerificationAuditSummary BuildVerificationAudit(
+        IEnumerable<DesignVerification> verifications,
+        Dictionary<Guid, string> verifierLookup,
+        VerificationType type)
+    {
+        var verification = verifications
+            .Where(v => v.VerificationType == type)
+            .OrderByDescending(v => v.VerifiedAt ?? v.CreatedAt)
+            .FirstOrDefault();
+
+        return BuildSummary(verification, verifierLookup);
+    }
+
+    private static VerificationAuditSummary BuildBoqVerificationAudit(
+        IEnumerable<DesignVerification> verifications,
+        Dictionary<Guid, string> verifierLookup)
+    {
+        var boqVerification = verifications
+            .Where(v => v.VerificationType == VerificationType.BOQ
+                || v.VerificationType == VerificationType.BOQArchitect
+                || v.VerificationType == VerificationType.BOQEngineer)
+            .OrderByDescending(v => v.VerifiedAt ?? v.CreatedAt)
+            .FirstOrDefault();
+
+        return BuildSummary(boqVerification, verifierLookup);
+    }
+
+    private static VerificationAuditSummary BuildSummary(DesignVerification? verification, Dictionary<Guid, string> verifierLookup)
+    {
+        if (verification == null)
+        {
+            return new VerificationAuditSummary
+            {
+                Status = "Not Requested"
+            };
+        }
+
+        return new VerificationAuditSummary
+        {
+            Status = verification.Status.ToString(),
+            VerifiedAt = verification.VerifiedAt,
+            VerifierName = verification.VerifierUserId.HasValue && verifierLookup.TryGetValue(verification.VerifierUserId.Value, out var name)
+                ? name
+                : null
+        };
+    }
+
+    private static string GetAuditSummary(VerificationAuditSummary summary)
+    {
+        if (summary.Status == nameof(VerificationStatus.Verified))
+        {
+            var verifier = string.IsNullOrWhiteSpace(summary.VerifierName) ? "Unknown verifier" : summary.VerifierName;
+            var verifiedAt = summary.VerifiedAt?.ToString("dd MMM yyyy, HH:mm") ?? "time unavailable";
+            return $"Verified by {verifier} on {verifiedAt}";
+        }
+
+        if (summary.Status == nameof(VerificationStatus.Rejected))
+        {
+            var verifier = string.IsNullOrWhiteSpace(summary.VerifierName) ? "Unknown reviewer" : summary.VerifierName;
+            var reviewedAt = summary.VerifiedAt?.ToString("dd MMM yyyy, HH:mm") ?? "time unavailable";
+            return $"Rejected by {verifier} on {reviewedAt}";
+        }
+
+        if (summary.Status == nameof(VerificationStatus.Pending))
+        {
+            return "Pending review";
+        }
+
+        return summary.Status;
+    }
+
     public class DesignViewModel
     {
         public Guid Id { get; set; }
         public string Title { get; set; } = "";
         public string Description { get; set; } = "";
         public string ArchitectName { get; set; } = "";
+        public string UploaderName { get; set; } = "";
         public string Category { get; set; } = "";
         public int Bedrooms { get; set; }
         public int Bathrooms { get; set; }
@@ -881,6 +989,16 @@
         public DateTime CreatedAt { get; set; }
         public string? PreviewImageUrl { get; set; }
         public bool IsReadyForApproval { get; set; }
+        public VerificationAuditSummary ArchitecturalVerification { get; set; } = new();
+        public VerificationAuditSummary StructuralVerification { get; set; } = new();
+        public VerificationAuditSummary BoqVerification { get; set; } = new();
+    }
+
+    public class VerificationAuditSummary
+    {
+        public string Status { get; set; } = "Not Requested";
+        public string? VerifierName { get; set; }
+        public DateTime? VerifiedAt { get; set; }
     }
 
     public class SignedUrlResponse

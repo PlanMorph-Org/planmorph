@@ -196,9 +196,12 @@ public class DesignService : IDesignService
             SquareFootage = design.SquareFootage,
             Stories = design.Stories,
             Category = design.Category.ToString(),
+            Status = design.Status.ToString(),
             EstimatedConstructionCost = design.EstimatedConstructionCost,
             PreviewImages = previewImages,
-            PreviewVideos = previewVideos
+            PreviewVideos = previewVideos,
+            CreatedAt = design.CreatedAt,
+            UpdatedAt = design.UpdatedAt
         };
     }
 

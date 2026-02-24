@@ -401,10 +401,21 @@ public class EmailService : IEmailService
         await SendEmailAsync(toEmail, subject, htmlBody);
     }
 
-    public async Task SendPasswordResetEmailAsync(string toEmail, string firstName, string resetToken)
+    public async Task SendPasswordResetEmailAsync(string toEmail, string firstName, string resetUrl, bool isProfessional = false, string? verificationCode = null)
     {
-        var resetUrl = $"https://planmorph.software/reset-password?token={resetToken}";
         var subject = "Reset your password — PlanMorph";
+        var verificationCodeBlock = isProfessional && !string.IsNullOrWhiteSpace(verificationCode)
+            ? $@"
+            <div class=""warning"">
+                <strong>Verification Code:</strong> {verificationCode}<br/>
+                You must enter this code to complete your password reset.
+            </div>"
+            : string.Empty;
+
+        var portalNote = isProfessional
+            ? "This professional account reset uses additional verification and expires in 10 minutes."
+            : "This link will expire in 1 hour.";
+
         var htmlBody = $@"
 <!DOCTYPE html>
 <html>
@@ -434,8 +445,10 @@ public class EmailService : IEmailService
             <a href=""{resetUrl}"" class=""button"">Reset Password</a>
 
             <div class=""warning"">
-                <strong>Security Note:</strong> This link will expire in 1 hour. If you didn't request a password reset, please ignore this email or contact support if you have concerns.
+                <strong>Security Note:</strong> {portalNote} If you didn't request a password reset, please ignore this email or contact support if you have concerns.
             </div>
+
+            {verificationCodeBlock}
 
             <p>If the button doesn't work, copy and paste this link into your browser:</p>
             <p style=""word-break: break-all; color: #3b82f6;"">{resetUrl}</p>

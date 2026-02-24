@@ -12,6 +12,12 @@ public interface IUnitOfWork : IDisposable
     IRepository<ConstructionContract> ConstructionContracts { get; }
     IRepository<ModificationRequest> ModificationRequests { get; }
     IRepository<DesignVerification> DesignVerifications { get; }
+    IRepository<PayoutRequest> PayoutRequests { get; }
+    IRepository<Wallet> Wallets { get; }
+    IRepository<WalletTransaction> WalletTransactions { get; }
+    IRepository<CommissionTier> CommissionTiers { get; }
+    IRepository<FinancialAuditLog> FinancialAuditLogs { get; }
+    IRepository<PaystackEventLog> PaystackEventLogs { get; }
     IRepository<User> Users { get; }
     IRepository<Ticket> Tickets { get; }
     IRepository<TicketMessage> TicketMessages { get; }

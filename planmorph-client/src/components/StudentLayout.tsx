@@ -11,6 +11,7 @@ interface StudentLayoutProps {
 const navItems = [
   { href: '/student/dashboard', label: 'Dashboard' },
   { href: '/student/projects', label: 'Projects' },
+  { href: '/student/earnings', label: 'Earnings' },
   { href: '/student/profile', label: 'Profile' },
 ];
 

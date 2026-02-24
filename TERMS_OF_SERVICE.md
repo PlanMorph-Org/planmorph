@@ -1,6 +1,6 @@
 # PlanMorph Terms of Service
 
-**Last Updated: February 11, 2026**
+**Last Updated: February 24, 2026**
 
 ## 1. Agreement to Terms
 
@@ -152,6 +152,12 @@ By uploading a design to PlanMorph, Architects represent and warrant that:
 - Suspected copyright infringement
 
 Rejected designs may be revised and resubmitted for review.
+
+**Verification Attribution and Responsibility:**
+- PlanMorph may record and display who uploaded a design and who verified each component (architectural, structural, and BOQ), including verification timestamps.
+- A "verified" status means only that a designated reviewer completed a platform review workflow for that component.
+- The design uploader and the verifying licensed professional(s) remain solely responsible for technical accuracy, code compliance, safety, and fitness for use.
+- PlanMorph does not assume professional liability for design faults, omissions, construction failures, or losses arising from reliance on uploaded or verified designs.
 
 ### 4.3 Intellectual Property Ownership
 
@@ -423,6 +429,10 @@ THE PLATFORM IS PROVIDED ON AN "AS IS" AND "AS AVAILABLE" BASIS WITHOUT WARRANTI
 - Ensuring designs comply with local building codes
 - Modifying designs as required for site-specific conditions
 
+**Verification Status Clarification:**
+- Platform verification records identify reviewer identity and timing for audit transparency.
+- Verification records are informational and do not create a warranty, guarantee, certification, or assumption of professional duty by PlanMorph.
+
 ### 9.3 Third-Party Services
 
 We are not responsible for:
@@ -459,7 +469,9 @@ Clients enter into construction contracts directly with contractors. PlanMorph's
 ### 9.6 Architect and Engineer Professional Liability
 
 - Architects and engineers are responsible for the professional quality of their designs
+- Architects/engineers who verify architectural, structural, or BOQ components are responsible for their own verification decisions and professional judgments
 - PlanMorph does not provide architectural or engineering services
+- PlanMorph is not liable for errors in uploaded files or in any verified component, including architectural, structural, or BOQ faults
 - Clients should verify architect credentials and design suitability
 - Professional liability insurance is recommended for architects
 

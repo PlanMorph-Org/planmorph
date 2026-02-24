@@ -10,6 +10,8 @@ interface EngineerLayoutProps {
 
 const navItems = [
   { href: '/engineer/dashboard', label: 'Dashboard' },
+  { href: '/engineer/upload', label: 'Upload' },
+  { href: '/engineer/earnings', label: 'Earnings' },
 ];
 
 export default function EngineerLayout({ children }: EngineerLayoutProps) {

@@ -57,7 +57,7 @@ else
         <div class="col-md-12">
             @if (filteredVerifications == null || !filteredVerifications.Any())
             {
-                <div class="alert alert-info">No pending verifications found.</div>
+                <div class="alert alert-info">No verifications found.</div>
             }
             else
             {
@@ -65,9 +65,11 @@ else
                     <thead>
                         <tr>
                             <th>Design</th>
-                            <th>Architect</th>
+                            <th>Uploaded By</th>
                             <th>Verification Type</th>
                             <th>Status</th>
+                            <th>Verified By</th>
+                            <th>Verified At</th>
                             <th>Submitted</th>
                             <th>Actions</th>
                         </tr>
@@ -91,7 +93,27 @@ else
                                     </span>
                                 </td>
                                 <td>
-                                    <small>@verification.CreatedAt.ToShortDateString()</small>
+                                    @if (!string.IsNullOrWhiteSpace(verification.VerifiedByName))
+                                    {
+                                        <small>@verification.VerifiedByName</small>
+                                    }
+                                    else
+                                    {
+                                        <small class="text-muted">-</small>
+                                    }
+                                </td>
+                                <td>
+                                    @if (verification.VerifiedAt.HasValue)
+                                    {
+                                        <small>@verification.VerifiedAt.Value.ToString("dd MMM yyyy, HH:mm")</small>
+                                    }
+                                    else
+                                    {
+                                        <small class="text-muted">-</small>
+                                    }
+                                </td>
+                                <td>
+                                    <small>@verification.CreatedAt.ToString("dd MMM yyyy")</small>
                                 </td>
                                 <td>
                                     <button class="btn btn-sm btn-primary me-1" @onclick="() => ViewVerification(verification.Id)">
@@ -130,8 +152,17 @@ else
                             <div class="card mb-3">
                                 <div class="card-body">
                                     <p><strong>Title:</strong> @selectedVerification.DesignTitle</p>
-                                    <p><strong>Architect:</strong> @selectedVerification.ArchitectName</p>
+                                    <p><strong>Uploaded By:</strong> @selectedVerification.ArchitectName</p>
                                     <p><strong>Submitted:</strong> @selectedVerification.CreatedAt.ToString("dd MMM yyyy")</p>
+                                    <p><strong>Verification Status:</strong> @selectedVerification.Status</p>
+                                    @if (!string.IsNullOrWhiteSpace(selectedVerification.VerifiedByName))
+                                    {
+                                        <p><strong>Verified By:</strong> @selectedVerification.VerifiedByName</p>
+                                    }
+                                    @if (selectedVerification.VerifiedAt.HasValue)
+                                    {
+                                        <p><strong>Verified At:</strong> @selectedVerification.VerifiedAt.Value.ToString("dd MMM yyyy, HH:mm")</p>
+                                    }
                                 </div>
                             </div>
 
@@ -255,6 +286,15 @@ else
         var unitOfWork = new UnitOfWork(context);
 
         var verifications = await unitOfWork.DesignVerifications.GetAllAsync();
+        var verifierUserIds = verifications
+            .Where(v => v.VerifierUserId.HasValue)
+            .Select(v => v.VerifierUserId!.Value)
+            .Distinct()
+            .ToList();
+        var verifierUsers = verifierUserIds.Any()
+            ? await unitOfWork.Users.FindAsync(u => verifierUserIds.Contains(u.Id))
+            : Enumerable.Empty<User>();
+        var verifierLookup = verifierUsers.ToDictionary(u => u.Id, u => $"{u.FirstName} {u.LastName}".Trim());
         allVerifications = new List<VerificationViewModel>();
 
         foreach (var verification in verifications.OrderByDescending(v => v.CreatedAt))
@@ -277,17 +317,21 @@ else
                 VerificationType = verification.VerificationType.ToString(),
                 Status = verification.Status.ToString(),
                 Comments = verification.Comments,
-                CreatedAt = verification.CreatedAt
+                CreatedAt = verification.CreatedAt,
+                VerifiedAt = verification.VerifiedAt,
+                VerifiedByName = verification.VerifierUserId.HasValue && verifierLookup.TryGetValue(verification.VerifierUserId.Value, out var name)
+                    ? name
+                    : null
             });
         }
 
         // Calculate counts
-        allCount = allVerifications.Count(v => v.Status == VerificationStatus.Pending.ToString());
-        architecturalCount = allVerifications.Count(v => v.VerificationType == VerificationType.Architectural.ToString() && v.Status == VerificationStatus.Pending.ToString());
-        structuralCount = allVerifications.Count(v => v.VerificationType == VerificationType.Structural.ToString() && v.Status == VerificationStatus.Pending.ToString());
-        boqCount = allVerifications.Count(v => IsBqType(v.VerificationType) && v.Status == VerificationStatus.Pending.ToString());
+        allCount = allVerifications.Count;
+        architecturalCount = allVerifications.Count(v => v.VerificationType == VerificationType.Architectural.ToString());
+        structuralCount = allVerifications.Count(v => v.VerificationType == VerificationType.Structural.ToString());
+        boqCount = allVerifications.Count(v => IsBqType(v.VerificationType));
 
-        filteredVerifications = allVerifications.Where(v => v.Status == VerificationStatus.Pending.ToString()).ToList();
+        filteredVerifications = allVerifications;
         isLoading = false;
     }
 
@@ -297,10 +341,10 @@ else
 
         filteredVerifications = filter switch
         {
-            "Architectural" => allVerifications?.Where(v => v.VerificationType == VerificationType.Architectural.ToString() && v.Status == VerificationStatus.Pending.ToString()).ToList(),
-            "Structural" => allVerifications?.Where(v => v.VerificationType == VerificationType.Structural.ToString() && v.Status == VerificationStatus.Pending.ToString()).ToList(),
-            "BOQ" => allVerifications?.Where(v => IsBqType(v.VerificationType) && v.Status == VerificationStatus.Pending.ToString()).ToList(),
-            _ => allVerifications?.Where(v => v.Status == VerificationStatus.Pending.ToString()).ToList()
+            "Architectural" => allVerifications?.Where(v => v.VerificationType == VerificationType.Architectural.ToString()).ToList(),
+            "Structural" => allVerifications?.Where(v => v.VerificationType == VerificationType.Structural.ToString()).ToList(),
+            "BOQ" => allVerifications?.Where(v => IsBqType(v.VerificationType)).ToList(),
+            _ => allVerifications
         };
     }
 
@@ -546,6 +590,8 @@ else
         public string Status { get; set; } = "";
         public string? Comments { get; set; }
         public DateTime CreatedAt { get; set; }
+        public DateTime? VerifiedAt { get; set; }
+        public string? VerifiedByName { get; set; }
     }
 }
 

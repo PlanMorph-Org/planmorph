@@ -11,7 +11,10 @@ public class DesignDto
     public double SquareFootage { get; set; }
     public int Stories { get; set; }
     public string Category { get; set; } = string.Empty;
+    public string Status { get; set; } = string.Empty;
     public decimal EstimatedConstructionCost { get; set; }
     public List<string> PreviewImages { get; set; } = new();
     public List<string> PreviewVideos { get; set; } = new();
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 }

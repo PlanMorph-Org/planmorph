@@ -44,7 +44,7 @@ public class DesignsController : ControllerBase
         return Ok(designs);
     }
 
-    [Authorize(Roles = "Architect")]
+    [Authorize(Roles = "Architect,Engineer")]
     [HttpPost]
     public async Task<IActionResult> CreateDesign([FromBody] CreateDesignDto createDesignDto)
     {
@@ -59,12 +59,12 @@ public class DesignsController : ControllerBase
             return BadRequest(new { message = "User ID not found in token" });
         }
 
-        if (!Guid.TryParse(userIdClaim, out var architectId))
+        if (!Guid.TryParse(userIdClaim, out var creatorUserId))
         {
             return BadRequest(new { message = "Invalid user ID format" });
         }
 
-        var design = await _designService.CreateDesignAsync(createDesignDto, architectId);
+        var design = await _designService.CreateDesignAsync(createDesignDto, creatorUserId);
 
         if (design == null)
             return BadRequest(new { message = "Failed to create design" });
@@ -72,12 +72,12 @@ public class DesignsController : ControllerBase
         return CreatedAtAction(nameof(GetDesign), new { id = design.Id }, design);
     }
 
-    [Authorize(Roles = "Architect")]
+    [Authorize(Roles = "Architect,Engineer")]
     [HttpGet("my-designs")]
     public async Task<IActionResult> GetMyDesigns()
     {
-        var architectId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var designs = await _designService.GetDesignsByArchitectAsync(architectId);
+        var creatorUserId = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var designs = await _designService.GetDesignsByArchitectAsync(creatorUserId);
         return Ok(designs);
     }
 
@@ -105,7 +105,7 @@ public class DesignsController : ControllerBase
         return Ok(new { message = "Design rejected successfully" });
     }
 
-    [Authorize(Roles = "Architect")]
+    [Authorize(Roles = "Architect,Engineer")]
     [HttpPost("{id}/files")]
     public async Task<IActionResult> UploadFiles(Guid id, [FromForm] IFormFileCollection files, [FromQuery] string category)
     {

@@ -21,6 +21,8 @@ public record MentorshipProjectDto
     public string? Scope { get; init; }
     public int EstimatedDeliveryDays { get; init; }
     public decimal ClientFee { get; init; }
+    public decimal MentorFee { get; init; }
+    public decimal StudentFee { get; init; }
     public ProjectPriority Priority { get; init; }
     public int MaxRevisions { get; init; }
     public int CurrentRevisionCount { get; init; }

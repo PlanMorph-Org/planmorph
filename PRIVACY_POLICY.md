@@ -1,6 +1,6 @@
 # PlanMorph Privacy Policy
 
-**Last Updated: February 11, 2026**
+**Last Updated: February 24, 2026**
 
 ## 1. Introduction
 
@@ -93,6 +93,7 @@ We use the information we collect or receive:
 - Review uploaded professional documentation
 - Approve or reject professional account applications
 - Maintain quality standards for design submissions
+- Record and display design verification attribution data (uploader identity, verifier identity, verification type, comments, and timestamps) for operational audit trails
 
 ### 3.3 To Process Transactions
 - Generate orders and order numbers
@@ -299,7 +300,7 @@ If you are located in Kenya, you have rights under the Kenya Data Protection Act
 - Right to lodge a complaint with the Office of the Data Protection Commissioner
 
 **Kenya Contact:**
-- Email: kenya@planmorph.software
+- Email: data@planmorph.software
 
 ### 10.4 Other African Countries
 
@@ -316,6 +317,11 @@ We comply with applicable data protection laws in all African countries where we
 - Approved professionals' work is publicly displayed in the marketplace
 - Sales data and earnings are tracked for commission payments (70% per sale)
 - Design submissions are reviewed by admin and may require engineering verification
+- Verification activity (including architectural, structural, and BOQ verification actions) may be logged and shown in admin interfaces with reviewer identity and time
+
+**Important Liability Clarification:**
+- Verification logs and status indicators are maintained for transparency and operational tracking.
+- These records do not transfer or create professional liability for PlanMorph regarding technical design faults, code compliance, structural safety, or BOQ accuracy.
 
 ### 11.2 Contractors
 - Contractor information is used to match clients with construction services

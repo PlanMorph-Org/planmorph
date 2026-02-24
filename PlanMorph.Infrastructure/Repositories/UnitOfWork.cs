@@ -18,6 +18,12 @@ public class UnitOfWork : IUnitOfWork
     public IRepository<ConstructionContract> ConstructionContracts { get; }
     public IRepository<ModificationRequest> ModificationRequests { get; }
     public IRepository<DesignVerification> DesignVerifications { get; }
+    public IRepository<PayoutRequest> PayoutRequests { get; }
+    public IRepository<Wallet> Wallets { get; }
+    public IRepository<WalletTransaction> WalletTransactions { get; }
+    public IRepository<CommissionTier> CommissionTiers { get; }
+    public IRepository<FinancialAuditLog> FinancialAuditLogs { get; }
+    public IRepository<PaystackEventLog> PaystackEventLogs { get; }
     public IRepository<User> Users { get; }
     public IRepository<Ticket> Tickets { get; }
     public IRepository<TicketMessage> TicketMessages { get; }
@@ -50,6 +56,12 @@ public class UnitOfWork : IUnitOfWork
         ConstructionContracts = new Repository<ConstructionContract>(context);
         ModificationRequests = new Repository<ModificationRequest>(context);
         DesignVerifications = new Repository<DesignVerification>(context);
+        PayoutRequests = new Repository<PayoutRequest>(context);
+        Wallets = new Repository<Wallet>(context);
+        WalletTransactions = new Repository<WalletTransaction>(context);
+        CommissionTiers = new Repository<CommissionTier>(context);
+        FinancialAuditLogs = new Repository<FinancialAuditLog>(context);
+        PaystackEventLogs = new Repository<PaystackEventLog>(context);
         Users = new Repository<User>(context);
         Tickets = new Repository<Ticket>(context);
         TicketMessages = new Repository<TicketMessage>(context);

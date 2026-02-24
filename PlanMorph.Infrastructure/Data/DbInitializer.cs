@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using PlanMorph.Core.Entities;
 
 namespace PlanMorph.Infrastructure.Data;
@@ -45,5 +46,29 @@ public static class DbInitializer
                 await userManager.AddToRoleAsync(admin, "Admin");
             }
         }
+    }
+
+    public static async Task SeedCommissionTiersAsync(ApplicationDbContext dbContext)
+    {
+        if (await dbContext.CommissionTiers.AnyAsync())
+            return;
+
+        var now = DateTime.UtcNow;
+        var tiers = new List<CommissionTier>
+        {
+            new() { RevenueType = CommissionRevenueType.DesignSale, MinAmountKes = 0m, MaxAmountKes = 20000m, RatePercent = 3m, CreatedAt = now, UpdatedAt = now },
+            new() { RevenueType = CommissionRevenueType.DesignSale, MinAmountKes = 20001m, MaxAmountKes = 50000m, RatePercent = 4m, CreatedAt = now, UpdatedAt = now },
+            new() { RevenueType = CommissionRevenueType.DesignSale, MinAmountKes = 50001m, MaxAmountKes = 100000m, RatePercent = 5m, CreatedAt = now, UpdatedAt = now },
+            new() { RevenueType = CommissionRevenueType.DesignSale, MinAmountKes = 100001m, MaxAmountKes = 200000m, RatePercent = 6m, CreatedAt = now, UpdatedAt = now },
+            new() { RevenueType = CommissionRevenueType.DesignSale, MinAmountKes = 200001m, MaxAmountKes = null, RatePercent = 7m, CreatedAt = now, UpdatedAt = now },
+
+            new() { RevenueType = CommissionRevenueType.ContractReferral, MinAmountKes = 0m, MaxAmountKes = 500000m, RatePercent = 1.5m, CreatedAt = now, UpdatedAt = now },
+            new() { RevenueType = CommissionRevenueType.ContractReferral, MinAmountKes = 500001m, MaxAmountKes = 2000000m, RatePercent = 2m, CreatedAt = now, UpdatedAt = now },
+            new() { RevenueType = CommissionRevenueType.ContractReferral, MinAmountKes = 2000001m, MaxAmountKes = 10000000m, RatePercent = 2.5m, CreatedAt = now, UpdatedAt = now },
+            new() { RevenueType = CommissionRevenueType.ContractReferral, MinAmountKes = 10000001m, MaxAmountKes = null, RatePercent = 3m, CreatedAt = now, UpdatedAt = now }
+        };
+
+        await dbContext.CommissionTiers.AddRangeAsync(tiers);
+        await dbContext.SaveChangesAsync();
     }
 }

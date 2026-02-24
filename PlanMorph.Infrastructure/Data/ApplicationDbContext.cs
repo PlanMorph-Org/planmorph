@@ -19,6 +19,12 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
     public DbSet<ConstructionContract> ConstructionContracts { get; set; }
     public DbSet<ModificationRequest> ModificationRequests { get; set; }
     public DbSet<DesignVerification> DesignVerifications { get; set; }
+    public DbSet<PayoutRequest> PayoutRequests { get; set; }
+    public DbSet<Wallet> Wallets { get; set; }
+    public DbSet<WalletTransaction> WalletTransactions { get; set; }
+    public DbSet<CommissionTier> CommissionTiers { get; set; }
+    public DbSet<FinancialAuditLog> FinancialAuditLogs { get; set; }
+    public DbSet<PaystackEventLog> PaystackEventLogs { get; set; }
     public DbSet<ProfessionalReviewLog> ProfessionalReviewLogs { get; set; }
     public DbSet<Ticket> Tickets { get; set; }
     public DbSet<TicketMessage> TicketMessages { get; set; }
@@ -78,6 +84,9 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
             entity.HasKey(e => e.Id);
             entity.Property(e => e.OrderNumber).IsRequired().HasMaxLength(50);
             entity.Property(e => e.Amount).HasPrecision(18, 2);
+            entity.Property(e => e.CommissionRatePercent).HasPrecision(8, 4);
+            entity.Property(e => e.CommissionAmount).HasPrecision(18, 2);
+            entity.Property(e => e.ProfessionalNetAmount).HasPrecision(18, 2);
             
             entity.HasOne(e => e.Client)
                 .WithMany(u => u.Orders)
@@ -159,6 +168,112 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
             entity.HasQueryFilter(e => !e.IsDeleted);
         });
 
+        builder.Entity<PayoutRequest>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Role).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.GrossEarningsSnapshot).HasPrecision(18, 2);
+            entity.Property(e => e.PriorSuccessfulCashoutsSnapshot).HasPrecision(18, 2);
+            entity.Property(e => e.AvailableBeforeRequest).HasPrecision(18, 2);
+            entity.Property(e => e.ReserveAmount).HasPrecision(18, 2);
+            entity.Property(e => e.Amount).HasPrecision(18, 2);
+            entity.Property(e => e.RecipientName).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.DestinationMasked).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Reference).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.IdempotencyKey).HasMaxLength(120);
+            entity.Property(e => e.RecipientCode).HasMaxLength(200);
+            entity.Property(e => e.TransferCode).HasMaxLength(200);
+            entity.Property(e => e.FailureReason).HasMaxLength(1000);
+
+            entity.HasIndex(e => e.Reference).IsUnique();
+            entity.HasIndex(e => e.IdempotencyKey).IsUnique().HasFilter("\"IdempotencyKey\" IS NOT NULL");
+
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasQueryFilter(e => !e.IsDeleted);
+        });
+
+        builder.Entity<Wallet>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Currency).IsRequired().HasMaxLength(3);
+            entity.Property(e => e.TotalEarned).HasPrecision(18, 2);
+            entity.Property(e => e.TotalWithdrawn).HasPrecision(18, 2);
+            entity.Property(e => e.PendingBalance).HasPrecision(18, 2);
+
+            entity.HasIndex(e => e.UserId).IsUnique();
+
+            entity.HasOne(e => e.User)
+                .WithOne(u => u.Wallet)
+                .HasForeignKey<Wallet>(e => e.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasQueryFilter(e => !e.IsDeleted);
+        });
+
+        builder.Entity<WalletTransaction>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Amount).HasPrecision(18, 2);
+            entity.Property(e => e.BalanceBefore).HasPrecision(18, 2);
+            entity.Property(e => e.BalanceAfter).HasPrecision(18, 2);
+            entity.Property(e => e.Currency).IsRequired().HasMaxLength(3);
+            entity.Property(e => e.IdempotencyKey).HasMaxLength(120);
+            entity.Property(e => e.ExternalReference).HasMaxLength(120);
+
+            entity.HasIndex(e => e.IdempotencyKey).IsUnique().HasFilter("\"IdempotencyKey\" IS NOT NULL");
+
+            entity.HasOne(e => e.Wallet)
+                .WithMany()
+                .HasForeignKey(e => e.WalletId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasOne(e => e.User)
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasQueryFilter(e => !e.IsDeleted);
+        });
+
+        builder.Entity<CommissionTier>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.MinAmountKes).HasPrecision(18, 2);
+            entity.Property(e => e.MaxAmountKes).HasPrecision(18, 2);
+            entity.Property(e => e.RatePercent).HasPrecision(8, 4);
+
+            entity.HasIndex(e => new { e.RevenueType, e.IsActive, e.MinAmountKes });
+
+            entity.HasQueryFilter(e => !e.IsDeleted);
+        });
+
+        builder.Entity<FinancialAuditLog>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Action).IsRequired().HasMaxLength(120);
+            entity.Property(e => e.Reference).HasMaxLength(120);
+
+            entity.HasQueryFilter(e => !e.IsDeleted);
+        });
+
+        builder.Entity<PaystackEventLog>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.EventId).HasMaxLength(120);
+            entity.Property(e => e.EventType).IsRequired().HasMaxLength(120);
+            entity.Property(e => e.EventSignature).HasMaxLength(200);
+            entity.Property(e => e.PayloadJson).IsRequired();
+            entity.Property(e => e.ErrorMessage).HasMaxLength(2000);
+
+            entity.HasIndex(e => e.EventId).IsUnique().HasFilter("\"EventId\" IS NOT NULL");
+
+            entity.HasQueryFilter(e => !e.IsDeleted);
+        });
+
         // User Configuration
         builder.Entity<User>(entity =>
         {
@@ -176,6 +291,8 @@ public class ApplicationDbContext : IdentityDbContext<User, IdentityRole<Guid>, 
             entity.Property(e => e.VerificationNotes).HasMaxLength(2000);
             entity.Property(e => e.LastReviewedByName).HasMaxLength(200);
             entity.Property(e => e.RejectionReason).HasMaxLength(2000);
+            entity.Property(e => e.PaystackSubaccountCode).HasMaxLength(120);
+            entity.Property(e => e.PaystackRecipientCode).HasMaxLength(120);
         });
 
         builder.Entity<ProfessionalReviewLog>(entity =>

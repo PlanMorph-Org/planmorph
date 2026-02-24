@@ -83,6 +83,7 @@ builder.Services.AddHttpClient<IPaystackGateway, PaystackGateway>(client =>
     client.Timeout = TimeSpan.FromSeconds(15);
 });
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<ICommissionService, CommissionService>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -179,6 +180,7 @@ using (var scope = app.Services.CreateScope())
     await dbContext.Database.MigrateAsync();
     await DbInitializer.SeedRolesAsync(roleManager);
     await DbInitializer.SeedAdminUserAsync(userManager, roleManager);
+    await DbInitializer.SeedCommissionTiersAsync(dbContext);
 }
 
 // Configure the HTTP request pipeline.

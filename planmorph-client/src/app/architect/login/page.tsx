@@ -107,6 +107,11 @@ export default function ArchitectLoginPage() {
                 <input id="password" name="password" type="password" required value={formData.password} onChange={handleChange}
                   placeholder="••••••••"
                   className="w-full px-4 py-3 glass-input rounded-lg text-sm text-white placeholder:text-white/20" />
+                <div className="mt-2 text-right">
+                  <Link href="/architect/forgot-password" className="text-xs text-golden/70 hover:text-golden transition-colors hover-underline">
+                    Forgot password?
+                  </Link>
+                </div>
               </div>
               <button type="submit" disabled={isLoading}
                 className="w-full py-3 bg-golden text-brand font-semibold rounded-lg hover:bg-golden-light transition-all duration-300 shadow-golden btn-glow disabled:opacity-50 disabled:cursor-not-allowed"

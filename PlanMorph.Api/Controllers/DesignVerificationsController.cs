@@ -162,10 +162,17 @@ public class DesignVerificationsController : ControllerBase
         if (verification == null)
             return NotFound(new { message = "Verification not found" });
 
+        var verificationDesign = await _unitOfWork.Designs.GetByIdAsync(verification.DesignId);
+        if (verificationDesign == null)
+            return NotFound(new { message = "Design not found" });
+
+        if (verificationDesign.ArchitectId == userId)
+            return BadRequest(new { message = "Design owner cannot verify their own design" });
+
         // Check if user has permission to verify this type
         bool canVerify = verification.VerificationType switch
         {
-            VerificationType.Architectural => userRole == "Architect",
+            VerificationType.Architectural => userRole == "Architect" && await IsVerifiedArchitectAsync(userId),
             VerificationType.Structural => userRole == "Engineer",
             VerificationType.BOQArchitect => userRole == "Architect",
             VerificationType.BOQEngineer => userRole == "Engineer",
@@ -215,10 +222,17 @@ public class DesignVerificationsController : ControllerBase
         if (verification == null)
             return NotFound(new { message = "Verification not found" });
 
+        var verificationDesign = await _unitOfWork.Designs.GetByIdAsync(verification.DesignId);
+        if (verificationDesign == null)
+            return NotFound(new { message = "Design not found" });
+
+        if (verificationDesign.ArchitectId == userId)
+            return BadRequest(new { message = "Design owner cannot review their own design" });
+
         // Check if user has permission to verify this type
         bool canVerify = verification.VerificationType switch
         {
-            VerificationType.Architectural => userRole == "Architect",
+            VerificationType.Architectural => userRole == "Architect" && await IsVerifiedArchitectAsync(userId),
             VerificationType.Structural => userRole == "Engineer",
             VerificationType.BOQArchitect => userRole == "Architect",
             VerificationType.BOQEngineer => userRole == "Engineer",
@@ -271,6 +285,15 @@ public class DesignVerificationsController : ControllerBase
         }).ToList();
 
         return Ok(result);
+    }
+
+    private async Task<bool> IsVerifiedArchitectAsync(Guid userId)
+    {
+        var user = await _unitOfWork.Users.GetByIdAsync(userId);
+        if (user == null)
+            return false;
+
+        return user.Role == UserRole.Architect && user.IsActive && !user.IsRejected;
     }
 }
 

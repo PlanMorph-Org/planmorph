@@ -107,6 +107,11 @@ export default function EngineerLoginPage() {
                 <input id="password" name="password" type="password" required value={formData.password} onChange={handleChange}
                   placeholder="••••••••"
                   className="w-full px-4 py-3 glass-input rounded-lg text-sm text-white placeholder:text-white/20" />
+                <div className="mt-2 text-right">
+                  <Link href="/engineer/forgot-password" className="text-xs text-slate-teal/70 hover:text-slate-teal transition-colors hover-underline">
+                    Forgot password?
+                  </Link>
+                </div>
               </div>
               <button type="submit" disabled={isLoading}
                 className="w-full py-3 bg-slate-teal text-white font-semibold rounded-lg hover:bg-teal-500 transition-all duration-300 btn-glow disabled:opacity-50 disabled:cursor-not-allowed"

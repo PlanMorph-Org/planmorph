@@ -39,12 +39,19 @@ public class User : IdentityUser<Guid>
     public string? RejectionReason { get; set; }
     public DateTime? RejectedAt { get; set; }
     public Guid? RejectedById { get; set; }
+
+    // Marketplace payment profile
+    public bool IsFoundingMember { get; set; }
+    public int? FoundingMemberSlot { get; set; }
+    public string? PaystackSubaccountCode { get; set; }
+    public string? PaystackRecipientCode { get; set; }
     
     // Navigation properties
     public ICollection<Design> Designs { get; set; } = new List<Design>();
     public ICollection<Order> Orders { get; set; } = new List<Order>();
     public ICollection<DesignVerification> Verifications { get; set; } = new List<DesignVerification>();
     public ICollection<ProfessionalReviewLog> ProfessionalReviewLogs { get; set; } = new List<ProfessionalReviewLog>();
+    public Wallet? Wallet { get; set; }
 }
 
 public enum UserRole

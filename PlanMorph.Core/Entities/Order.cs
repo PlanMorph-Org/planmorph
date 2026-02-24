@@ -11,6 +11,9 @@ public class Order : BaseEntity
     public Design Design { get; set; } = null!;
     
     public decimal Amount { get; set; }
+    public decimal CommissionRatePercent { get; set; }
+    public decimal CommissionAmount { get; set; }
+    public decimal ProfessionalNetAmount { get; set; }
     public OrderStatus Status { get; set; } = OrderStatus.Pending;
     public PaymentMethod PaymentMethod { get; set; }
     public string? PaymentReference { get; set; }

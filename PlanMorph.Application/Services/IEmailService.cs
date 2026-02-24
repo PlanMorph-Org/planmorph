@@ -8,7 +8,7 @@ public interface IEmailService
     Task SendArchitectRejectedEmailAsync(string toEmail, string architectName, string? reason = null);
     Task SendOrderConfirmationEmailAsync(string toEmail, string customerName, string designTitle, decimal amount);
     Task SendWelcomeEmailAsync(string toEmail, string firstName);
-    Task SendPasswordResetEmailAsync(string toEmail, string firstName, string resetToken);
+    Task SendPasswordResetEmailAsync(string toEmail, string firstName, string resetUrl, bool isProfessional = false, string? verificationCode = null);
 
     // Construction Service Emails
     Task SendConstructionRequestReceivedEmailAsync(string toEmail, string clientName, string designTitle, string location);
