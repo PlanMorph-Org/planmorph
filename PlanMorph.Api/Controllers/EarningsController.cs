@@ -21,17 +21,20 @@ public class EarningsController : ControllerBase
     private readonly IPaystackGateway _paystackGateway;
     private readonly ICommissionService _commissionService;
     private readonly ILogger<EarningsController> _logger;
+    private readonly IConfiguration _configuration;
 
     public EarningsController(
         ApplicationDbContext dbContext,
         IPaystackGateway paystackGateway,
         ICommissionService commissionService,
-        ILogger<EarningsController> logger)
+        ILogger<EarningsController> logger,
+        IConfiguration configuration)
     {
         _dbContext = dbContext;
         _paystackGateway = paystackGateway;
         _commissionService = commissionService;
         _logger = logger;
+        _configuration = configuration;
     }
 
     [Authorize(Roles = "Architect,Engineer,Student")]
@@ -354,6 +357,63 @@ public class EarningsController : ControllerBase
         }
 
         return Ok(filtered.Select(o => new { name = o.Name, code = o.Code, type = o.Type }));
+    }
+
+    [Authorize(Roles = "Architect,Engineer")]
+    [HttpGet("commission/founding-status")]
+    public async Task<IActionResult> GetFoundingCommissionStatus()
+    {
+        var userId = GetUserId();
+        if (userId == Guid.Empty)
+            return Unauthorized(new { message = "Invalid user identity" });
+
+        var architectSlots = int.TryParse(_configuration["FoundingMembers:ArchitectSlots"], out var a)
+            ? a
+            : 25;
+        var engineerSlots = int.TryParse(_configuration["FoundingMembers:EngineerSlots"], out var e)
+            ? e
+            : 25;
+
+        var architectFoundingCount = await _dbContext.Users.CountAsync(u =>
+            u.Role == UserRole.Architect &&
+            u.IsFoundingMember);
+
+        var engineerFoundingCount = await _dbContext.Users.CountAsync(u =>
+            u.Role == UserRole.Engineer &&
+            u.IsFoundingMember);
+
+        var currentUser = await _dbContext.Users
+            .Where(u => u.Id == userId)
+            .Select(u => new
+            {
+                role = u.Role.ToString(),
+                isFoundingMember = u.IsFoundingMember,
+                foundingMemberSlot = u.FoundingMemberSlot
+            })
+            .FirstOrDefaultAsync();
+
+        if (currentUser == null)
+            return NotFound(new { message = "User not found" });
+
+        return Ok(new FoundingCommissionStatusDto
+        {
+            Architect = new FoundingRoleStatusDto
+            {
+                SlotLimit = architectSlots,
+                Filled = architectFoundingCount,
+                Remaining = Math.Max(0, architectSlots - architectFoundingCount)
+            },
+            Engineer = new FoundingRoleStatusDto
+            {
+                SlotLimit = engineerSlots,
+                Filled = engineerFoundingCount,
+                Remaining = Math.Max(0, engineerSlots - engineerFoundingCount)
+            },
+            CurrentUserRole = currentUser.role,
+            CurrentUserIsFoundingMember = currentUser.isFoundingMember,
+            CurrentUserFoundingSlot = currentUser.foundingMemberSlot,
+            UpdatedAtUtc = DateTime.UtcNow
+        });
     }
 
     [Authorize(Roles = "Admin")]
@@ -691,5 +751,22 @@ public class EarningsController : ControllerBase
         public DateTime CreatedAtUtc { get; set; }
         public DateTime? ProcessedAtUtc { get; set; }
         public string? FailureReason { get; set; }
+    }
+
+    public class FoundingCommissionStatusDto
+    {
+        public FoundingRoleStatusDto Architect { get; set; } = new();
+        public FoundingRoleStatusDto Engineer { get; set; } = new();
+        public string CurrentUserRole { get; set; } = string.Empty;
+        public bool CurrentUserIsFoundingMember { get; set; }
+        public int? CurrentUserFoundingSlot { get; set; }
+        public DateTime UpdatedAtUtc { get; set; }
+    }
+
+    public class FoundingRoleStatusDto
+    {
+        public int SlotLimit { get; set; }
+        public int Filled { get; set; }
+        public int Remaining { get; set; }
     }
 }

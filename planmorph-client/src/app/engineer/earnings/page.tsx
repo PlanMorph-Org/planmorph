@@ -26,6 +26,16 @@ interface EarningsSummary {
 
 interface PayoutOption { name: string; code: string; type?: string; }
 
+interface FoundingRoleStatus { slotLimit: number; filled: number; remaining: number; }
+interface FoundingCommissionStatus {
+  architect: FoundingRoleStatus;
+  engineer: FoundingRoleStatus;
+  currentUserRole: string;
+  currentUserIsFoundingMember: boolean;
+  currentUserFoundingSlot?: number;
+  updatedAtUtc: string;
+}
+
 type Channel = 'Bank' | 'MobileMoney';
 
 export default function EngineerEarningsPage() {
@@ -36,10 +46,21 @@ export default function EngineerEarningsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [payoutOptions, setPayoutOptions] = useState<PayoutOption[]>([]);
   const [optionsLoading, setOptionsLoading] = useState(false);
+  const [foundingStatus, setFoundingStatus] = useState<FoundingCommissionStatus | null>(null);
   const [cashout, setCashout] = useState({ amount: '', channel: 'Bank' as Channel, recipientName: '', accountNumber: '', mobileNumber: '', bankCode: '' });
 
   useEffect(() => { if (isAuthorized) void loadSummary(); }, [isAuthorized]);
   useEffect(() => { if (isAuthorized) void loadPayoutOptions(cashout.channel); }, [isAuthorized, cashout.channel]);
+  useEffect(() => {
+    if (!isAuthorized) return;
+
+    void loadFoundingStatus();
+    const intervalId = window.setInterval(() => {
+      void loadFoundingStatus(true);
+    }, 15000);
+
+    return () => window.clearInterval(intervalId);
+  }, [isAuthorized]);
 
   const loadSummary = async () => {
     setLoading(true);
@@ -63,6 +84,17 @@ export default function EngineerEarningsPage() {
       toast.error('Failed to load payout providers.');
     } finally {
       setOptionsLoading(false);
+    }
+  };
+
+  const loadFoundingStatus = async (silent = false) => {
+    try {
+      const response = await api.get<FoundingCommissionStatus>('/earnings/commission/founding-status');
+      setFoundingStatus(response.data);
+    } catch {
+      if (!silent) {
+        toast.error('Failed to load 0% commission slot status.');
+      }
     }
   };
 
@@ -100,6 +132,20 @@ export default function EngineerEarningsPage() {
 
         {loading || !summary ? <div className="glass-card rounded-xl p-8 text-white/40">Loading...</div> : (
           <>
+            {foundingStatus ? (
+              <div className="glass-card rounded-xl p-4 mb-6 border border-white/10">
+                <p className="text-xs text-white/30 mb-1">0% Commission Founding Slots (Live)</p>
+                <p className="text-sm text-white/75">
+                  Architects: <span className="text-golden font-semibold">{foundingStatus.architect.filled}/{foundingStatus.architect.slotLimit}</span> filled ({foundingStatus.architect.remaining} left) • Engineers: <span className="text-slate-teal font-semibold">{foundingStatus.engineer.filled}/{foundingStatus.engineer.slotLimit}</span> filled ({foundingStatus.engineer.remaining} left)
+                </p>
+                <p className="text-xs text-white/50 mt-1">
+                  {foundingStatus.currentUserIsFoundingMember
+                    ? `You are on 0% commission${foundingStatus.currentUserFoundingSlot ? ` (slot #${foundingStatus.currentUserFoundingSlot})` : ''}.`
+                    : `Your role currently has ${foundingStatus.currentUserRole === 'Architect' ? foundingStatus.architect.remaining : foundingStatus.engineer.remaining} slot(s) remaining.`}
+                </p>
+              </div>
+            ) : null}
+
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
               <div className="glass-card rounded-xl p-5"><p className="text-xs text-white/30">Total Earnings</p><p className="text-xl font-bold text-verified">{formatCurrency(summary.totalEarnings, currency, rates)}</p></div>
               <div className="glass-card rounded-xl p-5"><p className="text-xs text-white/30">This Month</p><p className="text-xl font-bold text-brand-accent">{formatCurrency(summary.thisMonthEarnings, currency, rates)}</p></div>
