@@ -86,10 +86,6 @@ cd PlanMorph.Admin
 dotnet run
 ```
 
-Default admin credentials:
-- Email: admin@planmorph.software
-- Password: Admin@123
-
 ### Frontend Setup
 
 1. Navigate to client folder:

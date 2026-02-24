@@ -232,8 +232,8 @@ Response: `"role": "PendingApproval"` (no token)
 ```bash
 POST /api/auth/login
 {
-  "email": "admin@planmorph.software",
-  "password": "Admin@123"
+  "email": "<admin-email-from-env>",
+  "password": "<admin-password-from-env>"
 }
 ```
 Save the token from response.

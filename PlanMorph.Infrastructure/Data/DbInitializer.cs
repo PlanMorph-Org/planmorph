@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using PlanMorph.Core.Entities;
 
 namespace PlanMorph.Infrastructure.Data;
@@ -21,9 +22,19 @@ public static class DbInitializer
 
     public static async Task SeedAdminUserAsync(
         UserManager<User> userManager,
-        RoleManager<IdentityRole<Guid>> roleManager)
+        RoleManager<IdentityRole<Guid>> roleManager,
+        IConfiguration configuration)
     {
-        var adminEmail = "admin@planmorph.software";
+        var adminEmail = configuration["SeedAdmin:Email"]?.Trim();
+        var adminPassword = configuration["SeedAdmin:Password"];
+
+        if (string.IsNullOrWhiteSpace(adminEmail) || string.IsNullOrWhiteSpace(adminPassword) ||
+            string.Equals(adminEmail, "<set-in-env>", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(adminPassword, "<set-in-env>", StringComparison.OrdinalIgnoreCase))
+        {
+            return;
+        }
+
         var adminUser = await userManager.FindByEmailAsync(adminEmail);
 
         if (adminUser == null)
@@ -39,7 +50,7 @@ public static class DbInitializer
                 IsActive = true
             };
 
-            var result = await userManager.CreateAsync(admin, "Admin@123");
+            var result = await userManager.CreateAsync(admin, adminPassword);
             
             if (result.Succeeded)
             {

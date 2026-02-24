@@ -179,7 +179,7 @@ using (var scope = app.Services.CreateScope())
 
     await dbContext.Database.MigrateAsync();
     await DbInitializer.SeedRolesAsync(roleManager);
-    await DbInitializer.SeedAdminUserAsync(userManager, roleManager);
+    await DbInitializer.SeedAdminUserAsync(userManager, roleManager, app.Configuration);
     await DbInitializer.SeedCommissionTiersAsync(dbContext);
 }
 
