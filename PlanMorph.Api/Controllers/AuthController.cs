@@ -13,11 +13,13 @@ public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
     private readonly IFileStorageService _fileStorageService;
+    private readonly IConfiguration _configuration;
 
-    public AuthController(IAuthService authService, IFileStorageService fileStorageService)
+    public AuthController(IAuthService authService, IFileStorageService fileStorageService, IConfiguration configuration)
     {
         _authService = authService;
         _fileStorageService = fileStorageService;
+        _configuration = configuration;
     }
 
     [HttpPost("register")]
@@ -161,6 +163,112 @@ public class AuthController : ControllerBase
         return Ok(result);
     }
 
+    [HttpPost("register-professional-google")]
+    [Consumes("multipart/form-data")]
+    public async Task<IActionResult> RegisterProfessionalWithGoogle([FromForm] ProfessionalGoogleRegisterRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if (!IsProfessionalRole(request.Role))
+        {
+            return BadRequest(new { message = "Role must be Architect or Engineer for this endpoint." });
+        }
+
+        if (string.IsNullOrWhiteSpace(request.GoogleIdToken))
+        {
+            return BadRequest(new { message = "Google account connection is required." });
+        }
+
+        if (string.IsNullOrWhiteSpace(request.ProfessionalLicense) ||
+            request.YearsOfExperience <= 0)
+        {
+            return BadRequest(new { message = "Professional license and years of experience are required." });
+        }
+
+        var hasPortfolio = !string.IsNullOrWhiteSpace(request.PortfolioUrl);
+        if (!hasPortfolio)
+        {
+            if (request.CvFile == null || request.CoverLetterFile == null || request.WorkExperienceFile == null)
+            {
+                return BadRequest(new
+                {
+                    message = "Provide a portfolio URL or upload CV, cover letter, and work experience PDF."
+                });
+            }
+
+            if (!IsPdf(request.CvFile) || !IsPdf(request.CoverLetterFile) || !IsPdf(request.WorkExperienceFile))
+            {
+                return BadRequest(new { message = "CV, cover letter, and work experience must be PDF files." });
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.PortfolioUrl))
+        {
+            if (!Uri.TryCreate(request.PortfolioUrl, UriKind.Absolute, out var portfolioUri) ||
+                (portfolioUri.Scheme != Uri.UriSchemeHttps && portfolioUri.Scheme != Uri.UriSchemeHttp))
+            {
+                return BadRequest(new { message = "Portfolio URL must be a valid http(s) URL." });
+            }
+        }
+
+        var uploadBatchId = Guid.NewGuid().ToString("N");
+        string? cvUrl = null;
+        string? coverLetterUrl = null;
+        string? workExperienceUrl = null;
+
+        if (request.CvFile != null)
+        {
+            cvUrl = await UploadProfessionalDocumentAsync(request.CvFile, uploadBatchId, "cv");
+        }
+
+        if (request.CoverLetterFile != null)
+        {
+            coverLetterUrl = await UploadProfessionalDocumentAsync(request.CoverLetterFile, uploadBatchId, "cover-letter");
+        }
+
+        if (request.WorkExperienceFile != null)
+        {
+            workExperienceUrl = await UploadProfessionalDocumentAsync(request.WorkExperienceFile, uploadBatchId, "work-experience");
+        }
+
+        var registerDto = new GoogleProfessionalRegisterDto
+        {
+            GoogleIdToken = request.GoogleIdToken,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
+            PhoneNumber = request.PhoneNumber,
+            Role = request.Role,
+            ProfessionalLicense = request.ProfessionalLicense,
+            YearsOfExperience = request.YearsOfExperience,
+            PortfolioUrl = request.PortfolioUrl,
+            Specialization = request.Specialization,
+            CvUrl = cvUrl,
+            CoverLetterUrl = coverLetterUrl,
+            WorkExperienceUrl = workExperienceUrl,
+            CvFileName = request.CvFile?.FileName,
+            CvFileSizeBytes = request.CvFile?.Length,
+            CvUploadedAt = request.CvFile != null ? DateTime.UtcNow : null,
+            CoverLetterFileName = request.CoverLetterFile?.FileName,
+            CoverLetterFileSizeBytes = request.CoverLetterFile?.Length,
+            CoverLetterUploadedAt = request.CoverLetterFile != null ? DateTime.UtcNow : null,
+            WorkExperienceFileName = request.WorkExperienceFile?.FileName,
+            WorkExperienceFileSizeBytes = request.WorkExperienceFile?.Length,
+            WorkExperienceUploadedAt = request.WorkExperienceFile != null ? DateTime.UtcNow : null
+        };
+
+        var result = await _authService.RegisterProfessionalWithGoogleAsync(registerDto);
+        if (result == null)
+        {
+            await DeleteUploadedDocumentsAsync(cvUrl, coverLetterUrl, workExperienceUrl);
+            return BadRequest(new { message = "Google registration failed. Ensure your Google account and role are valid." });
+        }
+
+        return Ok(result);
+    }
+
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
@@ -177,6 +285,84 @@ public class AuthController : ControllerBase
         }
 
         return Ok(result);
+    }
+
+    [HttpPost("login-professional-google")]
+    public async Task<IActionResult> LoginProfessionalWithGoogle([FromBody] GoogleProfessionalLoginDto loginDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if (!IsProfessionalRole(loginDto.Role))
+        {
+            return BadRequest(new { message = "Role must be Architect or Engineer for this endpoint." });
+        }
+
+        var result = await _authService.LoginProfessionalWithGoogleAsync(loginDto);
+        if (result == null)
+        {
+            return Unauthorized(new { message = "Google sign-in failed. Ensure your professional account is approved." });
+        }
+
+        return Ok(result);
+    }
+
+    [HttpPost("register-client-google")]
+    public async Task<IActionResult> RegisterClientWithGoogle([FromBody] GoogleClientRegisterDto registerDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if (string.IsNullOrWhiteSpace(registerDto.GoogleIdToken))
+        {
+            return BadRequest(new { message = "Google account connection is required." });
+        }
+
+        var result = await _authService.RegisterClientWithGoogleAsync(registerDto);
+        if (result == null)
+        {
+            return BadRequest(new { message = "Google registration failed. Email may already be in use." });
+        }
+
+        return Ok(result);
+    }
+
+    [HttpPost("login-client-google")]
+    public async Task<IActionResult> LoginClientWithGoogle([FromBody] GoogleClientLoginDto loginDto)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        if (string.IsNullOrWhiteSpace(loginDto.GoogleIdToken))
+        {
+            return BadRequest(new { message = "Google account connection is required." });
+        }
+
+        var result = await _authService.LoginClientWithGoogleAsync(loginDto);
+        if (result == null)
+        {
+            return Unauthorized(new { message = "Google sign-in failed for client account." });
+        }
+
+        return Ok(result);
+    }
+
+    [HttpGet("google-client-id")]
+    public IActionResult GetGoogleClientId()
+    {
+        var clientId = _configuration["GoogleAuth:ClientId"];
+        if (string.IsNullOrWhiteSpace(clientId))
+        {
+            return NotFound(new { message = "Google auth is not configured." });
+        }
+
+        return Ok(new { clientId });
     }
 
     private static bool HasPortfolioOrDocuments(RegisterDto registerDto)
@@ -243,6 +429,22 @@ public class AuthController : ControllerBase
         public string Password { get; set; } = string.Empty;
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
+        public string PhoneNumber { get; set; } = string.Empty;
+        public string Role { get; set; } = string.Empty;
+        public string ProfessionalLicense { get; set; } = string.Empty;
+        public int YearsOfExperience { get; set; }
+        public string? PortfolioUrl { get; set; }
+        public string? Specialization { get; set; }
+        public IFormFile? CvFile { get; set; }
+        public IFormFile? CoverLetterFile { get; set; }
+        public IFormFile? WorkExperienceFile { get; set; }
+    }
+
+    public class ProfessionalGoogleRegisterRequest
+    {
+        public string GoogleIdToken { get; set; } = string.Empty;
+        public string? FirstName { get; set; }
+        public string? LastName { get; set; }
         public string PhoneNumber { get; set; } = string.Empty;
         public string Role { get; set; } = string.Empty;
         public string ProfessionalLicense { get; set; } = string.Empty;

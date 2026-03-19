@@ -8,7 +8,9 @@ interface AuthState {
   token: string | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  loginWithGoogleClient: (googleIdToken: string) => Promise<void>;
   register: (data: RegisterData) => Promise<AuthResponse>;
+  registerWithGoogleClient: (data: GoogleClientRegisterData) => Promise<AuthResponse>;
   logout: () => void;
   isAdmin: () => boolean;
 }
@@ -24,6 +26,13 @@ interface RegisterData {
   yearsOfExperience?: number;
   portfolioUrl?: string;
   specialization?: string;
+}
+
+interface GoogleClientRegisterData {
+  googleIdToken: string;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -51,6 +60,45 @@ export const useAuthStore = create<AuthState>()(
             isAuthenticated: false,
           });
           throw new Error('Access denied. Please contact your administrator if you believe this is an error.');
+        }
+
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify({
+          email: userData.email,
+          firstName: userData.firstName,
+          lastName: userData.lastName,
+          role: userData.role,
+        }));
+
+        set({
+          user: {
+            id: '',
+            email: userData.email,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            role: userData.role,
+          },
+          token,
+          isAuthenticated: true,
+        });
+      },
+
+      loginWithGoogleClient: async (googleIdToken: string) => {
+        const response = await api.post<AuthResponse>('/auth/login-client-google', {
+          googleIdToken,
+        });
+
+        const { token, ...userData } = response.data;
+
+        if (userData.role !== 'Client') {
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+          set({
+            user: null,
+            token: null,
+            isAuthenticated: false,
+          });
+          throw new Error('This Google account is not linked to a client profile.');
         }
 
         localStorage.setItem('token', token);
@@ -105,6 +153,35 @@ export const useAuthStore = create<AuthState>()(
             user: null,
             token: null,
             isAuthenticated: false,
+          });
+        }
+
+        return response.data;
+      },
+
+      registerWithGoogleClient: async (data: GoogleClientRegisterData) => {
+        const response = await api.post<AuthResponse>('/auth/register-client-google', data);
+
+        const { token, ...userData } = response.data;
+
+        if (token && token.length > 0 && userData.role === 'Client') {
+          localStorage.setItem('token', token);
+          localStorage.setItem('user', JSON.stringify({
+            email: userData.email,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            role: userData.role,
+          }));
+          set({
+            user: {
+              id: '',
+              email: userData.email,
+              firstName: userData.firstName,
+              lastName: userData.lastName,
+              role: userData.role,
+            },
+            token,
+            isAuthenticated: true,
           });
         }
 

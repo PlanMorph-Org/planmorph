@@ -1,26 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { isAxiosError } from 'axios';
 import api from '@/src/lib/api';
+import { consumePendingGoogleIdToken, decodeGoogleIdTokenProfile, type GoogleIdTokenProfile } from '@/src/lib/googleAuth';
 import toast, { Toaster } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import GoogleProfessionalButton from '@/src/components/auth/GoogleProfessionalButton';
 
 export default function ArchitectRegisterPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({
-    email: '', password: '', confirmPassword: '', firstName: '', lastName: '',
+    email: '', firstName: '', lastName: '',
     phoneNumber: '', professionalLicense: '', yearsOfExperience: '', portfolio: '', specialization: '',
   });
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [coverLetterFile, setCoverLetterFile] = useState<File | null>(null);
   const [workExperienceFile, setWorkExperienceFile] = useState<File | null>(null);
+  const [googleIdToken, setGoogleIdToken] = useState('');
+  const [googleEmail, setGoogleEmail] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const getErrorMessage = (error: unknown, fallback: string) => {
+    if (isAxiosError<{ message?: string }>(error)) {
+      return error.response?.data?.message || fallback;
+    }
+
+    return error instanceof Error && error.message ? error.message : fallback;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (formData.password !== formData.confirmPassword) { toast.error('Passwords do not match'); return; }
+    if (!googleIdToken) { toast.error('Connect your Google account first.'); return; }
     if (!formData.professionalLicense || !formData.yearsOfExperience) { toast.error('Please fill in all required fields'); return; }
     const hasPortfolio = formData.portfolio.trim().length > 0;
     const isPdf = (file: File | null) => !!file && (file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'));
@@ -32,7 +45,7 @@ export default function ArchitectRegisterPage() {
     try {
       const years = formData.yearsOfExperience ? parseInt(formData.yearsOfExperience, 10) : undefined;
       const payload = new FormData();
-      payload.append('email', formData.email); payload.append('password', formData.password);
+      payload.append('googleIdToken', googleIdToken);
       payload.append('firstName', formData.firstName); payload.append('lastName', formData.lastName);
       payload.append('phoneNumber', formData.phoneNumber); payload.append('role', 'Architect');
       payload.append('professionalLicense', formData.professionalLicense);
@@ -40,15 +53,39 @@ export default function ArchitectRegisterPage() {
       if (formData.portfolio.trim()) payload.append('portfolioUrl', formData.portfolio.trim());
       if (formData.specialization.trim()) payload.append('specialization', formData.specialization.trim());
       if (!hasPortfolio) { if (cvFile) payload.append('cvFile', cvFile); if (coverLetterFile) payload.append('coverLetterFile', coverLetterFile); if (workExperienceFile) payload.append('workExperienceFile', workExperienceFile); }
-      await api.post('/auth/register-professional', payload);
+      await api.post('/auth/register-professional-google', payload);
       toast.success('Application submitted. Review in 24–48 hours.', { duration: 6000 });
       setTimeout(() => router.push('/architect/login'), 2000);
-    } catch (error: any) { toast.error(error.response?.data?.message || 'Registration failed.'); }
+    } catch (error: unknown) { toast.error(getErrorMessage(error, 'Registration failed.')); }
     finally { setIsLoading(false); }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => setFormData({ ...formData, [e.target.name]: e.target.value });
   const handleFileChange = (setter: (file: File | null) => void) => (e: React.ChangeEvent<HTMLInputElement>) => { setter(e.target.files?.[0] ?? null); };
+  const handleGoogleSuccess = useCallback((idToken: string, profile?: GoogleIdTokenProfile) => {
+    setGoogleIdToken(idToken);
+    setGoogleEmail(profile?.email ?? '');
+    setFormData((prev) => ({
+      ...prev,
+      email: profile?.email ?? prev.email,
+      firstName: prev.firstName || profile?.given_name || '',
+      lastName: prev.lastName || profile?.family_name || '',
+    }));
+    toast.success('Google account connected. Continue with your professional details.');
+  }, []);
+
+  useEffect(() => {
+    if (googleIdToken) {
+      return;
+    }
+
+    const pendingToken = consumePendingGoogleIdToken();
+    if (!pendingToken) {
+      return;
+    }
+
+    handleGoogleSuccess(pendingToken, decodeGoogleIdTokenProfile(pendingToken));
+  }, [googleIdToken, handleGoogleSuccess]);
 
   const inputClass = 'w-full px-4 py-3 glass-input rounded-lg text-sm text-white placeholder:text-white/20 focus:outline-none';
   const labelClass = 'block text-xs font-medium text-white/40 mb-1.5';
@@ -72,11 +109,24 @@ export default function ArchitectRegisterPage() {
         </div>
 
         <form className="space-y-5" onSubmit={handleSubmit}>
+          <div className="glass-card-light rounded-lg p-4 border border-golden/10 space-y-3">
+            <p className="text-xs text-golden/70">Step 1: Connect Google Account *</p>
+            {!googleIdToken ? (
+              <GoogleProfessionalButton
+                onSuccess={handleGoogleSuccess}
+                onError={(message) => toast.error(message)}
+                disabled={isLoading}
+              />
+            ) : (
+              <p className="text-xs text-white/60">Connected as <span className="text-golden">{googleEmail || formData.email}</span></p>
+            )}
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div><label className={labelClass}>First Name *</label><input name="firstName" type="text" required value={formData.firstName} onChange={handleChange} className={inputClass} /></div>
             <div><label className={labelClass}>Last Name *</label><input name="lastName" type="text" required value={formData.lastName} onChange={handleChange} className={inputClass} /></div>
           </div>
-          <div><label className={labelClass}>Email *</label><input name="email" type="email" required value={formData.email} onChange={handleChange} className={inputClass} /></div>
+          <div><label className={labelClass}>Google Email *</label><input name="email" type="email" required value={formData.email} readOnly className={inputClass} /></div>
           <div><label className={labelClass}>Phone Number *</label><input name="phoneNumber" type="tel" required value={formData.phoneNumber} onChange={handleChange} className={inputClass} placeholder="+[country code] [number]" /></div>
 
           <div className="border-t border-white/6 pt-5">
@@ -112,13 +162,6 @@ export default function ArchitectRegisterPage() {
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
-          </div>
-
-          <div className="border-t border-white/6 pt-5">
-            <div className="grid grid-cols-2 gap-4">
-              <div><label className={labelClass}>Password *</label><input name="password" type="password" required value={formData.password} onChange={handleChange} className={inputClass} placeholder="Minimum 8 characters" /></div>
-              <div><label className={labelClass}>Confirm Password *</label><input name="confirmPassword" type="password" required value={formData.confirmPassword} onChange={handleChange} className={inputClass} /></div>
             </div>
           </div>
 

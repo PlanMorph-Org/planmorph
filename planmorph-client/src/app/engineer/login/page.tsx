@@ -1,16 +1,47 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/src/lib/api';
 import toast, { Toaster } from 'react-hot-toast';
 import { motion } from 'framer-motion';
+import GoogleProfessionalButton from '@/src/components/auth/GoogleProfessionalButton';
 
 export default function EngineerLoginPage() {
   const router = useRouter();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleGoogleLogin = useCallback(async (idToken: string) => {
+    setIsLoading(true);
+    try {
+      const response = await api.post('/auth/login-professional-google', { googleIdToken: idToken, role: 'Engineer' });
+      const { token, role, email, firstName, lastName } = response.data;
+      if (role !== 'Engineer') {
+        toast.error('This login is for engineers only.');
+        return;
+      }
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify({ email, firstName, lastName, role }));
+      toast.success('Signed in with Google.');
+      router.push('/engineer/dashboard');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Google sign-in failed.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [router]);
+
+  // Handle redirect fallback (when popup was blocked)
+  useEffect(() => {
+    const pendingToken = sessionStorage.getItem('google-auth-id-token');
+    if (pendingToken) {
+      sessionStorage.removeItem('google-auth-id-token');
+      void handleGoogleLogin(pendingToken);
+    }
+  }, [handleGoogleLogin]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,16 +126,30 @@ export default function EngineerLoginPage() {
               </Link>
             </p>
 
+            <div className="mb-5">
+              <GoogleProfessionalButton
+                onSuccess={(idToken) => void handleGoogleLogin(idToken)}
+                onError={(message) => toast.error(message)}
+                disabled={isLoading}
+              />
+            </div>
+            <div className="relative mb-5">
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/6" /></div>
+              <div className="relative flex justify-center text-xs"><span className="px-2 bg-transparent text-white/30">or sign in with email</span></div>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label htmlFor="email" className="block text-xs font-medium text-white/40 mb-1.5">Email</label>
                 <input id="email" name="email" type="email" required value={formData.email} onChange={handleChange}
+                  suppressHydrationWarning
                   placeholder="you@example.com"
                   className="w-full px-4 py-3 glass-input rounded-lg text-sm text-white placeholder:text-white/20" />
               </div>
               <div>
                 <label htmlFor="password" className="block text-xs font-medium text-white/40 mb-1.5">Password</label>
                 <input id="password" name="password" type="password" required value={formData.password} onChange={handleChange}
+                  suppressHydrationWarning
                   placeholder="••••••••"
                   className="w-full px-4 py-3 glass-input rounded-lg text-sm text-white placeholder:text-white/20" />
                 <div className="mt-2 text-right">

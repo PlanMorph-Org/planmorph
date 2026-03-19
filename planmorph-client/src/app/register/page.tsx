@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Layout from '@/src/components/Layout';
@@ -9,6 +9,7 @@ import api from '@/src/lib/api';
 import { AuthResponse } from '@/src/types';
 import toast, { Toaster } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
+import GoogleProfessionalButton from '@/src/components/auth/GoogleProfessionalButton';
 
 const roleCards = [
   {
@@ -48,7 +49,7 @@ const roleCards = [
 
 export default function RegisterPage() {
   const router = useRouter();
-  const { register } = useAuthStore();
+  const { register, registerWithGoogleClient } = useAuthStore();
   const [accountType, setAccountType] = useState<'Client' | 'Architect' | 'Engineer'>('Client');
   const [formData, setFormData] = useState({
     email: '', password: '', confirmPassword: '', firstName: '', lastName: '', phoneNumber: '',
@@ -59,6 +60,38 @@ export default function RegisterPage() {
   const [workExperienceFile, setWorkExperienceFile] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+  const handleGoogleClientRegister = useCallback(async (idToken: string) => {
+    if (accountType !== 'Client') {
+      toast.error('Google signup here is for client accounts only.');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await registerWithGoogleClient({
+        googleIdToken: idToken,
+        firstName: formData.firstName.trim() || undefined,
+        lastName: formData.lastName.trim() || undefined,
+        phoneNumber: formData.phoneNumber.trim() || undefined,
+      });
+      toast.success('Client account created with Google!');
+      router.push('/designs');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Google signup failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [accountType, formData.firstName, formData.lastName, formData.phoneNumber, registerWithGoogleClient, router]);
+
+  // Handle redirect fallback (when popup was blocked)
+  useEffect(() => {
+    const pendingToken = sessionStorage.getItem('google-auth-id-token');
+    if (pendingToken && accountType === 'Client') {
+      sessionStorage.removeItem('google-auth-id-token');
+      void handleGoogleClientRegister(pendingToken);
+    }
+  }, [handleGoogleClientRegister, accountType]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -189,23 +222,38 @@ export default function RegisterPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="firstName" className={labelClass}>First Name *</label>
-              <input id="firstName" name="firstName" type="text" required value={formData.firstName} onChange={handleChange} placeholder="First Name" className={inputClass} />
+              <input id="firstName" name="firstName" type="text" required value={formData.firstName} onChange={handleChange} placeholder="First Name" className={inputClass} suppressHydrationWarning />
             </div>
             <div>
               <label htmlFor="lastName" className={labelClass}>Last Name *</label>
-              <input id="lastName" name="lastName" type="text" required value={formData.lastName} onChange={handleChange} placeholder="Last Name" className={inputClass} />
+              <input id="lastName" name="lastName" type="text" required value={formData.lastName} onChange={handleChange} placeholder="Last Name" className={inputClass} suppressHydrationWarning />
             </div>
           </div>
 
           <div>
             <label htmlFor="email" className={labelClass}>Email *</label>
-            <input id="email" name="email" type="email" required value={formData.email} onChange={handleChange} placeholder="you@example.com" className={inputClass} />
+            <input id="email" name="email" type="email" required value={formData.email} onChange={handleChange} placeholder="you@example.com" className={inputClass} suppressHydrationWarning />
           </div>
 
           <div>
             <label htmlFor="phoneNumber" className={labelClass}>Phone Number *</label>
-            <input id="phoneNumber" name="phoneNumber" type="tel" required value={formData.phoneNumber} onChange={handleChange} placeholder="+254 7XX XXX XXX" className={inputClass} />
+            <input id="phoneNumber" name="phoneNumber" type="tel" required value={formData.phoneNumber} onChange={handleChange} placeholder="+254 7XX XXX XXX" className={inputClass} suppressHydrationWarning />
           </div>
+
+          {accountType === 'Client' && (
+            <div className="glass-card-light rounded-lg p-4 border border-brand-accent/20">
+              <p className="text-xs text-brand-accent/80 mb-3">Use Google for faster client signup</p>
+              <GoogleProfessionalButton
+                onSuccess={(idToken) => void handleGoogleClientRegister(idToken)}
+                onError={(message) => toast.error(message)}
+                disabled={isLoading}
+              />
+              <div className="relative mt-3">
+                <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/6" /></div>
+                <div className="relative flex justify-center text-[11px]"><span className="px-2 bg-transparent text-white/30">or continue with email and password</span></div>
+              </div>
+            </div>
+          )}
 
           {/* Professional fields */}
           <AnimatePresence>
@@ -222,23 +270,23 @@ export default function RegisterPage() {
 
                   <div>
                     <label htmlFor="professionalLicense" className={labelClass}>License Number *</label>
-                    <input id="professionalLicense" name="professionalLicense" type="text" required value={formData.professionalLicense} onChange={handleChange} placeholder="Professional License Number" className={inputClass} />
+                    <input id="professionalLicense" name="professionalLicense" type="text" required value={formData.professionalLicense} onChange={handleChange} placeholder="Professional License Number" className={inputClass} suppressHydrationWarning />
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label htmlFor="yearsOfExperience" className={labelClass}>Years of Experience *</label>
-                      <input id="yearsOfExperience" name="yearsOfExperience" type="number" required value={formData.yearsOfExperience} onChange={handleChange} placeholder="e.g., 5" className={inputClass} />
+                      <input id="yearsOfExperience" name="yearsOfExperience" type="number" required value={formData.yearsOfExperience} onChange={handleChange} placeholder="e.g., 5" className={inputClass} suppressHydrationWarning />
                     </div>
                     <div>
                       <label htmlFor="specialization" className={labelClass}>Specialization</label>
-                      <input id="specialization" name="specialization" type="text" value={formData.specialization} onChange={handleChange} placeholder="e.g., Residential" className={inputClass} />
+                      <input id="specialization" name="specialization" type="text" value={formData.specialization} onChange={handleChange} placeholder="e.g., Residential" className={inputClass} suppressHydrationWarning />
                     </div>
                   </div>
 
                   <div>
                     <label htmlFor="portfolio" className={labelClass}>Portfolio URL</label>
-                    <input id="portfolio" name="portfolio" type="url" value={formData.portfolio} onChange={handleChange} placeholder="https://yourportfolio.com" className={inputClass} />
+                    <input id="portfolio" name="portfolio" type="url" value={formData.portfolio} onChange={handleChange} placeholder="https://yourportfolio.com" className={inputClass} suppressHydrationWarning />
                   </div>
 
                   {!formData.portfolio.trim() && (
@@ -251,7 +299,7 @@ export default function RegisterPage() {
                       ].map((f) => (
                         <div key={f.id}>
                           <label htmlFor={f.id} className={labelClass}>{f.label}</label>
-                          <input id={f.id} name={f.id} type="file" accept=".pdf,application/pdf" required={!formData.portfolio.trim()} onChange={handleFileChange(f.setter)}
+                          <input id={f.id} name={f.id} type="file" accept=".pdf,application/pdf" required={!formData.portfolio.trim()} onChange={handleFileChange(f.setter)} suppressHydrationWarning
                             className="block w-full text-sm text-white/50 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-white/10 file:text-white/70 hover:file:bg-white/15 file:cursor-pointer file:transition-colors" />
                         </div>
                       ))}
@@ -265,11 +313,11 @@ export default function RegisterPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="password" className={labelClass}>Password *</label>
-              <input id="password" name="password" type="password" required value={formData.password} onChange={handleChange} placeholder="Min. 8 characters" className={inputClass} />
+              <input id="password" name="password" type="password" required value={formData.password} onChange={handleChange} placeholder="Min. 8 characters" className={inputClass} suppressHydrationWarning />
             </div>
             <div>
               <label htmlFor="confirmPassword" className={labelClass}>Confirm Password *</label>
-              <input id="confirmPassword" name="confirmPassword" type="password" required value={formData.confirmPassword} onChange={handleChange} placeholder="Confirm" className={inputClass} />
+              <input id="confirmPassword" name="confirmPassword" type="password" required value={formData.confirmPassword} onChange={handleChange} placeholder="Confirm" className={inputClass} suppressHydrationWarning />
             </div>
           </div>
 
@@ -283,7 +331,7 @@ export default function RegisterPage() {
 
           {/* Terms */}
           <div className="flex items-start gap-3">
-            <input id="acceptedTerms" name="acceptedTerms" type="checkbox" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} required
+            <input id="acceptedTerms" name="acceptedTerms" type="checkbox" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} required suppressHydrationWarning
               className="mt-0.5 h-4 w-4 rounded bg-white/5 border-white/20 text-brand-accent focus:ring-brand-accent/50" />
             <label htmlFor="acceptedTerms" className="text-xs text-white/40">
               I agree to the{' '}

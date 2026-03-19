@@ -1,17 +1,40 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuthStore } from '../../store/authStore';
 import toast, { Toaster } from 'react-hot-toast';
 import { motion } from 'framer-motion';
+import GoogleProfessionalButton from '@/src/components/auth/GoogleProfessionalButton';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuthStore();
+  const { login, loginWithGoogleClient } = useAuthStore();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
+
+  const handleGoogleLogin = useCallback(async (idToken: string) => {
+    setIsLoading(true);
+    try {
+      await loginWithGoogleClient(idToken);
+      toast.success('Signed in with Google.');
+      router.push('/designs');
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || error.message || 'Google sign-in failed.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [loginWithGoogleClient, router]);
+
+  // Handle redirect fallback (when popup was blocked)
+  useEffect(() => {
+    const pendingToken = sessionStorage.getItem('google-auth-id-token');
+    if (pendingToken) {
+      sessionStorage.removeItem('google-auth-id-token');
+      void handleGoogleLogin(pendingToken);
+    }
+  }, [handleGoogleLogin]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,6 +128,18 @@ export default function LoginPage() {
               </Link>
             </p>
 
+            <div className="mb-5">
+              <GoogleProfessionalButton
+                onSuccess={(idToken) => void handleGoogleLogin(idToken)}
+                onError={(message) => toast.error(message)}
+                disabled={isLoading}
+              />
+            </div>
+            <div className="relative mb-5">
+              <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/6" /></div>
+              <div className="relative flex justify-center text-xs"><span className="px-2 bg-transparent text-white/30">or sign in with email</span></div>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label htmlFor="email" className="block text-xs font-medium text-white/40 mb-1.5">Email</label>
@@ -116,6 +151,7 @@ export default function LoginPage() {
                   value={formData.email}
                   onChange={handleChange}
                   placeholder="you@example.com"
+                  suppressHydrationWarning
                   className="w-full px-4 py-3 glass-input rounded-lg text-sm text-white placeholder:text-white/20"
                 />
               </div>
@@ -129,6 +165,7 @@ export default function LoginPage() {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="••••••••"
+                  suppressHydrationWarning
                   className="w-full px-4 py-3 glass-input rounded-lg text-sm text-white placeholder:text-white/20"
                 />
                 <div className="mt-2 text-right">
